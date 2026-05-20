@@ -155,13 +155,14 @@
                 iniciarApp();
             }
 
-            // LÓGICA DE BYPASS IMPLEMENTADA AQUÍ
+// LÓGICA DE BYPASS CORREGIDA
             function iniciarApp() {
                 if (accessToken) {
                     statusText.innerText = "Descargando canciones...";
-                    logDebug(`Ejecutando bypass de seguridad para Playlist ID: ${PLAYLIST_ID}...`);
+                    logDebug(`Solicitando paquete completo para Playlist ID: ${PLAYLIST_ID}...`);
                     
-                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,tracks.items(track(uri))`, {
+                    // Quitamos el '?fields=' problemático y pedimos todo el objeto de la playlist
+                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
                     .then(async response => {
@@ -175,21 +176,24 @@
                     .then(data => {
                         logDebug(`Playlist confirmada: "${data.name}"`, "success");
 
-                        playlistTracks = data.tracks.items
-                            .filter(item => item.track && item.track.uri)
+                        // Navegación segura (Optional Chaining '?') para evitar colapsos
+                        const items = data.tracks?.items || [];
+                        
+                        playlistTracks = items
+                            .filter(item => item && item.track && item.track.uri) // Filtramos basura nula
                             .map(item => item.track.uri);
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`¡Bypass exitoso! ${playlistTracks.length} canciones listas en memoria.`, "success");
+                            logDebug(`¡Misión Cumplida! ${playlistTracks.length} canciones extraídas.`, "success");
                             btnPlay.style.display = 'flex';
                             statusText.innerText = `Conectado: ${playlistTracks.length} canciones`;
                         } else {
-                            logDebug("La lista cargó pero no tiene canciones válidas.", "warn");
+                            logDebug("La lista se descargó, pero realmente no tiene canciones.", "warn");
                             statusText.innerText = "Playlist vacía";
                         }
                     })
                     .catch(error => {
-                        logDebug(`Fallo Crítico: ${error.message}`, "error");
+                        logDebug(`Fallo: ${error.message}`, "error");
                         statusText.innerText = "Error al descargar (Ver consola)";
                         if (error.message.includes("TOKEN_CADUCADO")) {
                             logDebug("El token caducó. Usa el botón de Forzar Conexión.", "warn");
