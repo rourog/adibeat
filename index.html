@@ -12,7 +12,7 @@
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #673AB7; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
-        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; }
+        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 200px; }
         #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; word-break: break-word; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
@@ -28,7 +28,7 @@
         #btn-cycle { background-color: #673AB7; color: #fff; }
         #btn-reset { background-color: #333; color: #fff; }
 
-        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 170px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
+        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 190px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
         #debug-console div { margin-bottom: 4px; word-wrap: break-word; user-select: all; -webkit-user-select: all; }
         .log-error { color: #ff4646; }
         .log-warn { color: #ffeb3b; }
@@ -54,7 +54,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Sintaxis de API corregida. Esperando datos...</div>
+        <div>[Sistema] Filtros eliminados. Descarga en modo crudo (Raw).</div>
     </div>
 
     <script>
@@ -176,11 +176,11 @@
                 if (accessToken) {
                     statusText.innerText = `Cargando lista ${currentPlaylistIndex + 1}/${PLAYLISTS.length}...`;
                     
-                    // AQUÍ ESTÁ LA MAGIA: fields=name,tracks(items(track(uri)))
-                    // Esto le dice a Spotify exactamente la ruta anidada que queremos sin que se rompa.
-                    const apiUrl = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,tracks(total,items(track(name,uri)))`;
+                    // SOLUCIÓN: Eliminamos '?fields=' por completo. 
+                    // Pedimos el objeto JSON completo a Spotify tal cual sale de su base de datos.
+                    const apiUrl = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`;
                     
-                    logDebug(`Llamando API con gramática anidada...`, "info");
+                    logDebug(`Solicitando JSON completo de la lista...`);
                     
                     fetch(apiUrl, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -195,39 +195,54 @@
                     })
                     .then(data => {
                         const playlistName = data.name;
-                        logDebug(`Playlist conectada: "${playlistName}"`, "success");
-
-                        if (!data.tracks || !data.tracks.items) {
-                            logDebug("CRÍTICO: El objeto tracks.items sigue sin existir. Revisa permisos.", "error");
-                        } else {
-                            logDebug(`Spotify reporta un Total de: ${data.tracks.total} canciones.`, "info");
-                            
-                            const items = data.tracks.items;
-                            let tracksValidos = 0;
-                            
-                            playlistTracks = items.filter(item => {
-                                // Filtramos canciones bloqueadas por región o subidas locales sin URI de Spotify
-                                if (item && item.track && item.track.uri && item.track.uri.startsWith('spotify:track:')) {
-                                    tracksValidos++;
-                                    return true;
-                                }
-                                return false;
-                            }).map(item => item.track.uri);
-                        }
-                        
+                        logDebug(`Nombre de lista confirmado: "${playlistName}"`, "success");
                         controlPanel.style.display = 'flex';
+
+                        // ESCÁNER PROFUNDO DE LA RESPUESTA
+                        logDebug(`Estructura principal: [${Object.keys(data).join(', ')}]`, "info");
+
+                        if (!data.tracks) {
+                            logDebug("CRÍTICO: No existe la llave 'tracks' en la respuesta cruda.", "error");
+                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Error de estructura`;
+                            return;
+                        }
+
+                        logDebug(`Estructura de 'tracks': [${Object.keys(data.tracks).join(', ')}]`, "info");
+
+                        if (!data.tracks.items || data.tracks.items.length === 0) {
+                            logDebug("ALERTA: 'items' existe pero viene vacío [].", "warn");
+                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Está vacía`;
+                            return;
+                        }
+
+                        // Inspeccionamos la primera canción para ver qué trae
+                        const primerItem = data.tracks.items[0];
+                        logDebug(`Llaves del Item 0: [${Object.keys(primerItem).join(', ')}]`, "info");
+                        
+                        if (primerItem.track) {
+                            logDebug(`Llaves del Track: [${Object.keys(primerItem.track).join(', ')}]`, "info");
+                            logDebug(`URI de prueba: ${primerItem.track.uri}`, "success");
+                        } else {
+                            logDebug("ALERTA: El item no tiene propiedad 'track'. ¿Es un podcast?", "warn");
+                        }
+
+                        // EXTRAER URIs DE FORMA SEGURA (Optional Chaining)
+                        playlistTracks = data.tracks.items
+                            .map(item => item?.track?.uri) // Sacamos los URIs
+                            .filter(uri => uri !== undefined && uri !== null); // Filtramos los nulos
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`Extracción exitosa: ${playlistTracks.length} canciones reales.`, "success");
+                            logDebug(`¡ÉXITO TOTAL! ${playlistTracks.length} canciones extraídas.`, "success");
                             btnPlay.style.display = 'flex';
                             statusText.innerHTML = `Conectado a:<br><strong>${playlistName}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones)</span>`;
                         } else {
-                            statusText.innerHTML = `<strong>${playlistName}</strong><br>está vacía para la API`;
+                            logDebug("No se pudo extraer ningún URI válido.", "error");
+                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Sin pistas válidas`;
                         }
                     })
                     .catch(error => {
-                        logDebug(`Fallo: ${error.message}`, "error");
-                        statusText.innerText = "Error de descarga";
+                        logDebug(`Fallo Crítico: ${error.message}`, "error");
+                        statusText.innerText = "Error en la descarga";
                         controlPanel.style.display = 'flex';
                     });
 
