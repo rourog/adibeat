@@ -14,42 +14,22 @@
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
         #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; }
-        #status-text { font-size: 1.5rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
+        #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
-        #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); }
+        #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); margin-bottom: 20px;}
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 50vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; }
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 50vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
 
-        /* --- CONSOLA DE DEBUG (Mejorada para copiar) --- */
-        #debug-console {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background-color: rgba(0, 0, 0, 0.95);
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 13px;
-            padding: 10px;
-            overflow-y: auto;
-            border-top: 2px solid #444;
-            z-index: 100;
-            /* Propiedades para permitir selección fácil de texto */
-            user-select: text;
-            -webkit-user-select: text;
-            cursor: text;
-        }
-        #debug-console div {
-            margin-bottom: 4px;
-            word-wrap: break-word;
-            user-select: all; /* Al hacer clic se selecciona todo el renglón */
-            -webkit-user-select: all;
-        }
+        /* Botón para matar el token viejo */
+        #btn-reset { padding: 10px 20px; font-size: 1rem; border-radius: 20px; background-color: #333; color: #fff; margin-top: 10px; }
+
+        /* --- CONSOLA DE DEBUG --- */
+        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 13px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
+        #debug-console div { margin-bottom: 4px; word-wrap: break-word; user-select: all; -webkit-user-select: all; }
         .log-error { color: #ff4646; }
         .log-warn { color: #ffeb3b; }
     </style>
@@ -64,15 +44,15 @@
             <span id="play-text">▶ INICIAR TURNO</span>
             <span id="timer-text">15s</span>
         </button>
+        <button id="btn-reset">🔄 Forzar Nueva Conexión</button>
     </div>
 
-    <!-- Consola de Debug en Pantalla -->
+    <!-- Consola de Debug -->
     <div id="debug-console">
-        <div>[Sistema] Consola iniciada. Puedes copiar estos textos.</div>
+        <div>[Sistema] Consola iniciada. Probando nueva Playlist.</div>
     </div>
 
     <script>
-        // --- FUNCIÓN DE DEBUG EN PANTALLA ---
         const debugConsole = document.getElementById("debug-console");
         function logDebug(message, type = "info") {
             const div = document.createElement("div");
@@ -85,11 +65,13 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // --- CONFIGURACIÓN DE LA APP ---
+            // --- CONFIGURACIÓN ---
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative'; 
-            const PLAYLIST_ID = '6w5cQsiUyHHOZAmxzTXeER'; 
+            
+            // NUEVA PLAYLIST DE PRUEBA
+            const PLAYLIST_ID = '3qdqZPJUy1ulEwEeLOUmgA'; 
             
             let playlistTracks = []; 
             let temporizador;
@@ -98,11 +80,19 @@
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
+            const btnReset = document.getElementById("btn-reset");
             const statusText = document.getElementById("status-text");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
 
-            // Funciones Criptográficas
+            // Función de Reset de Token
+            btnReset.addEventListener('click', () => {
+                logDebug("Borrando credenciales antiguas...", "warn");
+                localStorage.removeItem('adibeat_token');
+                localStorage.removeItem('code_verifier');
+                window.location.href = window.location.pathname; // Recarga limpia sin código en URL
+            });
+
             const generateRandomString = (length) => {
                 const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                 const values = crypto.getRandomValues(new Uint8Array(length));
@@ -130,7 +120,7 @@
                     mainScreen.style.display = "flex";
                     setTimeout(() => mainScreen.style.opacity = "1", 50); 
                 }, 500);
-            }, 1500);
+            }, 1000);
 
             // --- AUTENTICACIÓN ---
             let accessToken = localStorage.getItem('adibeat_token') || '';
@@ -153,7 +143,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if(data.access_token) {
-                        logDebug("Token obtenido con éxito.");
+                        logDebug("Nuevo Token obtenido con éxito.");
                         accessToken = data.access_token;
                         localStorage.setItem('adibeat_token', accessToken); 
                         window.history.pushState("", document.title, window.location.pathname); 
@@ -170,14 +160,13 @@
 
             function iniciarApp() {
                 if (accessToken) {
-                    statusText.innerText = "Cargando Playlist...";
+                    statusText.innerText = "Cargando Playlist de Prueba...";
                     logDebug(`Solicitando playlist ID: ${PLAYLIST_ID}`);
                     
                     fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?fields=items(track(uri))`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
                     .then(async response => {
-                        // Capturamos explícitamente errores HTTP (como el 403)
                         if (!response.ok) {
                             if (response.status === 401) throw new Error("TOKEN_CADUCADO");
                             const errorData = await response.json();
@@ -191,22 +180,20 @@
                             .map(item => item.track.uri);
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`Éxito: ${playlistTracks.length} canciones cargadas.`);
+                            logDebug(`¡Éxito total! ${playlistTracks.length} canciones cargadas listas para jugar.`);
                             btnPlay.style.display = 'flex';
-                            statusText.innerText = `Playlist lista: ${playlistTracks.length} canciones`;
+                            statusText.innerText = `Playlist conectada: ${playlistTracks.length} canciones`;
                         } else {
-                            logDebug("La playlist está vacía o no tiene pistas válidas.", "warn");
-                            statusText.innerText = "Playlist vacía";
+                            logDebug("La playlist cargó, pero Spotify dice que está vacía.", "warn");
+                            statusText.innerText = "Playlist sin canciones válidas";
                         }
                     })
                     .catch(error => {
                         if (error.message === "TOKEN_CADUCADO") {
-                            logDebug("El token expiró. Limpiando y recargando...", "warn");
-                            localStorage.removeItem('adibeat_token');
-                            window.location.reload();
+                            logDebug("El token expiró. Usa el botón de Forzar Conexión.", "warn");
                         } else {
                             logDebug(`Fetch Error: ${error.message}`, "error");
-                            statusText.innerText = "Error al cargar (Ver consola)";
+                            statusText.innerText = "Error al cargar la lista";
                         }
                     });
 
@@ -215,6 +202,7 @@
                     btnLogin.style.display = 'block';
                     
                     btnLogin.addEventListener('click', async () => {
+                        logDebug("Iniciando flujo de login...");
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -242,7 +230,7 @@
 
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
                 const trackUri = playlistTracks[randomIndex];
-                logDebug(`Enviando PLAY: ${trackUri}`);
+                logDebug(`Mandando PLAY: ${trackUri}`);
                 
                 playText.innerText = "SINTONIZANDO...";
                 
@@ -260,7 +248,7 @@
                         throw new Error(`HTTP ${response.status}: ${err.error?.message || 'Error de Playback'}`);
                     }
                     
-                    logDebug("Comando PLAY aceptado.");
+                    logDebug("Reproducción remota iniciada.");
                     playText.innerText = "¡ADIVINA!";
                     timerText.style.display = "block";
                     btnPlay.style.backgroundColor = "#673AB7"; 
@@ -275,7 +263,7 @@
                     }, 1000);
 
                     temporizador = setTimeout(() => {
-                        logDebug("Tiempo terminado. Enviando PAUSE.");
+                        logDebug("Pausando la canción (15s).");
                         fetch('https://api.spotify.com/v1/me/player/pause', {
                             method: 'PUT',
                             headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -290,7 +278,7 @@
                 .catch(error => {
                     logDebug(`Playback Error: ${error.message}`, "error");
                     playText.innerText = "ERROR";
-                    statusText.innerText = "Abre Spotify en tu equipo";
+                    statusText.innerText = "Abre Spotify y ponle Play a cualquier cosa primero";
                 });
             });
         });
