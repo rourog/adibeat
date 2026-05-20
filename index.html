@@ -7,116 +7,28 @@
     <!-- Material Design Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        body {
-            background-color: #121212; /* Tema oscuro */
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* --- SPLASH SCREEN --- */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #1DB954;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            transition: opacity 0.5s ease-out;
-        }
-
-        #splash-screen h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: #121212;
-        }
-
-        /* --- PANTALLA PRINCIPAL --- */
-        #main-screen {
-            display: none; /* Oculto hasta que pase el splash */
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease-in;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: #121212; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         
-        #status-text { 
-            font-size: 2rem; 
-            margin-bottom: 30px; 
-            font-weight: 900; 
-            letter-spacing: 1px; 
-            text-align: center;
-        }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1DB954; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
+        #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #121212; }
         
-        /* --- BOTONES --- */
-        button { 
-            border: none; 
-            cursor: pointer; 
-            font-weight: bold; 
-            text-transform: uppercase;
-            transition: transform 0.1s, box-shadow 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; }
+        #status-text { font-size: 2rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; }
         
-        button:active { 
-            transform: scale(0.95); 
-        }
+        button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
+        button:active { transform: scale(0.95); }
         
-        #btn-login { 
-            padding: 20px 40px; 
-            font-size: 1.5rem; 
-            border-radius: 50px; 
-            background-color: #1DB954; 
-            color: #121212; 
-            box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4);
-        }
+        #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #1DB954; color: #121212; box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4); }
         
-        #btn-play { 
-            background-color: #ff4646; 
-            color: white; 
-            display: none; 
-            box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4);
-            width: 90vw;
-            height: 60vh;
-            border-radius: 30px;
-            font-size: 3rem;
-            border: 4px solid #ff4646;
-        }
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 60vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de Bienvenida -->
-    <div id="splash-screen">
-        <h1>AdiBeat</h1>
-    </div>
-
-    <!-- Pantalla Principal -->
+    <div id="splash-screen"><h1>AdiBeat</h1></div>
     <div id="main-screen">
         <h1 id="status-text">Bienvenido</h1>
-        
         <button id="btn-login">Conectar Spotify</button>
         <button id="btn-play">▶ INICIAR TURNO</button>
     </div>
@@ -126,23 +38,39 @@
             // --- CONFIGURACIÓN DE LA APP ---
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
             
-            // ¡OJO! Si vas a probar en tu computadora, descomenta la de localhost. 
-            // Para producción en GitHub, deja la de rourog.adibeat.io
+            // IMPORTANTE: Usa tu URL de GitHub o localhost según donde estés probando
             // const REDIRECT_URI = 'http://localhost:5500'; 
             const REDIRECT_URI = 'https://rourog.adibeat.io/adibeat/'; 
             
             const SCOPES = 'user-modify-playback-state user-read-playback-state'; 
 
-            // --- REFERENCIAS DEL DOM ---
             const splashScreen = document.getElementById("splash-screen");
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
             const statusText = document.getElementById("status-text");
 
-            let accessToken = '';
+            // --- FUNCIONES CRIPTOGRÁFICAS PARA EL NUEVO FLUJO PKCE ---
+            const generateRandomString = (length) => {
+                const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const values = crypto.getRandomValues(new Uint8Array(length));
+                return Object.values(values).reduce((acc, x) => acc + possible[x % possible.length], "");
+            };
 
-            // 1. Manejo del Splash Screen y Transición
+            const sha256 = async (plain) => {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(plain);
+                return window.crypto.subtle.digest('SHA-256', data);
+            };
+
+            const base64encode = (input) => {
+                return btoa(String.fromCharCode(...new Uint8Array(input)))
+                    .replace(/=/g, '')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_');
+            };
+
+            // Animación del Splash Screen
             setTimeout(() => {
                 splashScreen.style.opacity = "0";
                 setTimeout(() => {
@@ -152,31 +80,73 @@
                 }, 500);
             }, 2000);
 
-            // 2. Extraer el token de Spotify si venimos de la redirección
-            const hash = window.location.hash;
-            if (hash) {
-                accessToken = new URLSearchParams(hash.substring(1)).get('access_token');
-                // Limpiar la URL para que no se vea el token gigante
-                window.history.pushState("", document.title, window.location.pathname);
-            }
+            // --- LÓGICA DE AUTENTICACIÓN PKCE ---
+            let accessToken = localStorage.getItem('adibeat_token') || '';
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
 
-            // 3. Evaluar estado de sesión
-            if (accessToken) {
-                btnLogin.style.display = 'none';
-                btnPlay.style.display = 'flex';
-                statusText.innerText = "¡Conectado!";
-            } else {
-                // Función para enviar a loguear
-                btnLogin.addEventListener('click', () => {
-                    const authUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}`;
-                    window.location.href = authUrl;
+            if (code && !accessToken) {
+                // Si venimos de regreso con un código, lo cambiamos por el Token de acceso
+                const codeVerifier = localStorage.getItem('code_verifier');
+                
+                fetch("https://accounts.spotify.com/api/token", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        client_id: CLIENT_ID,
+                        grant_type: 'authorization_code',
+                        code: code,
+                        redirect_uri: REDIRECT_URI,
+                        code_verifier: codeVerifier,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.access_token) {
+                        accessToken = data.access_token;
+                        localStorage.setItem('adibeat_token', accessToken); // Lo guardamos
+                        window.history.pushState("", document.title, window.location.pathname); // Limpiamos la URL
+                        iniciarApp();
+                    } else {
+                        console.error("Error obteniendo el token", data);
+                        statusText.innerText = "Error de conexión";
+                    }
                 });
+            } else {
+                iniciarApp();
             }
 
-            // 4. Lógica de Reproducción Remota
+            function iniciarApp() {
+                if (accessToken) {
+                    btnLogin.style.display = 'none';
+                    btnPlay.style.display = 'flex';
+                    statusText.innerText = "¡Conectado!";
+                } else {
+                    btnLogin.addEventListener('click', async () => {
+                        // Generamos los candados criptográficos
+                        const codeVerifier = generateRandomString(64);
+                        window.localStorage.setItem('code_verifier', codeVerifier);
+                        const hashed = await sha256(codeVerifier);
+                        const codeChallenge = base64encode(hashed);
+
+                        const authUrl = new URL("https://accounts.spotify.com/authorize");
+                        authUrl.search = new URLSearchParams({
+                            client_id: CLIENT_ID,
+                            response_type: 'code',
+                            redirect_uri: REDIRECT_URI,
+                            scope: SCOPES,
+                            code_challenge_method: 'S256',
+                            code_challenge: codeChallenge,
+                        }).toString();
+                        
+                        window.location.href = authUrl.toString();
+                    });
+                }
+            }
+
+            // --- LÓGICA DE REPRODUCCIÓN REMOTA ---
             btnPlay.addEventListener('click', () => {
-                // URI de prueba (Para probar que Spotify responde)
-                const trackUri = 'spotify:track:4cOdK2wGLETKBW3PvgPWqT'; 
+                const trackUri = 'spotify:track:4cOdK2wGLETKBW3PvgPWqT'; // Canción de prueba
                 
                 btnPlay.innerText = "Cargando...";
                 
@@ -190,13 +160,11 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        // Animación del botón cuando suena
                         btnPlay.innerText = "¡SONANDO!";
                         btnPlay.style.backgroundColor = "#1DB954";
                         btnPlay.style.borderColor = "#1DB954";
                         statusText.innerText = "Escuchando en la sala...";
                         
-                        // Simulador del final del turno (15 segundos)
                         setTimeout(() => {
                             btnPlay.innerText = "▶ SIGUIENTE";
                             btnPlay.style.backgroundColor = "#ff4646";
@@ -204,16 +172,16 @@
                             statusText.innerText = "Turno Finalizado";
                         }, 15000);
                         
-                    } else if (response.status === 404 || response.status === 403) {
+                    } else if (response.status === 401) {
+                        // El token caducó (dura 1 hora), forzamos un re-login
+                        localStorage.removeItem('adibeat_token');
+                        window.location.reload();
+                    } else {
                         btnPlay.innerText = "ERROR";
                         statusText.innerText = "Abre Spotify en algún dispositivo";
-                        console.error("No hay un dispositivo activo para reproducir.");
                     }
                 })
-                .catch(error => {
-                    console.error("Error en la conexión:", error);
-                    statusText.innerText = "Error de red";
-                });
+                .catch(error => console.error("Error en la conexión:", error));
             });
         });
     </script>
