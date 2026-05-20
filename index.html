@@ -10,23 +10,26 @@
 
   <style>
     :root {
-      --bg-1: #24124f;
-      --bg-2: #0f9f9a;
-      --ink: #ffffff;
-      --muted: rgba(255,255,255,0.78);
-      --panel: rgba(255,255,255,0.14);
-      --panel-strong: rgba(255,255,255,0.22);
-      --line: rgba(255,255,255,0.24);
-      --green: #27e37a;
-      --cyan: #39d9ff;
-      --yellow: #ffd447;
-      --orange: #ff7a3d;
-      --pink: #ff3fb4;
-      --purple: #7f4dff;
-      --red: #ff4d5f;
-      --shadow: 0 20px 60px rgba(0,0,0,0.35);
-      --radius-xl: 34px;
-      --radius-md: 22px;
+      --bg-a: #17103f;
+      --bg-b: #0b9eaa;
+      --bg-c: #ff477e;
+      --white: #ffffff;
+      --soft-white: rgba(255,255,255,0.78);
+      --glass: rgba(255,255,255,0.17);
+      --glass-strong: rgba(255,255,255,0.26);
+      --line: rgba(255,255,255,0.28);
+      --dark-chip: rgba(0,0,0,0.26);
+      --green: #35ef83;
+      --cyan: #35dfff;
+      --yellow: #ffe156;
+      --orange: #ff8a3d;
+      --pink: #ff3fa4;
+      --purple: #744dff;
+      --red: #ff4d5e;
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+      --shadow: 0 18px 52px rgba(0,0,0,0.33);
     }
 
     * {
@@ -41,100 +44,72 @@
       margin: 0;
       overflow: hidden;
       background:
-        radial-gradient(circle at 15% 15%, rgba(255, 212, 71, 0.35), transparent 28%),
-        radial-gradient(circle at 88% 18%, rgba(255, 63, 180, 0.35), transparent 24%),
-        radial-gradient(circle at 50% 110%, rgba(39, 227, 122, 0.25), transparent 30%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2));
-      color: var(--ink);
+        radial-gradient(circle at 12% 8%, rgba(255,225,86,0.40), transparent 25%),
+        radial-gradient(circle at 88% 10%, rgba(255,63,164,0.36), transparent 27%),
+        radial-gradient(circle at 48% 112%, rgba(53,239,131,0.30), transparent 32%),
+        linear-gradient(135deg, var(--bg-a) 0%, #26205d 34%, var(--bg-b) 100%);
+      color: var(--white);
       font-family: "Nunito", "Roboto", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       touch-action: manipulation;
-    }
-
-    button,
-    input {
-      font: inherit;
     }
 
     button {
       border: 0;
       color: inherit;
+      font: inherit;
       cursor: pointer;
       user-select: none;
     }
 
-    button:active {
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    button:active:not(:disabled) {
       transform: scale(0.985);
-    }
-
-    #rotate-warning {
-      display: none;
-      width: 100dvw;
-      height: 100dvh;
-      padding: 28px;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background:
-        radial-gradient(circle at top left, rgba(255, 212, 71, 0.25), transparent 35%),
-        linear-gradient(135deg, #24124f, #0f9f9a);
-    }
-
-    .rotate-card {
-      width: min(88vw, 460px);
-      padding: 30px;
-      border-radius: var(--radius-xl);
-      background: rgba(255,255,255,0.16);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .rotate-icon {
-      font-size: 4.3rem;
-      line-height: 1;
-      margin-bottom: 12px;
-    }
-
-    .rotate-title {
-      font-size: 2rem;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-
-    .rotate-text {
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.35;
     }
 
     #app-shell {
       width: 100dvw;
       height: 100dvh;
-      padding: max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      padding:
+        max(10px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        max(10px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 10px;
     }
 
     .top-bar {
+      min-height: 42px;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 10px;
-      min-height: 38px;
+      gap: 9px;
+    }
+
+    .brand,
+    .playlist-chip,
+    .round-button {
+      border: 1px solid var(--line);
+      background: var(--glass);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.20);
+      backdrop-filter: blur(16px);
     }
 
     .brand {
+      height: 42px;
+      padding: 0 13px;
+      border-radius: var(--radius-pill);
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 8px 13px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.16);
-      border: 1px solid var(--line);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      gap: 8px;
       font-weight: 900;
       letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
     .brand-dot {
@@ -142,30 +117,47 @@
       height: 13px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--yellow), var(--pink));
-      box-shadow: 0 0 18px rgba(255,212,71,0.9);
+      box-shadow: 0 0 18px rgba(255,225,86,0.95);
+      flex: 0 0 auto;
+    }
+
+    .playlist-chip {
+      height: 42px;
+      min-width: 0;
+      border-radius: var(--radius-pill);
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: clamp(0.78rem, 2.5vw, 0.96rem);
+      font-weight: 900;
+      color: var(--soft-white);
+      text-align: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     #playlist-label {
       overflow: hidden;
-      white-space: nowrap;
       text-overflow: ellipsis;
-      color: var(--muted);
-      font-size: clamp(0.8rem, 2vw, 0.95rem);
-      font-weight: 800;
-      text-align: center;
-      opacity: 0.95;
+      white-space: nowrap;
     }
 
-    .icon-button {
-      width: 43px;
-      height: 43px;
+    .round-button {
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid var(--line);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
       display: grid;
       place-items: center;
-      font-size: 1.2rem;
+      font-size: 1.22rem;
+      font-weight: 900;
+    }
+
+    #btn-cycle {
+      background: linear-gradient(135deg, rgba(255,225,86,0.92), rgba(255,63,164,0.88));
+      color: #24124f;
+      border-color: rgba(255,255,255,0.42);
     }
 
     .game-area {
@@ -179,31 +171,40 @@
       width: 100%;
       height: 100%;
       min-height: 0;
+      position: relative;
+      overflow: hidden;
       border-radius: var(--radius-xl);
-      padding: clamp(16px, 3vw, 34px);
-      background:
-        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.36), transparent 22%),
-        linear-gradient(135deg, #ff7a3d 0%, #ff3fb4 52%, #7f4dff 100%);
-      border: 2px solid rgba(255,255,255,0.33);
-      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.14);
+      padding: clamp(18px, 4vw, 38px);
+      border: 2px solid rgba(255,255,255,0.36);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.16);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      position: relative;
-      transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      text-align: center;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.36), transparent 22%),
+        linear-gradient(135deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
+      transition: background 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
     }
 
     #btn-game::before {
       content: "";
       position: absolute;
-      inset: -30%;
+      inset: -28%;
       background:
-        radial-gradient(circle, rgba(255,255,255,0.16) 0 8%, transparent 9% 100%);
-      background-size: 72px 72px;
-      transform: rotate(-12deg);
+        radial-gradient(circle, rgba(255,255,255,0.17) 0 7%, transparent 8% 100%);
+      background-size: 62px 62px;
       opacity: 0.38;
+      transform: rotate(-14deg);
+      pointer-events: none;
+    }
+
+    #btn-game::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 42%, rgba(0,0,0,0.10));
       pointer-events: none;
     }
 
@@ -213,90 +214,91 @@
     }
 
     #state-label {
-      font-size: clamp(0.82rem, 2.3vw, 1.15rem);
+      margin-bottom: clamp(5px, 1.2vw, 11px);
+      font-size: clamp(0.78rem, 2.6vw, 1.15rem);
       font-weight: 900;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.17em;
       text-transform: uppercase;
-      opacity: 0.92;
-      margin-bottom: clamp(5px, 1vw, 10px);
+      opacity: 0.90;
     }
 
     #main-title {
-      font-size: clamp(2.3rem, 9vw, 6.7rem);
+      max-width: 96%;
+      font-size: clamp(2.25rem, 10vw, 7.2rem);
       line-height: 0.92;
       font-weight: 900;
-      text-align: center;
       text-wrap: balance;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.26);
-      max-width: 96%;
+      text-shadow: 0 10px 28px rgba(0,0,0,0.24);
+      overflow-wrap: anywhere;
     }
 
     #counter {
-      margin-top: clamp(8px, 1.8vw, 18px);
-      min-width: clamp(80px, 16vw, 135px);
-      padding: 6px 18px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.22);
-      border: 1px solid rgba(255,255,255,0.28);
-      font-size: clamp(2rem, 6.8vw, 5rem);
+      margin-top: clamp(10px, 2vw, 20px);
+      min-width: clamp(82px, 17vw, 142px);
+      padding: 7px 20px;
+      border-radius: var(--radius-pill);
+      background: var(--dark-chip);
+      border: 1px solid rgba(255,255,255,0.30);
+      font-size: clamp(2.15rem, 7vw, 5rem);
       line-height: 1;
       font-weight: 900;
       box-shadow: inset 0 0 18px rgba(0,0,0,0.12);
     }
 
     #track-artist-inline {
-      margin-top: clamp(8px, 1.3vw, 14px);
-      font-size: clamp(1.1rem, 3.6vw, 2.35rem);
+      margin-top: clamp(8px, 1.8vw, 16px);
+      max-width: 92%;
+      font-size: clamp(1.2rem, 4.4vw, 2.5rem);
       line-height: 1.05;
       font-weight: 900;
-      color: rgba(255,255,255,0.95);
-      max-width: 92%;
-      text-align: center;
+      color: rgba(255,255,255,0.94);
       text-wrap: balance;
+      text-shadow: 0 8px 24px rgba(0,0,0,0.20);
     }
 
     #next-hint {
-      margin-top: clamp(7px, 1.2vw, 12px);
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.20);
-      font-size: clamp(0.82rem, 2.1vw, 1rem);
+      margin-top: clamp(8px, 1.8vw, 14px);
+      padding: 7px 15px;
+      border-radius: var(--radius-pill);
+      background: var(--dark-chip);
+      border: 1px solid rgba(255,255,255,0.22);
+      font-size: clamp(0.78rem, 2.4vw, 1rem);
       font-weight: 900;
       color: rgba(255,255,255,0.82);
     }
 
     #btn-game.state-ready {
       background:
-        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.36), transparent 22%),
-        linear-gradient(135deg, #27e37a 0%, #39d9ff 52%, #7f4dff 100%);
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.36), transparent 22%),
+        linear-gradient(135deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
     }
 
     #btn-game.state-playing {
       background:
-        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.34), transparent 22%),
-        linear-gradient(135deg, #ff7a3d 0%, #ff3fb4 55%, #7f4dff 100%);
-      animation: pulseGlow 1.5s ease-in-out infinite;
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.34), transparent 22%),
+        linear-gradient(135deg, var(--orange) 0%, var(--pink) 52%, var(--purple) 100%);
+      animation: playingPulse 1.3s ease-in-out infinite;
     }
 
     #btn-game.state-timeout {
       background:
-        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.32), transparent 22%),
-        linear-gradient(135deg, #ff4d5f 0%, #ff7a3d 58%, #ffd447 100%);
-      animation: urgentPulse 0.8s ease-in-out infinite alternate;
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.32), transparent 22%),
+        linear-gradient(135deg, var(--red) 0%, var(--orange) 56%, var(--yellow) 100%);
+      animation: timeoutPulse 0.72s ease-in-out infinite alternate;
     }
 
     #btn-game.state-revealed {
       background:
-        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.28), transparent 22%),
-        linear-gradient(135deg, #24124f 0%, #7f4dff 46%, #0f9f9a 100%);
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.28), transparent 22%),
+        linear-gradient(135deg, #20124d 0%, var(--purple) 44%, var(--bg-b) 100%);
+      animation: none;
     }
 
     .trivia-row {
       display: none;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      min-height: clamp(62px, 16dvh, 102px);
+      min-height: clamp(74px, 15dvh, 116px);
     }
 
     .trivia-row.visible {
@@ -304,13 +306,13 @@
     }
 
     .trivia-button {
-      width: 100%;
       min-width: 0;
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.20);
-      border: 1px solid var(--line);
-      box-shadow: 0 12px 36px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.08);
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-lg);
+      padding: 11px 14px;
+      border: 1px solid rgba(255,255,255,0.36);
+      box-shadow: 0 12px 34px rgba(0,0,0,0.24), inset 0 0 0 1px rgba(255,255,255,0.10);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -318,50 +320,48 @@
       overflow: hidden;
     }
 
-    .trivia-button:first-child {
-      background: linear-gradient(135deg, rgba(255,212,71,0.92), rgba(255,122,61,0.92));
-      color: #24124f;
+    #btn-release {
+      background: linear-gradient(135deg, var(--yellow), var(--orange));
+      color: #251640;
     }
 
-    .trivia-button:last-child {
-      background: linear-gradient(135deg, rgba(57,217,255,0.92), rgba(39,227,122,0.92));
-      color: #24124f;
+    #btn-album {
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      color: #162947;
     }
 
     .trivia-label {
-      font-size: clamp(0.78rem, 2vw, 0.96rem);
+      font-size: clamp(0.76rem, 2.4vw, 1rem);
       line-height: 1.05;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      opacity: 0.86;
-      text-align: center;
+      opacity: 0.78;
     }
 
     .trivia-value {
-      margin-top: 3px;
-      font-size: clamp(1rem, 3.2vw, 1.75rem);
-      line-height: 1.05;
-      font-weight: 900;
-      text-align: center;
-      white-space: nowrap;
+      margin-top: 4px;
       max-width: 100%;
+      font-size: clamp(1.05rem, 3.7vw, 1.85rem);
+      line-height: 1.03;
+      font-weight: 900;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .trivia-button.revealed .trivia-label {
-      opacity: 0.68;
+      opacity: 0.62;
     }
 
     .status-strip {
-      min-height: 32px;
+      min-height: 33px;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 10px;
-      color: var(--muted);
-      font-size: clamp(0.78rem, 2vw, 0.95rem);
+      gap: 9px;
+      color: var(--soft-white);
+      font-size: clamp(0.76rem, 2.3vw, 0.94rem);
       font-weight: 800;
     }
 
@@ -371,122 +371,134 @@
       text-overflow: ellipsis;
     }
 
-    #btn-login {
+    #btn-login,
+    #btn-reset-session {
       display: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      background: var(--green);
-      color: #102017;
-      font-weight: 900;
-      box-shadow: 0 10px 25px rgba(39,227,122,0.25);
-    }
-
-    #settings-panel {
-      position: fixed;
-      inset: auto max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) auto;
-      width: min(430px, calc(100dvw - 28px));
-      display: none;
-      grid-template-columns: 1fr;
-      gap: 9px;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      background: rgba(20,14,40,0.84);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      z-index: 5;
-    }
-
-    #settings-panel.open {
-      display: grid;
-    }
-
-    .settings-title {
+      height: 36px;
+      border-radius: var(--radius-pill);
+      padding: 0 14px;
       font-size: 0.86rem;
       font-weight: 900;
-      color: rgba(255,255,255,0.72);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      white-space: nowrap;
     }
 
-    #input-playlist {
-      width: 100%;
-      border: 1px solid rgba(255,255,255,0.22);
-      outline: 0;
-      border-radius: 18px;
-      padding: 12px 14px;
-      background: rgba(255,255,255,0.12);
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 800;
-    }
-
-    #input-playlist::placeholder {
-      color: rgba(255,255,255,0.54);
-    }
-
-    .settings-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .small-action {
-      border-radius: 18px;
-      padding: 11px 12px;
-      background: rgba(255,255,255,0.16);
-      border: 1px solid rgba(255,255,255,0.20);
-      font-size: 0.85rem;
-      font-weight: 900;
-    }
-
-    .small-action.primary {
+    #btn-login {
       background: var(--green);
-      color: #112018;
+      color: #102017;
     }
 
-    @keyframes pulseGlow {
+    #btn-reset-session {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid var(--line);
+      color: var(--white);
+    }
+
+    @keyframes playingPulse {
       0%, 100% { box-shadow: var(--shadow), 0 0 0 rgba(255,255,255,0); }
-      50% { box-shadow: var(--shadow), 0 0 32px rgba(255,255,255,0.26); }
+      50% { box-shadow: var(--shadow), 0 0 34px rgba(255,255,255,0.27); }
     }
 
-    @keyframes urgentPulse {
+    @keyframes timeoutPulse {
       from { filter: brightness(1); }
       to { filter: brightness(1.17); }
     }
 
     @media (orientation: portrait) {
       #app-shell {
-        display: none;
-      }
-
-      #rotate-warning {
-        display: flex;
-      }
-    }
-
-    @media (max-height: 420px) and (orientation: landscape) {
-      #app-shell {
-        gap: 7px;
-        padding-top: 8px;
-        padding-bottom: 8px;
+        grid-template-rows: auto 1fr auto;
+        gap: 9px;
       }
 
       .top-bar {
+        grid-template-columns: auto 1fr auto;
+        min-height: 40px;
+      }
+
+      .brand {
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .brand span:last-child {
+        display: none;
+      }
+
+      .playlist-chip,
+      .round-button {
+        height: 40px;
+      }
+
+      .round-button {
+        width: 40px;
+      }
+
+      .game-area {
+        grid-template-rows: 1fr auto;
+      }
+
+      #btn-game {
+        border-radius: 30px;
+        padding: 18px 16px;
+      }
+
+      #main-title {
+        font-size: clamp(2.5rem, 13vw, 5.8rem);
+      }
+
+      #counter {
+        font-size: clamp(2.8rem, 15vw, 5.4rem);
+      }
+
+      #track-artist-inline {
+        font-size: clamp(1.25rem, 6vw, 2.35rem);
+      }
+
+      .trivia-row {
+        grid-template-columns: 1fr;
+        min-height: 150px;
+      }
+
+      .trivia-button {
+        min-height: 70px;
+      }
+
+      .status-strip {
         min-height: 34px;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 430px) {
+      #app-shell {
+        gap: 7px;
+        padding-top: max(7px, env(safe-area-inset-top));
+        padding-bottom: max(7px, env(safe-area-inset-bottom));
+      }
+
+      .top-bar {
+        min-height: 36px;
       }
 
       .brand,
-      .icon-button {
+      .playlist-chip,
+      .round-button {
         height: 36px;
       }
 
-      .icon-button {
+      .round-button {
         width: 36px;
+        font-size: 1rem;
       }
 
       .trivia-row {
         min-height: 58px;
+      }
+
+      .trivia-button {
+        border-radius: 18px;
+        padding: 7px 10px;
       }
 
       #state-label {
@@ -505,19 +517,11 @@
 </head>
 
 <body>
-  <div id="rotate-warning">
-    <div class="rotate-card">
-      <div class="rotate-icon">↻</div>
-      <div class="rotate-title">Gira el teléfono</div>
-      <div class="rotate-text">AdiBeat está diseñado para jugarse en horizontal. En vertical se desperdicia pantalla, y eso no se perdona.</div>
-    </div>
-  </div>
-
   <main id="app-shell">
     <header class="top-bar">
-      <div class="brand"><span class="brand-dot"></span><span>AdiBeat</span></div>
-      <div id="playlist-label">Preparando juego...</div>
-      <button id="btn-settings" class="icon-button" type="button" aria-label="Ajustes">⚙</button>
+      <div class="brand" aria-label="AdiBeat"><span class="brand-dot"></span><span>AdiBeat</span></div>
+      <div class="playlist-chip"><span id="playlist-label">Preparando juego...</span></div>
+      <button id="btn-cycle" class="round-button" type="button" aria-label="Cambiar playlist">↻</button>
     </header>
 
     <section class="game-area">
@@ -544,19 +548,9 @@
     <footer class="status-strip">
       <div id="status-text">Conecta Spotify y abre la app en un dispositivo activo.</div>
       <button id="btn-login" type="button">Conectar Spotify</button>
+      <button id="btn-reset-session" type="button">Reconectar</button>
     </footer>
   </main>
-
-  <aside id="settings-panel">
-    <div class="settings-title">Ajustes rápidos</div>
-    <input type="text" id="input-playlist" placeholder="Pega link o ID de playlist" autocomplete="off">
-    <div class="settings-actions">
-      <button id="btn-load-custom" class="small-action primary" type="button">Cargar</button>
-      <button id="btn-cycle" class="small-action" type="button">Cambiar lista</button>
-      <button id="btn-reset" class="small-action" type="button">Reiniciar</button>
-      <button id="btn-close-settings" class="small-action" type="button">Cerrar</button>
-    </div>
-  </aside>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -566,24 +560,30 @@
         "user-modify-playback-state",
         "user-read-playback-state",
         "playlist-read-private",
-        "playlist-read-collaborative",
-        "user-read-email",
-        "user-read-private",
-        "user-library-read"
+        "playlist-read-collaborative"
       ].join(" ");
 
+      // Prioridad: la primera lista siempre es AdiBeat.
+      // El botón ↻ solo cicla entre estas listas. Ya no hay playlist manual ni fallback a canciones guardadas.
       const PLAYLISTS = [
-        "00MtRUjzL76Njcqe0mNvsD",
-        "6w5cQsiUyHHOZAmxzTXeER",
-        "3qdqZPJUy1ulEwEeLOUmgA"
+        { id: "00MtRUjzL76Njcqe0mNvsD", fallbackName: "AdiBeat" },
+        { id: "6w5cQsiUyHHOZAmxzTXeER", fallbackName: "Lista 2" },
+        { id: "3qdqZPJUy1ulEwEeLOUmgA", fallbackName: "Lista 3" }
       ];
 
       const ROUND_SECONDS = 15;
+      const STORAGE_INDEX = "adibeat_playlist_index";
+      const STORAGE_TOKEN = "adibeat_token";
+      const STORAGE_REFRESH = "adibeat_refresh_token";
+      const STORAGE_VERSION = "adibeat_predef_v1";
+      const CURRENT_VERSION = "predefinidas_sin_plan_b_2026_05_20";
 
       const ui = {
         playlistLabel: document.getElementById("playlist-label"),
         statusText: document.getElementById("status-text"),
         btnLogin: document.getElementById("btn-login"),
+        btnResetSession: document.getElementById("btn-reset-session"),
+        btnCycle: document.getElementById("btn-cycle"),
         btnGame: document.getElementById("btn-game"),
         stateLabel: document.getElementById("state-label"),
         mainTitle: document.getElementById("main-title"),
@@ -592,29 +592,33 @@
         nextHint: document.getElementById("next-hint"),
         triviaRow: document.getElementById("trivia-row"),
         btnRelease: document.getElementById("btn-release"),
-        btnAlbum: document.getElementById("btn-album"),
-        settingsPanel: document.getElementById("settings-panel"),
-        btnSettings: document.getElementById("btn-settings"),
-        btnCloseSettings: document.getElementById("btn-close-settings"),
-        inputPlaylist: document.getElementById("input-playlist"),
-        btnLoadCustom: document.getElementById("btn-load-custom"),
-        btnCycle: document.getElementById("btn-cycle"),
-        btnReset: document.getElementById("btn-reset")
+        btnAlbum: document.getElementById("btn-album")
       };
 
-      let accessToken = localStorage.getItem("adibeat_token") || "";
-      let refreshToken = localStorage.getItem("adibeat_refresh_token") || "";
+      let accessToken = localStorage.getItem(STORAGE_TOKEN) || "";
+      let refreshToken = localStorage.getItem(STORAGE_REFRESH) || "";
       let playlistTracks = [];
       let currentTrack = null;
-      let currentPlaylistIndex = Number.parseInt(localStorage.getItem("adibeat_playlist_index") || "0", 10);
+      let currentPlaylistIndex = Number.parseInt(localStorage.getItem(STORAGE_INDEX) || "0", 10);
       let gameState = "IDLE";
       let roundTimer = null;
       let roundTicker = null;
       let audioCtx = null;
+      let loadingPlaylist = false;
 
-      if (!Number.isFinite(currentPlaylistIndex) || currentPlaylistIndex >= PLAYLISTS.length) {
+      if (localStorage.getItem(STORAGE_VERSION) !== CURRENT_VERSION) {
+        localStorage.setItem(STORAGE_INDEX, "0");
+        localStorage.setItem(STORAGE_VERSION, CURRENT_VERSION);
         currentPlaylistIndex = 0;
       }
+
+      if (!Number.isFinite(currentPlaylistIndex) || currentPlaylistIndex < 0 || currentPlaylistIndex >= PLAYLISTS.length) {
+        currentPlaylistIndex = 0;
+        localStorage.setItem(STORAGE_INDEX, "0");
+      }
+
+      // Limpieza de versiones anteriores: elimina el plan B/manual si quedó guardado.
+      localStorage.removeItem("adibeat_custom_playlist");
 
       const randomString = (length) => {
         const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -643,6 +647,13 @@
         ui.btnGame.classList.add(stateClass);
       }
 
+      function clearRoundTimers() {
+        if (roundTimer) clearTimeout(roundTimer);
+        if (roundTicker) clearInterval(roundTicker);
+        roundTimer = null;
+        roundTicker = null;
+      }
+
       function resetTriviaButtons() {
         ui.triviaRow.classList.remove("visible");
 
@@ -664,6 +675,19 @@
         ui.counter.hidden = true;
         ui.artistInline.hidden = true;
         ui.artistInline.textContent = "";
+        ui.nextHint.hidden = true;
+        resetTriviaButtons();
+      }
+
+      function setLoadingUI(label = "CARGANDO") {
+        gameState = "LOADING";
+        clearRoundTimers();
+        setGameClass("state-ready");
+        ui.btnGame.disabled = true;
+        ui.stateLabel.textContent = "SPOTIFY";
+        ui.mainTitle.textContent = label;
+        ui.counter.hidden = true;
+        ui.artistInline.hidden = true;
         ui.nextHint.hidden = true;
         resetTriviaButtons();
       }
@@ -690,7 +714,7 @@
         ui.counter.hidden = true;
         ui.artistInline.hidden = true;
         ui.nextHint.hidden = true;
-        setStatus("Se acabó el contador. La música sigue; presiona para revelar.");
+        setStatus("Se acabó el contador. La música sigue; toca para revelar.");
         softBeep("timeout");
       }
 
@@ -711,51 +735,25 @@
         softBeep("reveal");
       }
 
-      function clearRoundTimers() {
-        if (roundTimer) clearTimeout(roundTimer);
-        if (roundTicker) clearInterval(roundTicker);
-        roundTimer = null;
-        roundTicker = null;
-      }
-
-      function normalizePlaylistInput(rawInput) {
-        let value = rawInput.trim();
-        if (!value) return "";
-
-        if (value.includes("playlist/")) {
-          value = value.split("playlist/")[1].split("?")[0].split("&")[0];
-        }
-
-        if (value.startsWith("spotify:playlist:")) {
-          value = value.replace("spotify:playlist:", "");
-        }
-
-        return value.trim();
-      }
-
       function processTracks(itemsArray) {
         return (itemsArray || []).map(obj => {
-          const t = obj?.item || obj?.track;
+          const t = obj?.track || obj?.item;
           if (!t || !t.uri || !t.uri.startsWith("spotify:track:")) return null;
-
-          const releaseDate = t.album?.release_date || "Fecha no disponible";
-          const precision = t.album?.release_date_precision || "day";
+          if (t.is_local) return null;
 
           return {
             uri: t.uri,
             name: t.name || "Canción desconocida",
             artist: Array.isArray(t.artists) ? t.artists.map(a => a.name).join(", ") : "Artista desconocido",
             album: t.album?.name || "Álbum no disponible",
-            releaseDate,
-            releasePrecision: precision
+            releaseDate: t.album?.release_date || "Fecha no disponible",
+            releasePrecision: t.album?.release_date_precision || "day"
           };
         }).filter(Boolean);
       }
 
       function formatReleaseDate(track) {
         if (!track?.releaseDate || track.releaseDate === "Fecha no disponible") return "Fecha no disponible";
-        if (track.releasePrecision === "year") return track.releaseDate;
-        if (track.releasePrecision === "month") return track.releaseDate;
         return track.releaseDate;
       }
 
@@ -772,14 +770,22 @@
           const ctx = getAudioContext();
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
+          const now = ctx.currentTime;
 
           osc.type = "sine";
           osc.connect(gain);
           gain.connect(ctx.destination);
 
-          const now = ctx.currentTime;
-          const startFreq = type === "timeout" ? 220 : 620;
-          const endFreq = type === "timeout" ? 150 : 930;
+          let startFreq = 540;
+          let endFreq = 880;
+          if (type === "timeout") {
+            startFreq = 230;
+            endFreq = 150;
+          }
+          if (type === "cycle") {
+            startFreq = 450;
+            endFreq = 720;
+          }
 
           osc.frequency.setValueAtTime(startFreq, now);
           osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.18);
@@ -790,7 +796,7 @@
           osc.start(now);
           osc.stop(now + 0.26);
         } catch (e) {
-          // Silencioso por diseño: el juego no depende de estos sonidos.
+          // Silencioso: las notificaciones no deben romper el juego.
         }
       }
 
@@ -813,11 +819,11 @@
         if (!data.access_token) return false;
 
         accessToken = data.access_token;
-        localStorage.setItem("adibeat_token", accessToken);
+        localStorage.setItem(STORAGE_TOKEN, accessToken);
 
         if (data.refresh_token) {
           refreshToken = data.refresh_token;
-          localStorage.setItem("adibeat_refresh_token", refreshToken);
+          localStorage.setItem(STORAGE_REFRESH, refreshToken);
         }
 
         return true;
@@ -828,7 +834,7 @@
           ...options,
           headers: {
             ...(options.headers || {}),
-            "Authorization": `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`
           }
         });
 
@@ -871,11 +877,11 @@
         }
 
         accessToken = data.access_token;
-        localStorage.setItem("adibeat_token", accessToken);
+        localStorage.setItem(STORAGE_TOKEN, accessToken);
 
         if (data.refresh_token) {
           refreshToken = data.refresh_token;
-          localStorage.setItem("adibeat_refresh_token", refreshToken);
+          localStorage.setItem(STORAGE_REFRESH, refreshToken);
         }
 
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -901,25 +907,28 @@
         window.location.href = authUrl.toString();
       }
 
-      async function loadPlaylist(playlistId) {
-        ui.btnGame.disabled = true;
-        ui.mainTitle.textContent = "CARGANDO";
-        ui.stateLabel.textContent = "SPOTIFY";
-        ui.counter.hidden = true;
-        ui.artistInline.hidden = true;
-        ui.nextHint.hidden = true;
-        resetTriviaButtons();
-        setStatus("Cargando canciones...");
-        ui.playlistLabel.textContent = "Cargando playlist...";
+      async function loadPlaylist(index) {
+        if (loadingPlaylist) return;
+        loadingPlaylist = true;
 
-        let playlistName = "Playlist cargada";
-        let items = [];
+        const selected = PLAYLISTS[index] || PLAYLISTS[0];
+        currentPlaylistIndex = index;
+        localStorage.setItem(STORAGE_INDEX, String(currentPlaylistIndex));
+
+        playlistTracks = [];
+        currentTrack = null;
+        setLoadingUI("CARGANDO");
+        ui.playlistLabel.textContent = selected.fallbackName;
+        setStatus(`Cargando ${selected.fallbackName}...`);
 
         try {
-          const playlistData = await fetchJson(`https://api.spotify.com/v1/playlists/${playlistId}?fields=name`);
-          playlistName = playlistData.name || playlistName;
+          const playlistData = await fetchJson(
+            `https://api.spotify.com/v1/playlists/${selected.id}?fields=name,tracks(total)`
+          );
 
-          let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/items?limit=100&fields=items(track(uri,name,artists(name),album(name,release_date,release_date_precision))),next`;
+          const playlistName = playlistData.name || selected.fallbackName;
+          let items = [];
+          let nextUrl = `https://api.spotify.com/v1/playlists/${selected.id}/items?limit=100&fields=items(track(uri,is_local,name,artists(name),album(name,release_date,release_date_precision))),next`;
 
           while (nextUrl) {
             const page = await fetchJson(nextUrl);
@@ -930,43 +939,38 @@
           playlistTracks = processTracks(items);
 
           if (!playlistTracks.length) {
-            throw new Error("La playlist no tiene canciones utilizables.");
+            throw new Error("La playlist no tiene canciones reproducibles.");
           }
 
-          ui.playlistLabel.textContent = `${playlistName} · ${playlistTracks.length} canciones`;
-          setStatus("Listo. Presiona INICIAR para empezar la ronda.");
+          ui.playlistLabel.textContent = `${playlistName} · ${playlistTracks.length}`;
           ui.btnGame.disabled = false;
+          ui.btnCycle.disabled = false;
+          setStatus(`Lista activa: ${playlistName}. Presiona INICIAR.`);
           setReadyUI();
-        } catch (playlistError) {
-          try {
-            setStatus("No pude cargar esa playlist. Intentando con tus canciones guardadas...");
-            const saved = await fetchJson("https://api.spotify.com/v1/me/tracks?limit=50");
-            playlistTracks = processTracks(saved.items || []);
-
-            if (!playlistTracks.length) throw new Error("No hay canciones guardadas disponibles.");
-
-            ui.playlistLabel.textContent = `Tus canciones guardadas · ${playlistTracks.length} canciones`;
-            setStatus("Listo con canciones guardadas. Presiona INICIAR.");
-            ui.btnGame.disabled = false;
-            setReadyUI();
-          } catch (fallbackError) {
-            playlistTracks = [];
-            ui.btnGame.disabled = true;
-            ui.playlistLabel.textContent = "Sin canciones cargadas";
-            ui.mainTitle.textContent = "SIN LISTA";
-            ui.stateLabel.textContent = "ERROR";
-            setStatus("No se pudo cargar música. Revisa conexión, permisos o ID de playlist.");
-          }
+        } catch (error) {
+          playlistTracks = [];
+          ui.btnGame.disabled = true;
+          ui.btnCycle.disabled = false;
+          setGameClass("state-timeout");
+          ui.stateLabel.textContent = "ERROR";
+          ui.mainTitle.textContent = "SIN LISTA";
+          ui.counter.hidden = true;
+          ui.artistInline.hidden = true;
+          ui.nextHint.hidden = true;
+          resetTriviaButtons();
+          setStatus(`No se pudo cargar ${selected.fallbackName}. Usa ↻ para intentar otra lista.`);
+        } finally {
+          loadingPlaylist = false;
         }
       }
 
       async function startRound() {
-        if (!playlistTracks.length || !accessToken) return;
+        if (!playlistTracks.length || !accessToken || loadingPlaylist) return;
 
         clearRoundTimers();
         currentTrack = playlistTracks[Math.floor(Math.random() * playlistTracks.length)];
         setPlayingUI(ROUND_SECONDS);
-        setStatus("Reproduciendo. Presiona el botón si alguien adivina.");
+        setStatus("Reproduciendo. Toca el botón si alguien adivina.");
 
         try {
           const response = await spotifyFetch("https://api.spotify.com/v1/me/player/play", {
@@ -990,19 +994,18 @@
             }
           }, 1000);
 
-          roundTimer = setTimeout(() => {
-            setTimeoutUI();
-          }, ROUND_SECONDS * 1000);
-
+          roundTimer = setTimeout(setTimeoutUI, ROUND_SECONDS * 1000);
           softBeep("start");
         } catch (error) {
           clearRoundTimers();
           gameState = "IDLE";
-          setGameClass("state-ready");
+          setGameClass("state-timeout");
           ui.stateLabel.textContent = "SIN DISPOSITIVO";
           ui.mainTitle.textContent = "ABRE SPOTIFY";
           ui.counter.hidden = true;
-          setStatus("Spotify necesita estar abierto y reproduciendo en algún dispositivo activo.");
+          ui.artistInline.hidden = true;
+          ui.nextHint.hidden = true;
+          setStatus("Abre Spotify y reproduce algo primero. Sin dispositivo activo, la API se pone exquisita.");
         }
       }
 
@@ -1031,6 +1034,14 @@
         softBeep("reveal");
       }
 
+      function resetSession() {
+        localStorage.removeItem(STORAGE_TOKEN);
+        localStorage.removeItem(STORAGE_REFRESH);
+        localStorage.removeItem("code_verifier");
+        localStorage.removeItem("adibeat_custom_playlist");
+        window.location.reload();
+      }
+
       ui.btnGame.addEventListener("click", () => {
         getAudioContext();
 
@@ -1044,43 +1055,18 @@
         }
       });
 
+      ui.btnCycle.addEventListener("click", () => {
+        if (!accessToken || loadingPlaylist) return;
+        getAudioContext();
+        softBeep("cycle");
+        const nextIndex = (currentPlaylistIndex + 1) % PLAYLISTS.length;
+        loadPlaylist(nextIndex);
+      });
+
       ui.btnRelease.addEventListener("click", () => revealTrivia("release"));
       ui.btnAlbum.addEventListener("click", () => revealTrivia("album"));
-
       ui.btnLogin.addEventListener("click", login);
-
-      ui.btnSettings.addEventListener("click", () => {
-        ui.settingsPanel.classList.toggle("open");
-      });
-
-      ui.btnCloseSettings.addEventListener("click", () => {
-        ui.settingsPanel.classList.remove("open");
-      });
-
-      ui.btnCycle.addEventListener("click", () => {
-        currentPlaylistIndex = (currentPlaylistIndex + 1) % PLAYLISTS.length;
-        localStorage.setItem("adibeat_playlist_index", String(currentPlaylistIndex));
-        localStorage.removeItem("adibeat_custom_playlist");
-        ui.settingsPanel.classList.remove("open");
-        loadPlaylist(PLAYLISTS[currentPlaylistIndex]);
-      });
-
-      ui.btnReset.addEventListener("click", () => {
-        localStorage.removeItem("adibeat_token");
-        localStorage.removeItem("adibeat_refresh_token");
-        localStorage.removeItem("code_verifier");
-        localStorage.removeItem("adibeat_custom_playlist");
-        window.location.reload();
-      });
-
-      ui.btnLoadCustom.addEventListener("click", () => {
-        const playlistId = normalizePlaylistInput(ui.inputPlaylist.value);
-        if (!playlistId) return;
-
-        localStorage.setItem("adibeat_custom_playlist", playlistId);
-        ui.settingsPanel.classList.remove("open");
-        loadPlaylist(playlistId);
-      });
+      ui.btnResetSession.addEventListener("click", resetSession);
 
       async function boot() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1097,25 +1083,30 @@
 
           if (!accessToken) {
             ui.btnLogin.style.display = "inline-flex";
+            ui.btnResetSession.style.display = "none";
             ui.btnGame.disabled = true;
+            ui.btnCycle.disabled = true;
             ui.stateLabel.textContent = "SPOTIFY";
             ui.mainTitle.textContent = "CONECTA";
             ui.playlistLabel.textContent = "Sin conexión";
-            setStatus("Conecta Spotify para cargar canciones.");
+            setStatus("Conecta Spotify para cargar AdiBeat.");
             return;
           }
 
           ui.btnLogin.style.display = "none";
-
-          const savedPlaylist = localStorage.getItem("adibeat_custom_playlist");
-          await loadPlaylist(savedPlaylist || PLAYLISTS[currentPlaylistIndex]);
+          ui.btnResetSession.style.display = "inline-flex";
+          ui.btnCycle.disabled = false;
+          await loadPlaylist(currentPlaylistIndex);
         } catch (error) {
           ui.btnLogin.style.display = "inline-flex";
+          ui.btnResetSession.style.display = "inline-flex";
           ui.btnGame.disabled = true;
+          ui.btnCycle.disabled = true;
+          setGameClass("state-timeout");
           ui.stateLabel.textContent = "ERROR";
           ui.mainTitle.textContent = "RECONECTA";
-          ui.playlistLabel.textContent = "Error de conexión";
-          setStatus("La sesión falló. Reinicia o vuelve a conectar Spotify.");
+          ui.playlistLabel.textContent = "Error de sesión";
+          setStatus("La sesión falló. Reconecta Spotify.");
         }
       }
 
