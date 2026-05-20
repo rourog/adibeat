@@ -14,43 +14,49 @@
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #121212; }
         
         #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; }
-        #status-text { font-size: 2rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; }
+        #status-text { font-size: 1.5rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
         #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #1DB954; color: #121212; box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4); }
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 60vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; }
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 60vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; }
+        #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
     </style>
 </head>
 <body>
 
     <div id="splash-screen"><h1>AdiBeat</h1></div>
     <div id="main-screen">
-        <h1 id="status-text">Bienvenido</h1>
-        <button id="btn-login">Conectar Spotify</button>
-        <button id="btn-play">▶ INICIAR TURNO</button>
+        <h1 id="status-text">Iniciando sistema...</h1>
+        <button id="btn-login" style="display: none;">Conectar Spotify</button>
+        <button id="btn-play">
+            <span id="play-text">▶ INICIAR TURNO</span>
+            <span id="timer-text">15s</span>
+        </button>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // --- CONFIGURACIÓN DE LA APP ---
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
+            const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
+            const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative'; 
+            const PLAYLIST_ID = '6w5cQsiUyHHOZAmxzTXeER'; 
             
-            // IMPORTANTE: Usa tu URL de GitHub o localhost según donde estés probando
-            // const REDIRECT_URI = 'http://localhost:5500'; 
-            const REDIRECT_URI = 'https://rourog.adibeat.io/adibeat/'; 
-            
-            const SCOPES = 'user-modify-playback-state user-read-playback-state'; 
+            let playlistTracks = []; 
+            let temporizador;
 
             const splashScreen = document.getElementById("splash-screen");
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
             const statusText = document.getElementById("status-text");
+            const playText = document.getElementById("play-text");
+            const timerText = document.getElementById("timer-text");
 
-            // --- FUNCIONES CRIPTOGRÁFICAS PARA EL NUEVO FLUJO PKCE ---
+            // --- FUNCIONES CRIPTOGRÁFICAS PKCE ---
             const generateRandomString = (length) => {
                 const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                 const values = crypto.getRandomValues(new Uint8Array(length));
@@ -78,7 +84,7 @@
                     mainScreen.style.display = "flex";
                     setTimeout(() => mainScreen.style.opacity = "1", 50); 
                 }, 500);
-            }, 2000);
+            }, 1500);
 
             // --- LÓGICA DE AUTENTICACIÓN PKCE ---
             let accessToken = localStorage.getItem('adibeat_token') || '';
@@ -86,9 +92,7 @@
             const code = urlParams.get('code');
 
             if (code && !accessToken) {
-                // Si venimos de regreso con un código, lo cambiamos por el Token de acceso
                 const codeVerifier = localStorage.getItem('code_verifier');
-                
                 fetch("https://accounts.spotify.com/api/token", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -104,12 +108,12 @@
                 .then(data => {
                     if(data.access_token) {
                         accessToken = data.access_token;
-                        localStorage.setItem('adibeat_token', accessToken); // Lo guardamos
-                        window.history.pushState("", document.title, window.location.pathname); // Limpiamos la URL
+                        localStorage.setItem('adibeat_token', accessToken); 
+                        window.history.pushState("", document.title, window.location.pathname); 
                         iniciarApp();
                     } else {
-                        console.error("Error obteniendo el token", data);
-                        statusText.innerText = "Error de conexión";
+                        statusText.innerText = "Error de conexión con Spotify";
+                        btnLogin.style.display = 'block';
                     }
                 });
             } else {
@@ -118,12 +122,43 @@
 
             function iniciarApp() {
                 if (accessToken) {
-                    btnLogin.style.display = 'none';
-                    btnPlay.style.display = 'flex';
-                    statusText.innerText = "¡Conectado!";
+                    statusText.innerText = "Cargando Playlist 'AdiBeat - Red'...";
+                    
+                    // --- OBTENER CANCIONES DE LA PLAYLIST ---
+                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?fields=items(track(uri))`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    })
+                    .then(response => {
+                        if(response.status === 401) throw new Error("Token caducado");
+                        return response.json();
+                    })
+                    .then(data => {
+                        playlistTracks = data.items
+                            .filter(item => item.track && item.track.uri)
+                            .map(item => item.track.uri);
+                        
+                        if(playlistTracks.length > 0) {
+                            btnPlay.style.display = 'flex';
+                            statusText.innerText = `Playlist lista: ${playlistTracks.length} canciones`;
+                        } else {
+                            statusText.innerText = "La playlist está vacía";
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        if (error.message === "Token caducado") {
+                            localStorage.removeItem('adibeat_token');
+                            window.location.reload();
+                        } else {
+                            statusText.innerText = "Error cargando la música";
+                        }
+                    });
+
                 } else {
+                    statusText.innerText = "Bienvenido a AdiBeat";
+                    btnLogin.style.display = 'block';
+                    
                     btnLogin.addEventListener('click', async () => {
-                        // Generamos los candados criptográficos
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -144,12 +179,20 @@
                 }
             }
 
-            // --- LÓGICA DE REPRODUCCIÓN REMOTA ---
+            // --- LÓGICA DE JUEGO (REPRODUCCIÓN Y TEMPORIZADOR) ---
             btnPlay.addEventListener('click', () => {
-                const trackUri = 'spotify:track:4cOdK2wGLETKBW3PvgPWqT'; // Canción de prueba
+                if(playlistTracks.length === 0) return;
+
+                // Limpiar cualquier temporizador anterior por si acaso
+                clearTimeout(temporizador);
+
+                // 1. Elegimos una canción al azar
+                const randomIndex = Math.floor(Math.random() * playlistTracks.length);
+                const trackUri = playlistTracks[randomIndex];
                 
-                btnPlay.innerText = "Cargando...";
+                playText.innerText = "SINTONIZANDO...";
                 
+                // 2. Le mandamos el comando de PLAY a Spotify
                 fetch('https://api.spotify.com/v1/me/player/play', {
                     method: 'PUT',
                     headers: {
@@ -160,28 +203,40 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        btnPlay.innerText = "¡SONANDO!";
+                        // Cambiamos interfaz a modo "Sonando"
+                        playText.innerText = "¡ADIVINA!";
+                        timerText.style.display = "block";
                         btnPlay.style.backgroundColor = "#1DB954";
                         btnPlay.style.borderColor = "#1DB954";
-                        statusText.innerText = "Escuchando en la sala...";
                         
-                        setTimeout(() => {
-                            btnPlay.innerText = "▶ SIGUIENTE";
-                            btnPlay.style.backgroundColor = "#ff4646";
-                            btnPlay.style.borderColor = "#ff4646";
-                            statusText.innerText = "Turno Finalizado";
-                        }, 15000);
+                        // Cuenta regresiva visual simple de 15 segundos
+                        let tiempo = 15;
+                        timerText.innerText = `${tiempo}s`;
+                        const intervalo = setInterval(() => {
+                            tiempo--;
+                            timerText.innerText = `${tiempo}s`;
+                            if(tiempo <= 0) clearInterval(intervalo);
+                        }, 1000);
+
+                        // 3. Pausar automáticamente después de 15 segundos
+                        temporizador = setTimeout(() => {
+                            fetch('https://api.spotify.com/v1/me/player/pause', {
+                                method: 'PUT',
+                                headers: { 'Authorization': `Bearer ${accessToken}` }
+                            }).then(() => {
+                                playText.innerText = "▶ SIGUIENTE";
+                                timerText.style.display = "none";
+                                btnPlay.style.backgroundColor = "#ff4646";
+                                btnPlay.style.borderColor = "#ff4646";
+                            });
+                        }, 15000); // 15000 milisegundos = 15 segundos
                         
-                    } else if (response.status === 401) {
-                        // El token caducó (dura 1 hora), forzamos un re-login
-                        localStorage.removeItem('adibeat_token');
-                        window.location.reload();
                     } else {
-                        btnPlay.innerText = "ERROR";
-                        statusText.innerText = "Abre Spotify en algún dispositivo";
+                        playText.innerText = "ERROR";
+                        statusText.innerText = "Por favor abre Spotify en tu dispositivo o TV para empezar";
                     }
                 })
-                .catch(error => console.error("Error en la conexión:", error));
+                .catch(error => console.error(error));
             });
         });
     </script>
