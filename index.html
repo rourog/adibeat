@@ -54,7 +54,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Filtros eliminados. Descarga en modo crudo (Raw).</div>
+        <div>[Sistema] Ataque Agresivo a API Iniciado. Plan B Activado.</div>
     </div>
 
     <script>
@@ -74,7 +74,9 @@
         document.addEventListener("DOMContentLoaded", () => {
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
-            const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private'; 
+            
+            // SE AÑADIÓ EL PERMISO PARA LEER "CANCIONES QUE TE GUSTAN" (user-library-read)
+            const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private user-library-read'; 
             
             const PLAYLISTS = [
                 '00MtRUjzL76Njcqe0mNvsD', 
@@ -175,75 +177,94 @@
             function iniciarApp() {
                 if (accessToken) {
                     statusText.innerText = `Cargando lista ${currentPlaylistIndex + 1}/${PLAYLISTS.length}...`;
+                    logDebug(`Iniciando Extracción Agresiva para ID: ${PLAYLIST_ID}`);
                     
-                    // SOLUCIÓN: Eliminamos '?fields=' por completo. 
-                    // Pedimos el objeto JSON completo a Spotify tal cual sale de su base de datos.
-                    const apiUrl = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`;
-                    
-                    logDebug(`Solicitando JSON completo de la lista...`);
-                    
-                    fetch(apiUrl, {
+                    let nombreLista = `Lista ${currentPlaylistIndex + 1}`;
+
+                    // PASO 1: Intentamos conseguir solo el nombre de la lista
+                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
+                    })
+                    .then(res => {
+                        if(res.status === 401) throw new Error("TOKEN_CADUCADO");
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.name) {
+                            nombreLista = data.name;
+                            logDebug(`Nombre detectado: "${nombreLista}"`, "success");
+                        }
+                        
+                        // PASO 2: Atacamos el endpoint dedicado a canciones, saltando la portada
+                        logDebug("Atacando endpoint directo de canciones...");
+                        return fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks`, {
+                            headers: { 'Authorization': `Bearer ${accessToken}` }
+                        });
                     })
                     .then(async response => {
                         if (!response.ok) {
-                            if (response.status === 401) throw new Error("TOKEN_CADUCADO");
                             const err = await response.json();
-                            throw new Error(`Error HTTP ${response.status}: ${err.error?.message}`);
+                            throw new Error(`API Bloqueó las pistas (HTTP ${response.status})`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        const playlistName = data.name;
-                        logDebug(`Nombre de lista confirmado: "${playlistName}"`, "success");
-                        controlPanel.style.display = 'flex';
-
-                        // ESCÁNER PROFUNDO DE LA RESPUESTA
-                        logDebug(`Estructura principal: [${Object.keys(data).join(', ')}]`, "info");
-
-                        if (!data.tracks) {
-                            logDebug("CRÍTICO: No existe la llave 'tracks' en la respuesta cruda.", "error");
-                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Error de estructura`;
-                            return;
-                        }
-
-                        logDebug(`Estructura de 'tracks': [${Object.keys(data.tracks).join(', ')}]`, "info");
-
-                        if (!data.tracks.items || data.tracks.items.length === 0) {
-                            logDebug("ALERTA: 'items' existe pero viene vacío [].", "warn");
-                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Está vacía`;
-                            return;
-                        }
-
-                        // Inspeccionamos la primera canción para ver qué trae
-                        const primerItem = data.tracks.items[0];
-                        logDebug(`Llaves del Item 0: [${Object.keys(primerItem).join(', ')}]`, "info");
+                        if (!data.items) throw new Error("Spotify no devolvió 'items'.");
                         
-                        if (primerItem.track) {
-                            logDebug(`Llaves del Track: [${Object.keys(primerItem.track).join(', ')}]`, "info");
-                            logDebug(`URI de prueba: ${primerItem.track.uri}`, "success");
-                        } else {
-                            logDebug("ALERTA: El item no tiene propiedad 'track'. ¿Es un podcast?", "warn");
-                        }
-
-                        // EXTRAER URIs DE FORMA SEGURA (Optional Chaining)
-                        playlistTracks = data.tracks.items
-                            .map(item => item?.track?.uri) // Sacamos los URIs
-                            .filter(uri => uri !== undefined && uri !== null); // Filtramos los nulos
+                        playlistTracks = data.items
+                            .map(item => item?.track?.uri)
+                            .filter(uri => uri !== undefined && uri !== null && uri.startsWith('spotify:track:'));
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`¡ÉXITO TOTAL! ${playlistTracks.length} canciones extraídas.`, "success");
+                            logDebug(`¡Victoria! ${playlistTracks.length} canciones extraídas.`, "success");
                             btnPlay.style.display = 'flex';
-                            statusText.innerHTML = `Conectado a:<br><strong>${playlistName}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones)</span>`;
+                            controlPanel.style.display = 'flex';
+                            statusText.innerHTML = `Conectado a:<br><strong>${nombreLista}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones)</span>`;
                         } else {
-                            logDebug("No se pudo extraer ningún URI válido.", "error");
-                            statusText.innerHTML = `<strong>${playlistName}</strong><br>Sin pistas válidas`;
+                            throw new Error("La lista está vacía o censurada.");
                         }
                     })
                     .catch(error => {
-                        logDebug(`Fallo Crítico: ${error.message}`, "error");
-                        statusText.innerText = "Error en la descarga";
-                        controlPanel.style.display = 'flex';
+                        if (error.message.includes("TOKEN_CADUCADO")) {
+                            logDebug("El token caducó. Usa Forzar Conexión.", "warn");
+                            statusText.innerText = "Token Caducado";
+                            controlPanel.style.display = 'flex';
+                            return;
+                        }
+
+                        // LLEGÓ LA POLICÍA DE SPOTIFY: ACTIVAR PLAN B
+                        logDebug(`Fallo principal: ${error.message}`, "error");
+                        logDebug("Activando PLAN B: Rescatando tus 'Me Gusta'...", "warn");
+                        statusText.innerHTML = "Bloqueo detectado<br><span style='font-size:1rem'>Activando Plan B...</span>";
+                        
+                        fetch(`https://api.spotify.com/v1/me/tracks?limit=50`, {
+                            headers: { 'Authorization': `Bearer ${accessToken}` }
+                        })
+                        .then(async res => {
+                            if (!res.ok) throw new Error("No tienes acceso a Liked Songs.");
+                            return res.json();
+                        })
+                        .then(data => {
+                            playlistTracks = (data.items || [])
+                                .map(item => item?.track?.uri)
+                                .filter(uri => uri && uri.startsWith('spotify:track:'));
+                                
+                            if(playlistTracks.length > 0) {
+                                logDebug(`Plan B Exitoso: ${playlistTracks.length} canciones guardadas.`, "success");
+                                btnPlay.style.display = 'flex';
+                                controlPanel.style.display = 'flex';
+                                statusText.innerHTML = `Plan B Activado:<br><strong>Tus Me Gusta</strong><br><span style="font-size:1rem; opacity:0.7;">(Respaldo automático)</span>`;
+                            } else {
+                                logDebug("Tus 'Me gusta' están vacíos.", "error");
+                                statusText.innerText = "Plan B Falló";
+                                controlPanel.style.display = 'flex';
+                            }
+                        })
+                        .catch(err => {
+                            logDebug(`Fallo Plan B: ${err.message}`, "error");
+                            statusText.innerText = "Error (Ver consola)";
+                            controlPanel.style.display = 'flex';
+                        });
                     });
 
                 } else {
