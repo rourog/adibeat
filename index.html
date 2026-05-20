@@ -363,88 +363,121 @@
         #trivia-panel {
             display: none;
             width: 100%;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            min-height: clamp(132px, 28vh, 220px);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: clamp(10px, 2.6vw, 18px);
+            align-items: stretch;
         }
 
         .trivia-btn {
-            min-height: 100%;
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            min-height: 0;
+            aspect-ratio: 1 / 1;
             border-radius: var(--radius-lg);
-            padding: clamp(16px, 3.8vw, 24px);
+            padding: clamp(14px, 3.4vw, 24px);
             flex-direction: column;
             gap: 10px;
             background: rgba(255,255,255,0.14);
-            border: 1px solid rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.20);
             box-shadow: 0 16px 36px rgba(0,0,0,0.24);
             overflow: hidden;
         }
 
-        .trivia-btn:nth-child(1) {
-            background: linear-gradient(135deg, rgba(34,211,238,0.35), rgba(14,165,233,0.18));
+        .trivia-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.48));
+            pointer-events: none;
         }
 
-        .trivia-btn:nth-child(2) {
-            background: linear-gradient(135deg, rgba(251,191,36,0.34), rgba(236,72,153,0.18));
+        #btn-release {
+            background:
+                radial-gradient(circle at 20% 10%, rgba(255,255,255,0.26), transparent 30%),
+                linear-gradient(135deg, rgba(34,211,238,0.82), rgba(139,92,246,0.72));
+        }
+
+        #btn-album {
+            background: rgba(17,24,39,0.72);
+        }
+
+        .trivia-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 2vw, 14px);
+            text-shadow: 0 4px 18px rgba(0,0,0,0.55);
         }
 
         .trivia-label {
-            font-size: clamp(1rem, 4vw, 1.6rem);
+            font-size: clamp(1rem, 4.2vw, 1.75rem);
             line-height: 1;
             text-transform: uppercase;
             letter-spacing: -0.02em;
         }
 
+        .trivia-hint {
+            font-size: clamp(0.74rem, 2.8vw, 1rem);
+            line-height: 1.05;
+            color: rgba(255,255,255,0.74);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
         .trivia-answer {
             display: none;
-            font-size: clamp(1.15rem, 5vw, 2.1rem);
-            line-height: 1.05;
-            color: rgba(255,255,255,0.92);
-            text-transform: none;
-            overflow-wrap: anywhere;
-        }
-
-        .trivia-art {
-            display: none;
-            width: min(100%, 180px);
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.16);
-            box-shadow: 0 14px 30px rgba(0,0,0,0.28);
-            background: rgba(0,0,0,0.18);
-        }
-
-        .album-placeholder {
-            display: block;
             max-width: 100%;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: rgba(0,0,0,0.18);
-            color: rgba(255,255,255,0.72);
-            font-size: clamp(1rem, 4.2vw, 1.7rem);
-            line-height: 1.08;
+            padding: 8px 12px;
+            border-radius: 18px;
+            background: rgba(0,0,0,0.34);
+            border: 1px solid rgba(255,255,255,0.16);
+            font-size: clamp(1.12rem, 5vw, 2rem);
+            line-height: 1.05;
+            color: rgba(255,255,255,0.96);
             text-transform: none;
-            filter: blur(5px);
-            opacity: 0.72;
-            transform: scale(0.98);
             overflow-wrap: anywhere;
         }
 
-        .trivia-btn.is-open .trivia-label {
-            opacity: 0.62;
+        .album-art-blur {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: blur(14px) saturate(1.16) brightness(0.68);
+            transform: scale(1.12);
+            transition: filter 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
+            opacity: 0.96;
+        }
+
+        #btn-album.is-open .album-art-blur {
+            filter: blur(0) saturate(1.08) brightness(0.78);
+            transform: scale(1.01);
+        }
+
+        .trivia-btn.is-open .trivia-hint {
+            display: none;
         }
 
         .trivia-btn.is-open .trivia-answer {
             display: block;
         }
 
-        .trivia-btn.is-open .trivia-art {
-            display: block;
+        #btn-album.is-open .trivia-content {
+            justify-content: flex-end;
         }
 
-        .trivia-btn.is-open .album-placeholder {
-            display: none;
+        #btn-album.is-open .trivia-label {
+            opacity: 0.82;
         }
 
         .loading-note {
@@ -479,7 +512,12 @@
 
             #trivia-panel {
                 grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
                 min-height: 0;
+            }
+
+            .trivia-btn {
+                aspect-ratio: auto;
             }
         }
 
@@ -487,10 +525,6 @@
             .reveal-layout {
                 grid-template-columns: 1fr;
                 justify-items: center;
-            }
-
-            #album-art-main {
-                width: min(52vw, 180px);
             }
 
             .reveal-copy {
@@ -571,14 +605,19 @@
 
             <div id="trivia-panel">
                 <button class="trivia-btn" id="btn-release" type="button">
-                    <div class="trivia-label">Década</div>
-                    <div class="trivia-answer" id="answer-release">????</div>
+                    <div class="trivia-content">
+                        <div class="trivia-label">Década</div>
+                        <div class="trivia-hint">Toca para revelar</div>
+                        <div class="trivia-answer" id="answer-release">????</div>
+                    </div>
                 </button>
                 <button class="trivia-btn" id="btn-album" type="button">
-                    <div class="trivia-label">Álbum</div>
-                    <div class="album-placeholder" id="album-placeholder">Título del álbum</div>
-                    <img class="trivia-art" id="album-art-trivia" alt="Arte del álbum" loading="lazy">
-                    <div class="trivia-answer" id="answer-album">????</div>
+                    <img class="album-art-blur" id="album-art-trivia" alt="Arte del álbum" loading="lazy">
+                    <div class="trivia-content">
+                        <div class="trivia-label">Álbum</div>
+                        <div class="trivia-hint">Toca para revelar</div>
+                        <div class="trivia-answer" id="answer-album">????</div>
+                    </div>
                 </button>
             </div>
         </div>
@@ -643,7 +682,6 @@
             const answerRelease = document.getElementById("answer-release");
             const answerAlbum = document.getElementById("answer-album");
             const albumArtTrivia = document.getElementById("album-art-trivia");
-            const albumPlaceholder = document.getElementById("album-placeholder");
 
             splashScreen.addEventListener('click', () => {
                 playStartSound();
@@ -1077,14 +1115,14 @@
                 answerRelease.textContent = currentTrackObj.year || 'Año no disponible';
                 answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
 
-                albumPlaceholder.textContent = currentTrackObj.album || 'Álbum no disponible';
-
                 if (currentTrackObj.albumArt) {
                     albumArtTrivia.src = currentTrackObj.albumArt;
                     albumArtTrivia.alt = `Arte del álbum ${currentTrackObj.album}`;
+                    albumArtTrivia.style.opacity = '0.96';
                 } else {
                     albumArtTrivia.removeAttribute('src');
                     albumArtTrivia.alt = 'Arte del álbum no disponible';
+                    albumArtTrivia.style.opacity = '0';
                 }
 
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
