@@ -10,37 +10,45 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body { background-color: #121212; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         
-        /* NUEVO COLOR: Morado Neón para validar actualización */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #673AB7; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
-        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; /* Espacio para la consola */ }
+        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; }
         #status-text { font-size: 1.5rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
-        /* Botones también en morado */
         #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); }
         
         #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 50vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; }
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
 
-        /* --- CONSOLA DE DEBUG --- */
+        /* --- CONSOLA DE DEBUG (Mejorada para copiar) --- */
         #debug-console {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 150px;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
             color: #00ff00;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 13px;
             padding: 10px;
             overflow-y: auto;
-            border-top: 2px solid #333;
+            border-top: 2px solid #444;
             z-index: 100;
+            /* Propiedades para permitir selección fácil de texto */
+            user-select: text;
+            -webkit-user-select: text;
+            cursor: text;
+        }
+        #debug-console div {
+            margin-bottom: 4px;
+            word-wrap: break-word;
+            user-select: all; /* Al hacer clic se selecciona todo el renglón */
+            -webkit-user-select: all;
         }
         .log-error { color: #ff4646; }
         .log-warn { color: #ffeb3b; }
@@ -60,7 +68,7 @@
 
     <!-- Consola de Debug en Pantalla -->
     <div id="debug-console">
-        <div>[Sistema] Consola iniciada...</div>
+        <div>[Sistema] Consola iniciada. Puedes copiar estos textos.</div>
     </div>
 
     <script>
@@ -72,8 +80,8 @@
             if (type === "error") div.className = "log-error";
             if (type === "warn") div.className = "log-warn";
             debugConsole.appendChild(div);
-            debugConsole.scrollTop = debugConsole.scrollHeight; // Auto-scroll
-            console.log(`[${type.toUpperCase()}]`, message); // Mantiene el log original
+            debugConsole.scrollTop = debugConsole.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message); 
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -83,13 +91,6 @@
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative'; 
             const PLAYLIST_ID = '6w5cQsiUyHHOZAmxzTXeER'; 
             
-            logDebug(`URL Actual del navegador: ${window.location.href}`);
-            logDebug(`REDIRECT_URI configurada: ${REDIRECT_URI}`);
-            
-            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://127.0.0.1")) {
-                logDebug("⚠️ ADVERTENCIA: Estás en localhost pero tu REDIRECT_URI apunta a GitHub.", "warn");
-            }
-
             let playlistTracks = []; 
             let temporizador;
 
@@ -101,7 +102,7 @@
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
 
-            // --- FUNCIONES CRIPTOGRÁFICAS PKCE ---
+            // Funciones Criptográficas
             const generateRandomString = (length) => {
                 const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                 const values = crypto.getRandomValues(new Uint8Array(length));
@@ -121,7 +122,7 @@
                     .replace(/\//g, '_');
             };
 
-            // Animación del Splash Screen
+            // Splash Screen
             setTimeout(() => {
                 splashScreen.style.opacity = "0";
                 setTimeout(() => {
@@ -131,15 +132,13 @@
                 }, 500);
             }, 1500);
 
-            // --- LÓGICA DE AUTENTICACIÓN PKCE ---
+            // --- AUTENTICACIÓN ---
             let accessToken = localStorage.getItem('adibeat_token') || '';
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
             if (code && !accessToken) {
-                logDebug("Código detectado en la URL. Solicitando Token a Spotify...");
                 const codeVerifier = localStorage.getItem('code_verifier');
-                
                 fetch("https://accounts.spotify.com/api/token", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -164,22 +163,26 @@
                         statusText.innerText = "Error de conexión";
                         btnLogin.style.display = 'block';
                     }
-                })
-                .catch(err => logDebug(`Fetch error: ${err}`, "error"));
+                });
             } else {
                 iniciarApp();
             }
 
             function iniciarApp() {
                 if (accessToken) {
-                    logDebug("Iniciando app con Token existente.");
-                    statusText.innerText = "Cargando Playlist 'AdiBeat - Red'...";
+                    statusText.innerText = "Cargando Playlist...";
+                    logDebug(`Solicitando playlist ID: ${PLAYLIST_ID}`);
                     
                     fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?fields=items(track(uri))`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
-                    .then(response => {
-                        if(response.status === 401) throw new Error("Token caducado");
+                    .then(async response => {
+                        // Capturamos explícitamente errores HTTP (como el 403)
+                        if (!response.ok) {
+                            if (response.status === 401) throw new Error("TOKEN_CADUCADO");
+                            const errorData = await response.json();
+                            throw new Error(`HTTP ${response.status}: ${errorData.error?.message || 'Desconocido'}`);
+                        }
                         return response.json();
                     })
                     .then(data => {
@@ -188,31 +191,30 @@
                             .map(item => item.track.uri);
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`Playlist cargada. ${playlistTracks.length} pistas encontradas.`);
+                            logDebug(`Éxito: ${playlistTracks.length} canciones cargadas.`);
                             btnPlay.style.display = 'flex';
                             statusText.innerText = `Playlist lista: ${playlistTracks.length} canciones`;
                         } else {
-                            logDebug("La playlist se cargó pero está vacía.", "warn");
-                            statusText.innerText = "La playlist está vacía";
+                            logDebug("La playlist está vacía o no tiene pistas válidas.", "warn");
+                            statusText.innerText = "Playlist vacía";
                         }
                     })
                     .catch(error => {
-                        logDebug(`Error cargando música: ${error.message}`, "error");
-                        if (error.message === "Token caducado") {
+                        if (error.message === "TOKEN_CADUCADO") {
+                            logDebug("El token expiró. Limpiando y recargando...", "warn");
                             localStorage.removeItem('adibeat_token');
                             window.location.reload();
                         } else {
-                            statusText.innerText = "Error cargando la música";
+                            logDebug(`Fetch Error: ${error.message}`, "error");
+                            statusText.innerText = "Error al cargar (Ver consola)";
                         }
                     });
 
                 } else {
-                    logDebug("No hay token. Esperando acción del usuario.");
                     statusText.innerText = "Bienvenido a AdiBeat";
                     btnLogin.style.display = 'block';
                     
                     btnLogin.addEventListener('click', async () => {
-                        logDebug("Generando llaves y redirigiendo a Spotify...");
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -228,20 +230,19 @@
                             code_challenge: codeChallenge,
                         }).toString();
                         
-                        logDebug(`Redirigiendo a: ${authUrl.toString().substring(0, 100)}...`);
                         window.location.href = authUrl.toString();
                     });
                 }
             }
 
-            // --- LÓGICA DE JUEGO (REPRODUCCIÓN Y TEMPORIZADOR) ---
+            // --- LÓGICA DE JUEGO (PLAY/PAUSE) ---
             btnPlay.addEventListener('click', () => {
                 if(playlistTracks.length === 0) return;
                 clearTimeout(temporizador);
 
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
                 const trackUri = playlistTracks[randomIndex];
-                logDebug(`Enviando PLAY para pista: ${trackUri}`);
+                logDebug(`Enviando PLAY: ${trackUri}`);
                 
                 playText.innerText = "SINTONIZANDO...";
                 
@@ -253,42 +254,44 @@
                     },
                     body: JSON.stringify({ "uris": [trackUri] })
                 })
-                .then(response => {
-                    if (response.ok) {
-                        logDebug("Comando PLAY aceptado por Spotify.");
-                        playText.innerText = "¡ADIVINA!";
-                        timerText.style.display = "block";
-                        btnPlay.style.backgroundColor = "#673AB7"; // Color activo morado
-                        btnPlay.style.borderColor = "#673AB7";
-                        
-                        let tiempo = 15;
-                        timerText.innerText = `${tiempo}s`;
-                        const intervalo = setInterval(() => {
-                            tiempo--;
-                            timerText.innerText = `${tiempo}s`;
-                            if(tiempo <= 0) clearInterval(intervalo);
-                        }, 1000);
-
-                        temporizador = setTimeout(() => {
-                            logDebug("15s alcanzados. Enviando comando PAUSE.");
-                            fetch('https://api.spotify.com/v1/me/player/pause', {
-                                method: 'PUT',
-                                headers: { 'Authorization': `Bearer ${accessToken}` }
-                            }).then(() => {
-                                playText.innerText = "▶ SIGUIENTE";
-                                timerText.style.display = "none";
-                                btnPlay.style.backgroundColor = "#ff4646";
-                                btnPlay.style.borderColor = "#ff4646";
-                            });
-                        }, 15000); 
-                        
-                    } else {
-                        logDebug(`Error de PLAY. Status: ${response.status}. ¿Spotify está abierto?`, "error");
-                        playText.innerText = "ERROR";
-                        statusText.innerText = "Abre Spotify en tu celular o TV";
+                .then(async response => {
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(`HTTP ${response.status}: ${err.error?.message || 'Error de Playback'}`);
                     }
+                    
+                    logDebug("Comando PLAY aceptado.");
+                    playText.innerText = "¡ADIVINA!";
+                    timerText.style.display = "block";
+                    btnPlay.style.backgroundColor = "#673AB7"; 
+                    btnPlay.style.borderColor = "#673AB7";
+                    
+                    let tiempo = 15;
+                    timerText.innerText = `${tiempo}s`;
+                    const intervalo = setInterval(() => {
+                        tiempo--;
+                        timerText.innerText = `${tiempo}s`;
+                        if(tiempo <= 0) clearInterval(intervalo);
+                    }, 1000);
+
+                    temporizador = setTimeout(() => {
+                        logDebug("Tiempo terminado. Enviando PAUSE.");
+                        fetch('https://api.spotify.com/v1/me/player/pause', {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${accessToken}` }
+                        }).then(() => {
+                            playText.innerText = "▶ SIGUIENTE";
+                            timerText.style.display = "none";
+                            btnPlay.style.backgroundColor = "#ff4646";
+                            btnPlay.style.borderColor = "#ff4646";
+                        });
+                    }, 15000); 
                 })
-                .catch(error => logDebug(`Error en el fetch de PLAY: ${error}`, "error"));
+                .catch(error => {
+                    logDebug(`Playback Error: ${error.message}`, "error");
+                    playText.innerText = "ERROR";
+                    statusText.innerText = "Abre Spotify en tu equipo";
+                });
             });
         });
     </script>
