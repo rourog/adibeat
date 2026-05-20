@@ -310,6 +310,28 @@
             backdrop-filter: blur(12px);
         }
 
+        .reveal-layout {
+            display: grid;
+            grid-template-columns: minmax(88px, 28vw) 1fr;
+            gap: clamp(12px, 3vw, 24px);
+            align-items: center;
+        }
+
+        #album-art-main {
+            width: 100%;
+            max-width: 210px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: clamp(18px, 4vw, 28px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.36);
+            background: rgba(0,0,0,0.24);
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .reveal-copy {
+            min-width: 0;
+        }
+
         #track-name-main {
             font-size: clamp(1.55rem, 7vw, 4.2rem);
             line-height: 0.98;
@@ -424,6 +446,21 @@
             }
         }
 
+        @media (max-width: 560px) and (orientation: portrait) {
+            .reveal-layout {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+
+            #album-art-main {
+                width: min(52vw, 180px);
+            }
+
+            .reveal-copy {
+                width: 100%;
+            }
+        }
+
         @media (max-width: 420px) and (orientation: portrait) {
             .top-bar {
                 grid-template-columns: auto 1fr auto auto;
@@ -485,9 +522,14 @@
                 <div id="play-text">INICIAR</div>
                 <div id="timer-text">15</div>
                 <div id="revealed-info">
-                    <div id="track-name-main">Nombre de la canción</div>
-                    <div id="track-artist-main">Artista</div>
-                    <div id="next-hint">Toca aquí para la siguiente canción</div>
+                    <div class="reveal-layout">
+                        <img id="album-art-main" alt="Arte del álbum" loading="lazy">
+                        <div class="reveal-copy">
+                            <div id="track-name-main">Nombre de la canción</div>
+                            <div id="track-artist-main">Artista</div>
+                            <div id="next-hint">Toca aquí para la siguiente canción</div>
+                        </div>
+                    </div>
                 </div>
             </button>
 
@@ -534,6 +576,8 @@
             }
 
             let playlistTracks = [];
+            let sessionQueue = [];
+            let playedTrackUris = new Set();
             let currentTrackObj = null;
             let gameState = 'IDLE';
             let temporizador = null;
@@ -550,6 +594,7 @@
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
             const revealedInfo = document.getElementById("revealed-info");
+            const albumArtMain = document.getElementById("album-art-main");
             const trackNameMain = document.getElementById("track-name-main");
             const trackArtistMain = document.getElementById("track-artist-main");
             const playlistLabel = document.getElementById("playlist-label");
@@ -721,6 +766,8 @@
             async function cargarPlaylist(index) {
                 const selected = PLAYLISTS[index];
                 playlistTracks = [];
+                sessionQueue = [];
+                playedTrackUris = new Set();
                 currentTrackObj = null;
 
                 hideError();
@@ -741,6 +788,7 @@
 
                     const items = await cargarItemsPlaylist(selected.id);
                     playlistTracks = procesarCanciones(items);
+                    prepararSesionSinRepeticiones();
 
                     if (playlistTracks.length === 0) {
                         throw new Error('La lista se pudo leer, pero no tiene tracks reproducibles.');
@@ -812,18 +860,48 @@
                     const releaseRaw = t.album?.release_date || '';
                     const releasePrecision = t.album?.release_date_precision || '';
                     const albumName = t.album?.name || 'Sencillo / sin álbum';
+                    const albumImages = Array.isArray(t.album?.images) ? t.album.images : [];
+                    const albumArt = albumImages.find(img => img?.width >= 300)?.url || albumImages[0]?.url || '';
 
                     return {
                         uri: t.uri,
+                        id: t.id || t.uri,
                         name: t.name || 'Desconocida',
                         artist: Array.isArray(t.artists) && t.artists.length
                             ? t.artists.map(a => a.name).join(', ')
                             : 'Artista desconocido',
                         album: albumName,
+                        albumArt,
+                        spotifyUrl: t.external_urls?.spotify || t.album?.external_urls?.spotify || '',
                         releaseDate: formatearFechaSpotify(releaseRaw, releasePrecision),
                         year: releaseRaw ? releaseRaw.substring(0, 4) : '????'
                     };
                 }).filter(Boolean);
+            }
+
+            function prepararSesionSinRepeticiones() {
+                playedTrackUris = new Set();
+                sessionQueue = mezclarArray([...playlistTracks]);
+            }
+
+            function obtenerSiguienteCancion() {
+                while (sessionQueue.length > 0) {
+                    const nextTrack = sessionQueue.pop();
+                    if (!playedTrackUris.has(nextTrack.uri)) {
+                        playedTrackUris.add(nextTrack.uri);
+                        return nextTrack;
+                    }
+                }
+
+                return null;
+            }
+
+            function mezclarArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
             }
 
             function formatearFechaSpotify(value, precision) {
@@ -853,8 +931,17 @@
                 hideError();
                 hideTrivia();
 
-                const randomIndex = Math.floor(Math.random() * playlistTracks.length);
-                currentTrackObj = playlistTracks[randomIndex];
+                currentTrackObj = obtenerSiguienteCancion();
+                if (!currentTrackObj) {
+                    gameState = 'IDLE';
+                    setPlayButtonState('idle');
+                    playKicker.textContent = 'Sesión completa';
+                    playText.textContent = 'SIN CANCIONES';
+                    timerText.style.display = 'none';
+                    revealedInfo.style.display = 'none';
+                    showError('Ya se usaron todas las canciones de esta lista en esta sesión. Cambia de lista o recarga la página para reiniciar la bolsa.');
+                    return;
+                }
 
                 gameState = 'LOADING';
                 setPlayButtonState('loading');
@@ -945,10 +1032,26 @@
 
                 trackNameMain.textContent = currentTrackObj.name;
                 trackArtistMain.textContent = currentTrackObj.artist;
+
+                if (currentTrackObj.albumArt) {
+                    albumArtMain.src = currentTrackObj.albumArt;
+                    albumArtMain.alt = `Arte del álbum ${currentTrackObj.album}`;
+                    albumArtMain.style.display = 'block';
+                } else {
+                    albumArtMain.removeAttribute('src');
+                    albumArtMain.alt = 'Arte del álbum no disponible';
+                    albumArtMain.style.display = 'none';
+                }
+
                 revealedInfo.style.display = 'block';
 
                 answerRelease.textContent = currentTrackObj.releaseDate || currentTrackObj.year || 'Fecha no disponible';
                 answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
+
+                const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
+                document.getElementById('next-hint').textContent = restantes > 0
+                    ? `Toca aquí para la siguiente canción · quedan ${restantes}`
+                    : 'Lista completada en esta sesión';
 
                 triviaPanel.style.display = 'grid';
                 btnRelease.classList.remove('is-open');
@@ -962,7 +1065,8 @@
                 gameState = 'IDLE';
                 btnPlay.disabled = false;
                 setPlayButtonState('idle');
-                playKicker.textContent = `${playlistTracks.length} canciones disponibles`;
+                const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
+                playKicker.textContent = `${restantes} de ${playlistTracks.length} canciones sin repetir`;
                 playText.textContent = 'INICIAR';
                 timerText.style.display = 'none';
                 revealedInfo.style.display = 'none';
