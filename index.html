@@ -54,7 +54,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Rayos X Activados. Analizando problema de vaciado.</div>
+        <div>[Sistema] Sintaxis de API corregida. Esperando datos...</div>
     </div>
 
     <script>
@@ -176,8 +176,13 @@
                 if (accessToken) {
                     statusText.innerText = `Cargando lista ${currentPlaylistIndex + 1}/${PLAYLISTS.length}...`;
                     
-                    // AÑADIDO: ?market=from_token para evitar canciones ocultas por región
-                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?market=from_token`, {
+                    // AQUÍ ESTÁ LA MAGIA: fields=name,tracks(items(track(uri)))
+                    // Esto le dice a Spotify exactamente la ruta anidada que queremos sin que se rompa.
+                    const apiUrl = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,tracks(total,items(track(name,uri)))`;
+                    
+                    logDebug(`Llamando API con gramática anidada...`, "info");
+                    
+                    fetch(apiUrl, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
                     .then(async response => {
@@ -192,31 +197,22 @@
                         const playlistName = data.name;
                         logDebug(`Playlist conectada: "${playlistName}"`, "success");
 
-                        // DIAGNÓSTICO PROFUNDO DE LAS CANCIONES
-                        if (!data.tracks) {
-                            logDebug("CRÍTICO: Spotify censuró el bloque de canciones de la respuesta.", "error");
+                        if (!data.tracks || !data.tracks.items) {
+                            logDebug("CRÍTICO: El objeto tracks.items sigue sin existir. Revisa permisos.", "error");
                         } else {
                             logDebug(`Spotify reporta un Total de: ${data.tracks.total} canciones.`, "info");
                             
-                            const items = data.tracks.items || [];
-                            logDebug(`El paquete contiene ${items.length} objetos. Analizando...`, "info");
-                            
+                            const items = data.tracks.items;
                             let tracksValidos = 0;
-                            let tracksNulos = 0;
                             
                             playlistTracks = items.filter(item => {
-                                if (item && item.track && item.track.uri) {
+                                // Filtramos canciones bloqueadas por región o subidas locales sin URI de Spotify
+                                if (item && item.track && item.track.uri && item.track.uri.startsWith('spotify:track:')) {
                                     tracksValidos++;
                                     return true;
-                                } else {
-                                    tracksNulos++;
-                                    return false;
                                 }
+                                return false;
                             }).map(item => item.track.uri);
-                            
-                            if (tracksNulos > 0) {
-                                logDebug(`ALERTA: Spotify nos ocultó ${tracksNulos} pistas (posible archivo local o podcast).`, "warn");
-                            }
                         }
                         
                         controlPanel.style.display = 'flex';
