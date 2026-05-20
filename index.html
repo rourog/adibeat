@@ -49,7 +49,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Consola de Diagnóstico Iniciada.</div>
+        <div>[Sistema] Consola de Diagnóstico Iniciada con Bypass.</div>
     </div>
 
     <script>
@@ -155,72 +155,44 @@
                 iniciarApp();
             }
 
+            // LÓGICA DE BYPASS IMPLEMENTADA AQUÍ
             function iniciarApp() {
                 if (accessToken) {
-                    statusText.innerText = "Diagnosticando permisos...";
+                    statusText.innerText = "Descargando canciones...";
+                    logDebug(`Ejecutando bypass de seguridad para Playlist ID: ${PLAYLIST_ID}...`);
                     
-                    fetch('https://api.spotify.com/v1/me', {
+                    fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,tracks.items(track(uri))`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
                     .then(async response => {
                         if (!response.ok) {
+                            if (response.status === 401) throw new Error("TOKEN_CADUCADO");
                             const err = await response.json();
-                            throw new Error(`Error en Perfil: ${err.error?.message}`);
-                        }
-                        return response.json();
-                    })
-                    .then(userData => {
-                        logDebug(`Usuario Activo: ${userData.email} (${userData.id})`);
-                        logDebug(`Inspeccionando Playlist ID: ${PLAYLIST_ID}`);
-                        
-                        // Diagnóstico profundo de la Playlist
-                        return fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,owner(id,display_name),public`, {
-                            headers: { 'Authorization': `Bearer ${accessToken}` }
-                        });
-                    })
-                    .then(async response => {
-                        if (!response.ok) {
-                            const err = await response.json();
-                            throw new Error(`Info Playlist Falló (HTTP ${response.status}): ${err.error?.message}`);
+                            throw new Error(`Error HTTP ${response.status}: ${err.error?.message || 'Forbidden'}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        logDebug(`Playlist Encontrada: "${data.name}"`, "success");
-                        logDebug(`Dueño: ${data.owner.display_name} (ID: ${data.owner.id})`);
-                        logDebug(`Estado de Privacidad: ${data.public ? 'Pública' : 'Privada'}`);
+                        logDebug(`Playlist confirmada: "${data.name}"`, "success");
 
-                        logDebug("Solicitando lista de canciones...");
-                        return fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?fields=items(track(uri))`, {
-                            headers: { 'Authorization': `Bearer ${accessToken}` }
-                        });
-                    })
-                    .then(async response => {
-                        if (!response.ok) {
-                            const err = await response.json();
-                            throw new Error(`Lectura Canciones Falló (HTTP ${response.status}): ${err.error?.message}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        playlistTracks = data.items
+                        playlistTracks = data.tracks.items
                             .filter(item => item.track && item.track.uri)
                             .map(item => item.track.uri);
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`¡Éxito total! ${playlistTracks.length} canciones en memoria.`, "success");
+                            logDebug(`¡Bypass exitoso! ${playlistTracks.length} canciones listas en memoria.`, "success");
                             btnPlay.style.display = 'flex';
-                            statusText.innerText = `Listo: ${playlistTracks.length} canciones`;
+                            statusText.innerText = `Conectado: ${playlistTracks.length} canciones`;
                         } else {
-                            logDebug("Playlist vacía.", "warn");
-                            statusText.innerText = "Playlist sin canciones";
+                            logDebug("La lista cargó pero no tiene canciones válidas.", "warn");
+                            statusText.innerText = "Playlist vacía";
                         }
                     })
                     .catch(error => {
-                        logDebug(`Error: ${error.message}`, "error");
-                        statusText.innerText = "Error (Ver consola)";
-                        if (error.message.includes("Expired")) {
-                            logDebug("Usa el botón Forzar Nueva Conexión.", "warn");
+                        logDebug(`Fallo Crítico: ${error.message}`, "error");
+                        statusText.innerText = "Error al descargar (Ver consola)";
+                        if (error.message.includes("TOKEN_CADUCADO")) {
+                            logDebug("El token caducó. Usa el botón de Forzar Conexión.", "warn");
                         }
                     });
 
