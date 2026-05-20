@@ -13,15 +13,23 @@
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
         #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 200px; }
-        #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; word-break: break-word; }
+        #status-text { font-size: 1.5rem; margin-bottom: 10px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; word-break: break-word; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
         #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); margin-bottom: 20px;}
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 40vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 35vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
+
+        /* NUEVO: Contenedor para mostrar la información de la canción */
+        #track-info { display: none; text-align: center; margin-bottom: 20px; background-color: #1e1e1e; padding: 15px 20px; border-radius: 15px; width: 90vw; border: 1px solid #333; animation: fadeIn 0.5s ease-in; }
+        #track-name { font-size: 1.8rem; font-weight: 900; color: #1DB954; margin-bottom: 5px; }
+        #track-artist { font-size: 1.2rem; font-weight: 700; color: #ffffff; margin-bottom: 5px; }
+        #track-album { font-size: 1rem; font-weight: 400; color: #b3b3b3; font-style: italic; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .control-panel { display: none; flex-direction: column; gap: 10px; width: 90vw; }
         .btn-small { padding: 15px 20px; font-size: 1rem; border-radius: 20px; width: 100%; }
@@ -42,10 +50,18 @@
     <div id="main-screen">
         <h1 id="status-text">Iniciando sistema...</h1>
         <button id="btn-login" style="display: none;">Conectar Spotify</button>
+        
         <button id="btn-play">
             <span id="play-text">▶ INICIAR TURNO</span>
             <span id="timer-text">15s</span>
         </button>
+
+        <!-- SECCIÓN DE RESPUESTA REVELADA -->
+        <div id="track-info">
+            <div id="track-name">Nombre de la Canción</div>
+            <div id="track-artist">Artista</div>
+            <div id="track-album">Álbum (Año)</div>
+        </div>
         
         <div id="control-panel" class="control-panel">
             <button id="btn-cycle" class="btn-small">⏭ Siguiente Playlist</button>
@@ -54,7 +70,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Ataque Agresivo a API Iniciado. Plan B Activado.</div>
+        <div>[Sistema] Sistema de Metadatos Activado.</div>
     </div>
 
     <script>
@@ -74,8 +90,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
-            
-            // SE AÑADIÓ EL PERMISO PARA LEER "CANCIONES QUE TE GUSTAN" (user-library-read)
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private user-library-read'; 
             
             const PLAYLISTS = [
@@ -88,7 +102,7 @@
             if (currentPlaylistIndex >= PLAYLISTS.length) currentPlaylistIndex = 0;
             const PLAYLIST_ID = PLAYLISTS[currentPlaylistIndex];
             
-            let playlistTracks = []; 
+            let playlistTracks = []; // Ahora guardará objetos completos, no solo textos
             let temporizador;
 
             const splashScreen = document.getElementById("splash-screen");
@@ -101,6 +115,12 @@
             const statusText = document.getElementById("status-text");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
+            
+            // Elementos del Track Info
+            const trackInfoDiv = document.getElementById("track-info");
+            const trackNameEl = document.getElementById("track-name");
+            const trackArtistEl = document.getElementById("track-artist");
+            const trackAlbumEl = document.getElementById("track-album");
 
             btnCycle.addEventListener('click', () => {
                 let nextIndex = currentPlaylistIndex + 1;
@@ -163,7 +183,8 @@
                     if(data.access_token) {
                         accessToken = data.access_token;
                         localStorage.setItem('adibeat_token', accessToken); 
-                        window.history.pushState("", document.title, window.location.pathname); 
+                        // Limpiamos la URL para que quede bonita
+                        window.history.replaceState({}, document.title, window.location.pathname); 
                         iniciarApp();
                     } else {
                         statusText.innerText = "Error de conexión";
@@ -174,14 +195,28 @@
                 iniciarApp();
             }
 
+            // FUNCIÓN CENTRAL DE EXTRACCIÓN Y FORMATEO
+            function procesarCanciones(itemsArray) {
+                return itemsArray.map(item => {
+                    const t = item?.track;
+                    if (!t || !t.uri || !t.uri.startsWith('spotify:track:')) return null;
+                    
+                    // Formateamos los datos seguros en un objeto
+                    return {
+                        uri: t.uri,
+                        name: t.name || 'Desconocida',
+                        artist: t.artists ? t.artists.map(a => a.name).join(', ') : 'Varios',
+                        album: t.album ? t.album.name : 'Sencillo',
+                        year: (t.album && t.album.release_date) ? t.album.release_date.substring(0, 4) : '????'
+                    };
+                }).filter(trackObj => trackObj !== null); // Filtramos las vacías
+            }
+
             function iniciarApp() {
                 if (accessToken) {
                     statusText.innerText = `Cargando lista ${currentPlaylistIndex + 1}/${PLAYLISTS.length}...`;
-                    logDebug(`Iniciando Extracción Agresiva para ID: ${PLAYLIST_ID}`);
-                    
                     let nombreLista = `Lista ${currentPlaylistIndex + 1}`;
 
-                    // PASO 1: Intentamos conseguir solo el nombre de la lista
                     fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
@@ -190,12 +225,7 @@
                         return res.json();
                     })
                     .then(data => {
-                        if (data.name) {
-                            nombreLista = data.name;
-                            logDebug(`Nombre detectado: "${nombreLista}"`, "success");
-                        }
-                        
-                        // PASO 2: Atacamos el endpoint dedicado a canciones, saltando la portada
+                        if (data.name) nombreLista = data.name;
                         logDebug("Atacando endpoint directo de canciones...");
                         return fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks`, {
                             headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -211,12 +241,10 @@
                     .then(data => {
                         if (!data.items) throw new Error("Spotify no devolvió 'items'.");
                         
-                        playlistTracks = data.items
-                            .map(item => item?.track?.uri)
-                            .filter(uri => uri !== undefined && uri !== null && uri.startsWith('spotify:track:'));
+                        playlistTracks = procesarCanciones(data.items);
                         
                         if(playlistTracks.length > 0) {
-                            logDebug(`¡Victoria! ${playlistTracks.length} canciones extraídas.`, "success");
+                            logDebug(`¡Victoria! ${playlistTracks.length} canciones extraídas con metadatos.`, "success");
                             btnPlay.style.display = 'flex';
                             controlPanel.style.display = 'flex';
                             statusText.innerHTML = `Conectado a:<br><strong>${nombreLista}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones)</span>`;
@@ -232,8 +260,7 @@
                             return;
                         }
 
-                        // LLEGÓ LA POLICÍA DE SPOTIFY: ACTIVAR PLAN B
-                        logDebug(`Fallo principal: ${error.message}`, "error");
+                        // PLAN B
                         logDebug("Activando PLAN B: Rescatando tus 'Me Gusta'...", "warn");
                         statusText.innerHTML = "Bloqueo detectado<br><span style='font-size:1rem'>Activando Plan B...</span>";
                         
@@ -245,23 +272,19 @@
                             return res.json();
                         })
                         .then(data => {
-                            playlistTracks = (data.items || [])
-                                .map(item => item?.track?.uri)
-                                .filter(uri => uri && uri.startsWith('spotify:track:'));
+                            playlistTracks = procesarCanciones(data.items || []);
                                 
                             if(playlistTracks.length > 0) {
-                                logDebug(`Plan B Exitoso: ${playlistTracks.length} canciones guardadas.`, "success");
+                                logDebug(`Plan B Exitoso: ${playlistTracks.length} canciones guardadas con metadatos.`, "success");
                                 btnPlay.style.display = 'flex';
                                 controlPanel.style.display = 'flex';
                                 statusText.innerHTML = `Plan B Activado:<br><strong>Tus Me Gusta</strong><br><span style="font-size:1rem; opacity:0.7;">(Respaldo automático)</span>`;
                             } else {
-                                logDebug("Tus 'Me gusta' están vacíos.", "error");
                                 statusText.innerText = "Plan B Falló";
                                 controlPanel.style.display = 'flex';
                             }
                         })
                         .catch(err => {
-                            logDebug(`Fallo Plan B: ${err.message}`, "error");
                             statusText.innerText = "Error (Ver consola)";
                             controlPanel.style.display = 'flex';
                         });
@@ -292,15 +315,19 @@
                 }
             }
 
-            // --- LÓGICA DE JUEGO (REPRODUCCIÓN) ---
+            // --- LÓGICA DE JUEGO (REPRODUCCIÓN Y METADATOS) ---
             btnPlay.addEventListener('click', () => {
                 if(playlistTracks.length === 0) return;
                 clearTimeout(temporizador);
 
+                // Ocultar la respuesta anterior si existía
+                trackInfoDiv.style.display = "none";
+
+                // Elegimos una canción al azar (ahora es un objeto completo)
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
-                const trackUri = playlistTracks[randomIndex];
-                logDebug(`Enviando a bocinas: ${trackUri}`);
+                const currentTrack = playlistTracks[randomIndex];
                 
+                logDebug(`Enviando a bocinas: ${currentTrack.name}`);
                 playText.innerText = "SINTONIZANDO...";
                 
                 fetch('https://api.spotify.com/v1/me/player/play', {
@@ -309,7 +336,7 @@
                         'Authorization': `Bearer ${accessToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ "uris": [trackUri] })
+                    body: JSON.stringify({ "uris": [currentTrack.uri] })
                 })
                 .then(async response => {
                     if (!response.ok) {
@@ -317,7 +344,6 @@
                         throw new Error(`HTTP ${response.status}: ${err.error?.message || 'Error de Playback'}`);
                     }
                     
-                    logDebug("Comando Play ejecutado.");
                     playText.innerText = "¡ADIVINA!";
                     timerText.style.display = "block";
                     btnPlay.style.backgroundColor = "#673AB7"; 
@@ -332,15 +358,22 @@
                     }, 1000);
 
                     temporizador = setTimeout(() => {
-                        logDebug("15s alcanzados. Pausando...");
+                        logDebug("15s alcanzados. Pausando y mostrando info...");
                         fetch('https://api.spotify.com/v1/me/player/pause', {
                             method: 'PUT',
                             headers: { 'Authorization': `Bearer ${accessToken}` }
                         }).then(() => {
+                            // Cambiamos el botón
                             playText.innerText = "▶ SIGUIENTE";
                             timerText.style.display = "none";
                             btnPlay.style.backgroundColor = "#ff4646";
                             btnPlay.style.borderColor = "#ff4646";
+                            
+                            // LLENAMOS Y MOSTRAMOS LOS METADATOS
+                            trackNameEl.innerText = currentTrack.name;
+                            trackArtistEl.innerText = currentTrack.artist;
+                            trackAlbumEl.innerText = `${currentTrack.album} (${currentTrack.year})`;
+                            trackInfoDiv.style.display = "block";
                         });
                     }, 15000); 
                 })
