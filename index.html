@@ -362,16 +362,16 @@
             display: none;
             width: 100%;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            min-height: clamp(104px, 22vh, 160px);
+            gap: 12px;
+            min-height: clamp(132px, 28vh, 220px);
         }
 
         .trivia-btn {
             min-height: 100%;
             border-radius: var(--radius-lg);
-            padding: clamp(12px, 3vw, 18px);
+            padding: clamp(16px, 3.8vw, 24px);
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             background: rgba(255,255,255,0.14);
             border: 1px solid rgba(255,255,255,0.18);
             box-shadow: 0 16px 36px rgba(0,0,0,0.24);
@@ -387,7 +387,7 @@
         }
 
         .trivia-label {
-            font-size: clamp(0.9rem, 3.6vw, 1.45rem);
+            font-size: clamp(1rem, 4vw, 1.6rem);
             line-height: 1;
             text-transform: uppercase;
             letter-spacing: -0.02em;
@@ -395,11 +395,22 @@
 
         .trivia-answer {
             display: none;
-            font-size: clamp(1rem, 4.5vw, 1.9rem);
+            font-size: clamp(1.15rem, 5vw, 2.1rem);
             line-height: 1.05;
             color: rgba(255,255,255,0.92);
             text-transform: none;
             overflow-wrap: anywhere;
+        }
+
+        .trivia-art {
+            display: none;
+            width: min(100%, 180px);
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.28);
+            background: rgba(0,0,0,0.18);
         }
 
         .trivia-btn.is-open .trivia-label {
@@ -407,6 +418,10 @@
         }
 
         .trivia-btn.is-open .trivia-answer {
+            display: block;
+        }
+
+        .trivia-btn.is-open .trivia-art {
             display: block;
         }
 
@@ -535,11 +550,12 @@
 
             <div id="trivia-panel">
                 <button class="trivia-btn" id="btn-release" type="button">
-                    <div class="trivia-label">Fecha de publicación</div>
+                    <div class="trivia-label">Década</div>
                     <div class="trivia-answer" id="answer-release">????</div>
                 </button>
                 <button class="trivia-btn" id="btn-album" type="button">
-                    <div class="trivia-label">Nombre del álbum</div>
+                    <div class="trivia-label">Álbum</div>
+                    <img class="trivia-art" id="album-art-trivia" alt="Arte del álbum" loading="lazy">
                     <div class="trivia-answer" id="answer-album">????</div>
                 </button>
             </div>
@@ -605,6 +621,7 @@
             const btnAlbum = document.getElementById("btn-album");
             const answerRelease = document.getElementById("answer-release");
             const answerAlbum = document.getElementById("answer-album");
+            const albumArtTrivia = document.getElementById("album-art-trivia");
 
             splashScreen.addEventListener('click', () => {
                 playStartSound();
@@ -1045,8 +1062,18 @@
 
                 revealedInfo.style.display = 'block';
 
-                answerRelease.textContent = currentTrackObj.releaseDate || currentTrackObj.year || 'Fecha no disponible';
+                answerRelease.textContent = currentTrackObj.year || 'Año no disponible';
                 answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
+
+                if (currentTrackObj.albumArt) {
+                    albumArtTrivia.src = currentTrackObj.albumArt;
+                    albumArtTrivia.alt = `Arte del álbum ${currentTrackObj.album}`;
+                    albumArtTrivia.style.display = 'none';
+                } else {
+                    albumArtTrivia.removeAttribute('src');
+                    albumArtTrivia.alt = 'Arte del álbum no disponible';
+                    albumArtTrivia.style.display = 'none';
+                }
 
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
                 document.getElementById('next-hint').textContent = restantes > 0
