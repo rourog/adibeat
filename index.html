@@ -12,7 +12,7 @@
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #673AB7; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
-        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 180px; }
+        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 200px; }
         #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; word-break: break-word; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
@@ -20,28 +20,27 @@
         
         #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #1DB954; color: #121212; box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4); margin-bottom: 20px;}
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 30vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 25vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
 
         /* Contenedor de Info de la Canción */
-        #track-info { display: none; text-align: center; margin-bottom: 20px; background-color: #1e1e1e; padding: 15px 20px; border-radius: 15px; width: 90vw; border: 1px solid #333; animation: fadeIn 0.5s ease-in; }
-        #track-name { font-size: 1.8rem; font-weight: 900; color: #1DB954; margin-bottom: 5px; }
+        #track-info { display: none; text-align: center; margin-bottom: 20px; background-color: #1e1e1e; padding: 20px; border-radius: 15px; width: 90vw; border: 1px solid #333; animation: fadeIn 0.5s ease-in; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #track-name { font-size: 1.8rem; font-weight: 900; color: #1DB954; margin-bottom: 8px; line-height: 1.1;}
         #track-artist { font-size: 1.2rem; font-weight: 700; color: #ffffff; margin-bottom: 5px; }
         #track-album { font-size: 1rem; font-weight: 400; color: #b3b3b3; font-style: italic; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* NUEVO: Panel para ingresar cualquier Playlist */
         #setup-panel { display: none; flex-direction: column; gap: 10px; width: 90vw; margin-bottom: 20px; }
         #input-playlist { padding: 15px; border-radius: 10px; font-size: 1rem; border: none; text-align: center; outline: none; background-color: #2a2a2a; color: #fff; }
-        #input-playlist::placeholder { color: #888; }
-        #btn-load-custom { padding: 15px 20px; font-size: 1.2rem; border-radius: 20px; width: 100%; background-color: #673AB7; color: #fff; }
+        #btn-load-custom { padding: 15px 20px; font-size: 1rem; border-radius: 20px; width: 100%; background-color: #444; color: #fff; }
 
         .control-panel { display: none; flex-direction: column; gap: 10px; width: 90vw; }
         .btn-small { padding: 15px 20px; font-size: 1rem; border-radius: 20px; width: 100%; }
+        #btn-cycle { background-color: #673AB7; color: #fff; }
         #btn-reset { background-color: #333; color: #fff; }
 
-        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
+        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 180px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
         #debug-console div { margin-bottom: 4px; word-wrap: break-word; user-select: all; -webkit-user-select: all; }
         .log-error { color: #ff4646; }
         .log-warn { color: #ffeb3b; }
@@ -56,10 +55,9 @@
         <h1 id="status-text">Iniciando sistema...</h1>
         <button id="btn-login" style="display: none;">Conectar Spotify</button>
         
-        <!-- Panel para pegar el link -->
         <div id="setup-panel">
-            <input type="text" id="input-playlist" placeholder="Pega el link de Spotify aquí...">
-            <button id="btn-load-custom">Cargar Lista</button>
+            <input type="text" id="input-playlist" placeholder="O pega un link directo aquí...">
+            <button id="btn-load-custom">Cargar Lista Manual</button>
         </div>
 
         <button id="btn-play">
@@ -67,7 +65,6 @@
             <span id="timer-text">15s</span>
         </button>
 
-        <!-- Metadatos de la canción -->
         <div id="track-info">
             <div id="track-name">Nombre de la Canción</div>
             <div id="track-artist">Artista</div>
@@ -75,12 +72,13 @@
         </div>
         
         <div id="control-panel" class="control-panel">
+            <button id="btn-cycle" class="btn-small">⏭ Siguiente Playlist</button>
             <button id="btn-reset" class="btn-small">🔄 Forzar Nueva Conexión</button>
         </div>
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Modo de Playlist Dinámica Activado.</div>
+        <div>[Sistema] Modos Ciclado y Escáner de Cuentas Activados.</div>
     </div>
 
     <script>
@@ -102,6 +100,16 @@
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private user-library-read'; 
             
+            // --- EL ARREGLO DE TUS LISTAS ---
+            const PLAYLISTS = [
+                '00MtRUjzL76Njcqe0mNvsD', 
+                '6w5cQsiUyHHOZAmxzTXeER', 
+                '3qdqZPJUy1ulEwEeLOUmgA'  
+            ];
+            
+            let currentPlaylistIndex = parseInt(localStorage.getItem('adibeat_playlist_index')) || 0;
+            if (currentPlaylistIndex >= PLAYLISTS.length) currentPlaylistIndex = 0;
+            
             let playlistTracks = []; 
             let temporizador;
 
@@ -114,6 +122,7 @@
             const btnPlay = document.getElementById("btn-play");
             const controlPanel = document.getElementById("control-panel");
             const btnReset = document.getElementById("btn-reset");
+            const btnCycle = document.getElementById("btn-cycle");
             const statusText = document.getElementById("status-text");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
@@ -123,10 +132,19 @@
             const trackArtistEl = document.getElementById("track-artist");
             const trackAlbumEl = document.getElementById("track-album");
 
+            // Función para ciclar listas
+            btnCycle.addEventListener('click', () => {
+                let nextIndex = currentPlaylistIndex + 1;
+                if (nextIndex >= PLAYLISTS.length) nextIndex = 0;
+                localStorage.setItem('adibeat_playlist_index', nextIndex);
+                localStorage.removeItem('adibeat_custom_playlist'); // Borra cualquier link pegado
+                window.location.href = window.location.pathname; 
+            });
+
             btnReset.addEventListener('click', () => {
                 localStorage.removeItem('adibeat_token');
                 localStorage.removeItem('code_verifier');
-                localStorage.removeItem('adibeat_custom_playlist'); // Borrar lista guardada
+                localStorage.removeItem('adibeat_custom_playlist'); 
                 window.location.href = window.location.pathname; 
             });
 
@@ -204,26 +222,50 @@
                 }).filter(trackObj => trackObj !== null);
             }
 
-            // FUNCIÓN PARA EXTRAER EL ID DEL LINK
             function extractPlaylistId(input) {
                 if (input.includes('playlist/')) {
                     return input.split('playlist/')[1].split('?')[0];
                 }
-                return input; // Por si pega directamente el ID
+                return input; 
             }
 
+            // FUNCIÓN MEJORADA: COMPARA IDs ANTES DE DESCARGAR
             function cargarPlaylist(playlistId) {
-                statusText.innerText = `Extrayendo canciones...`;
+                statusText.innerText = `Analizando seguridad...`;
                 btnPlay.style.display = 'none';
                 setupPanel.style.display = 'none';
 
-                fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                let loggedInUserId = '';
+                let playlistName = '';
+
+                // Diagnóstico Simultáneo
+                Promise.all([
+                    fetch('https://api.spotify.com/v1/me', { headers: { 'Authorization': `Bearer ${accessToken}` } }).then(res => res.json()),
+                    fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).then(res => res.json())
+                ])
+                .then(([userData, playlistData]) => {
+                    loggedInUserId = userData.id;
+                    const ownerId = playlistData.owner?.id;
+                    playlistName = playlistData.name || "Lista Custom";
+
+                    logDebug(`ID de la Sesión Actual: ${loggedInUserId}`, "info");
+                    logDebug(`ID del Creador de la Lista: ${ownerId}`, "info");
+
+                    if (loggedInUserId !== ownerId) {
+                        logDebug("⚠️ ALERTA: Tu sesión no coincide con el creador. Spotify bloqueará la lista.", "error");
+                    } else {
+                        logDebug("✅ IDs idénticos. Permiso concedido por propiedad.", "success");
+                    }
+
+                    // Proceder a descargar pistas
+                    return fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    });
                 })
                 .then(async response => {
                     if (!response.ok) {
                         const err = await response.json();
-                        throw new Error(`HTTP ${response.status}`);
+                        throw new Error(`HTTP ${response.status}: ${err.error?.message}`);
                     }
                     return response.json();
                 })
@@ -234,56 +276,65 @@
                     
                     if(playlistTracks.length > 0) {
                         logDebug(`¡Éxito! ${playlistTracks.length} canciones cargadas.`, "success");
-                        localStorage.setItem('adibeat_custom_playlist', playlistId); // Guardamos la lista para la próxima vez
                         btnPlay.style.display = 'flex';
                         controlPanel.style.display = 'flex';
-                        statusText.innerHTML = `Lista Cargada<br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones listas)</span>`;
+                        setupPanel.style.display = 'flex';
+                        statusText.innerHTML = `Conectado a:<br><strong>${playlistName}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones listas)</span>`;
                     } else {
                         throw new Error("No hay canciones válidas en la lista.");
                     }
                 })
                 .catch(error => {
-                    logDebug(`Error cargando playlist: ${error.message}`, "error");
-                    statusText.innerHTML = `Error: ¿Tú creaste esta lista?<br><span style="font-size:1rem; color:#ff4646;">En modo Desarrollo no puedes usar listas de otros.</span>`;
-                    setupPanel.style.display = 'flex'; // Volvemos a mostrar el input
+                    logDebug(`Error Crítico: ${error.message}`, "error");
+                    
+                    if (error.message.includes("TOKEN_CADUCADO")) {
+                        logDebug("Token expirado. Forzando cierre...", "warn");
+                        statusText.innerText = "Token Caducado";
+                    } else {
+                        // Plan B
+                        logDebug("Activando Plan B: Tus 'Me Gusta'", "warn");
+                        statusText.innerHTML = `Bloqueo de API detectado<br><span style="font-size:1rem">Cargando tus Me Gusta...</span>`;
+                        
+                        fetch(`https://api.spotify.com/v1/me/tracks?limit=50`, {
+                            headers: { 'Authorization': `Bearer ${accessToken}` }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            playlistTracks = procesarCanciones(data.items || []);
+                            if(playlistTracks.length > 0) {
+                                btnPlay.style.display = 'flex';
+                                statusText.innerHTML = `Plan B Activado:<br><strong>Tus Me Gusta</strong><br><span style="font-size:1rem; opacity:0.7;">(Respaldo automático)</span>`;
+                            }
+                        });
+                    }
+                    setupPanel.style.display = 'flex';
                     controlPanel.style.display = 'flex';
                 });
             }
 
-            // EVENTO DEL BOTÓN DE CARGAR LISTA
             btnLoadCustom.addEventListener('click', () => {
                 const rawInput = inputPlaylist.value.trim();
-                if(!rawInput) {
-                    logDebug("Por favor pega un link primero.", "warn");
-                    return;
-                }
+                if(!rawInput) return;
                 const playlistId = extractPlaylistId(rawInput);
-                logDebug(`ID detectado: ${playlistId}`, "info");
+                localStorage.setItem('adibeat_custom_playlist', playlistId);
                 cargarPlaylist(playlistId);
             });
 
             function iniciarApp() {
                 if (accessToken) {
-                    controlPanel.style.display = 'flex';
                     const savedPlaylist = localStorage.getItem('adibeat_custom_playlist');
-                    
                     if (savedPlaylist) {
-                        // Si ya tenía una lista guardada, la carga automáticamente
-                        logDebug(`Encontrada lista anterior. Cargando...`);
                         cargarPlaylist(savedPlaylist);
                     } else {
-                        // Si es la primera vez, le pide el link
-                        statusText.innerText = "Configura tu juego";
-                        setupPanel.style.display = 'flex';
-                        logDebug("Esperando que pegues un link de Playlist.");
+                        // Carga la lista correspondiente del arreglo PLAYLISTS
+                        logDebug(`Iniciando con Lista en Memoria: ${currentPlaylistIndex + 1}/${PLAYLISTS.length}`);
+                        cargarPlaylist(PLAYLISTS[currentPlaylistIndex]);
                     }
-
                 } else {
                     statusText.innerText = "Bienvenido a AdiBeat";
                     btnLogin.style.display = 'block';
                     
                     btnLogin.addEventListener('click', async () => {
-                        logDebug("Generando URL de Autorización (show_dialog=true)");
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -297,7 +348,7 @@
                             scope: SCOPES,
                             code_challenge_method: 'S256',
                             code_challenge: codeChallenge,
-                            show_dialog: 'true' // EL SECRETO PARA FORZAR LOS NUEVOS PERMISOS
+                            show_dialog: 'true'
                         }).toString();
                         
                         window.location.href = authUrl.toString();
@@ -314,7 +365,7 @@
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
                 const currentTrack = playlistTracks[randomIndex];
                 
-                logDebug(`Enviando a bocinas: ${currentTrack.name}`);
+                logDebug(`Sintonizando: ${currentTrack.name}`);
                 playText.innerText = "SINTONIZANDO...";
                 
                 fetch('https://api.spotify.com/v1/me/player/play', {
@@ -345,7 +396,7 @@
                     }, 1000);
 
                     temporizador = setTimeout(() => {
-                        logDebug("15s alcanzados. Pausando y mostrando info...");
+                        logDebug("Revelando datos de la canción...");
                         fetch('https://api.spotify.com/v1/me/player/pause', {
                             method: 'PUT',
                             headers: { 'Authorization': `Bearer ${accessToken}` }
