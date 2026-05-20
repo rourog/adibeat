@@ -225,13 +225,54 @@
             position: relative;
         }
 
+        #btn-play::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 50% 35%, rgba(0,0,0,0.08), transparent 34%),
+                linear-gradient(180deg, rgba(3,7,18,0.14), rgba(3,7,18,0.52));
+            transition: opacity 0.28s ease;
+        }
+
+        #btn-play.state-revealed::before {
+            opacity: 1;
+        }
+
         #btn-play::after {
             content: "";
             position: absolute;
             inset: -45%;
-            background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.16), transparent 62%);
+            z-index: 2;
+            background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.13), transparent 62%);
             transform: translateX(-35%) rotate(12deg);
             pointer-events: none;
+        }
+
+        #main-album-art {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            pointer-events: none;
+            filter: blur(26px) saturate(1.18) brightness(0.56);
+            transform: scale(1.15);
+            transition: opacity 0.28s ease, filter 0.34s ease, transform 0.34s ease;
+        }
+
+        #btn-play.state-revealed #main-album-art {
+            opacity: 0.92;
+        }
+
+        #btn-play.state-revealed.album-clear #main-album-art {
+            filter: blur(0) saturate(1.08) brightness(0.72);
+            transform: scale(1.02);
         }
 
         #btn-play.state-loading {
@@ -263,7 +304,7 @@
 
         #play-kicker {
             position: relative;
-            z-index: 1;
+            z-index: 3;
             font-size: clamp(0.8rem, 2.7vw, 1rem);
             letter-spacing: 0.16em;
             text-transform: uppercase;
@@ -272,7 +313,7 @@
 
         #play-text {
             position: relative;
-            z-index: 1;
+            z-index: 3;
             max-width: 100%;
             font-size: clamp(2.5rem, 13vw, 7rem);
             line-height: 0.88;
@@ -283,7 +324,7 @@
 
         #timer-text {
             position: relative;
-            z-index: 1;
+            z-index: 3;
             display: none;
             min-width: 96px;
             height: clamp(64px, 16vw, 118px);
@@ -300,14 +341,18 @@
 
         #revealed-info {
             position: relative;
-            z-index: 1;
+            z-index: 4;
             display: none;
             width: min(96%, 920px);
-            padding: clamp(14px, 3.2vw, 24px);
+            padding: clamp(16px, 3.4vw, 26px);
             border-radius: var(--radius-lg);
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
-            backdrop-filter: blur(12px);
+            background: rgba(10,14,28,0.58);
+            border: 1px solid rgba(255,255,255,0.22);
+            backdrop-filter: blur(18px) saturate(1.25);
+            -webkit-backdrop-filter: blur(18px) saturate(1.25);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.14),
+                0 20px 46px rgba(0,0,0,0.34);
         }
 
         .reveal-layout {
@@ -445,24 +490,6 @@
             overflow-wrap: anywhere;
         }
 
-        .album-art-blur {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            filter: blur(14px) saturate(1.16) brightness(0.68);
-            transform: scale(1.12);
-            transition: filter 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
-            opacity: 0.96;
-        }
-
-        #btn-album.is-open .album-art-blur {
-            filter: blur(0) saturate(1.08) brightness(0.78);
-            transform: scale(1.01);
-        }
 
         .trivia-btn.is-open .trivia-hint {
             display: none;
@@ -589,6 +616,7 @@
 
         <div class="game-area">
             <button id="btn-play" type="button" class="state-idle">
+                <img id="main-album-art" alt="Arte del álbum" loading="lazy">
                 <div id="play-kicker">Juego listo</div>
                 <div id="play-text">INICIAR</div>
                 <div id="timer-text">15</div>
@@ -612,7 +640,6 @@
                     </div>
                 </button>
                 <button class="trivia-btn" id="btn-album" type="button">
-                    <img class="album-art-blur" id="album-art-trivia" alt="Arte del álbum" loading="lazy">
                     <div class="trivia-content">
                         <div class="trivia-label">Álbum</div>
                         <div class="trivia-hint">Toca para revelar</div>
@@ -681,7 +708,7 @@
             const btnAlbum = document.getElementById("btn-album");
             const answerRelease = document.getElementById("answer-release");
             const answerAlbum = document.getElementById("answer-album");
-            const albumArtTrivia = document.getElementById("album-art-trivia");
+            const mainAlbumArt = document.getElementById("main-album-art");
 
             splashScreen.addEventListener('click', () => {
                 playStartSound();
@@ -787,6 +814,11 @@
             btnPlay.addEventListener('click', () => {
                 if (playlistTracks.length === 0) return;
 
+                if (gameState === 'SESSION_DONE') {
+                    reiniciarSesion();
+                    return;
+                }
+
                 if (gameState === 'IDLE' || gameState === 'REVEALED') {
                     iniciarRonda();
                     return;
@@ -804,12 +836,13 @@
 
             btnRelease.addEventListener('click', () => {
                 if (!currentTrackObj) return;
-                btnRelease.classList.toggle('is-open');
+                btnRelease.classList.add('is-open');
             });
 
             btnAlbum.addEventListener('click', () => {
                 if (!currentTrackObj) return;
-                btnAlbum.classList.toggle('is-open');
+                btnAlbum.classList.add('is-open');
+                btnPlay.classList.add('album-clear');
             });
 
             function iniciarApp() {
@@ -1007,16 +1040,18 @@
                 clearTimers();
                 hideError();
                 hideTrivia();
+                btnPlay.classList.remove('album-clear');
 
                 currentTrackObj = obtenerSiguienteCancion();
                 if (!currentTrackObj) {
-                    gameState = 'IDLE';
+                    gameState = 'SESSION_DONE';
                     setPlayButtonState('idle');
                     playKicker.textContent = 'Sesión completa';
-                    playText.textContent = 'SIN CANCIONES';
+                    playText.textContent = 'REINICIAR CICLO';
                     timerText.style.display = 'none';
                     revealedInfo.style.display = 'none';
-                    showError('Ya se usaron todas las canciones de esta lista en esta sesión. Cambia de lista o recarga la página para reiniciar la bolsa.');
+                    mainAlbumArt.removeAttribute('src');
+                    showError('Ya se usaron todas las canciones de esta lista. Toca REINICIAR CICLO para barajar de nuevo.');
                     return;
                 }
 
@@ -1116,13 +1151,11 @@
                 answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
 
                 if (currentTrackObj.albumArt) {
-                    albumArtTrivia.src = currentTrackObj.albumArt;
-                    albumArtTrivia.alt = `Arte del álbum ${currentTrackObj.album}`;
-                    albumArtTrivia.style.opacity = '0.96';
+                    mainAlbumArt.src = currentTrackObj.albumArt;
+                    mainAlbumArt.alt = `Arte del álbum ${currentTrackObj.album}`;
                 } else {
-                    albumArtTrivia.removeAttribute('src');
-                    albumArtTrivia.alt = 'Arte del álbum no disponible';
-                    albumArtTrivia.style.opacity = '0';
+                    mainAlbumArt.removeAttribute('src');
+                    mainAlbumArt.alt = 'Arte del álbum no disponible';
                 }
 
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
@@ -1141,6 +1174,8 @@
 
                 gameState = 'IDLE';
                 btnPlay.disabled = false;
+                btnPlay.classList.remove('album-clear');
+                mainAlbumArt.removeAttribute('src');
                 setPlayButtonState('idle');
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
                 playKicker.textContent = `${restantes} de ${playlistTracks.length} canciones sin repetir`;
@@ -1153,6 +1188,15 @@
                 triviaPanel.style.display = 'none';
                 btnRelease.classList.remove('is-open');
                 btnAlbum.classList.remove('is-open');
+                btnPlay.classList.remove('album-clear');
+            }
+
+            function reiniciarSesion() {
+                if (playlistTracks.length === 0) return;
+                prepararSesionSinRepeticiones();
+                currentTrackObj = null;
+                hideError();
+                resetRoundUi();
             }
 
             function setPlayButtonState(stateName) {
