@@ -1,1117 +1,1028 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>AdiBeat</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg-a: #17103f;
-      --bg-b: #0b9eaa;
-      --bg-c: #ff477e;
-      --white: #ffffff;
-      --soft-white: rgba(255,255,255,0.78);
-      --glass: rgba(255,255,255,0.17);
-      --glass-strong: rgba(255,255,255,0.26);
-      --line: rgba(255,255,255,0.28);
-      --dark-chip: rgba(0,0,0,0.26);
-      --green: #35ef83;
-      --cyan: #35dfff;
-      --yellow: #ffe156;
-      --orange: #ff8a3d;
-      --pink: #ff3fa4;
-      --purple: #744dff;
-      --red: #ff4d5e;
-      --radius-xl: 32px;
-      --radius-lg: 24px;
-      --radius-pill: 999px;
-      --shadow: 0 18px 52px rgba(0,0,0,0.33);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 12% 8%, rgba(255,225,86,0.40), transparent 25%),
-        radial-gradient(circle at 88% 10%, rgba(255,63,164,0.36), transparent 27%),
-        radial-gradient(circle at 48% 112%, rgba(53,239,131,0.30), transparent 32%),
-        linear-gradient(135deg, var(--bg-a) 0%, #26205d 34%, var(--bg-b) 100%);
-      color: var(--white);
-      font-family: "Nunito", "Roboto", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      touch-action: manipulation;
-    }
-
-    button {
-      border: 0;
-      color: inherit;
-      font: inherit;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.72;
-    }
-
-    button:active:not(:disabled) {
-      transform: scale(0.985);
-    }
-
-    #app-shell {
-      width: 100dvw;
-      height: 100dvh;
-      padding:
-        max(10px, env(safe-area-inset-top))
-        max(12px, env(safe-area-inset-right))
-        max(10px, env(safe-area-inset-bottom))
-        max(12px, env(safe-area-inset-left));
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 10px;
-    }
-
-    .top-bar {
-      min-height: 42px;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .brand,
-    .playlist-chip,
-    .round-button {
-      border: 1px solid var(--line);
-      background: var(--glass);
-      box-shadow: 0 10px 28px rgba(0,0,0,0.20);
-      backdrop-filter: blur(16px);
-    }
-
-    .brand {
-      height: 42px;
-      padding: 0 13px;
-      border-radius: var(--radius-pill);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 900;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
-    }
-
-    .brand-dot {
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--yellow), var(--pink));
-      box-shadow: 0 0 18px rgba(255,225,86,0.95);
-      flex: 0 0 auto;
-    }
-
-    .playlist-chip {
-      height: 42px;
-      min-width: 0;
-      border-radius: var(--radius-pill);
-      padding: 0 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      font-size: clamp(0.78rem, 2.5vw, 0.96rem);
-      font-weight: 900;
-      color: var(--soft-white);
-      text-align: center;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    #playlist-label {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .round-button {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 1.22rem;
-      font-weight: 900;
-    }
-
-    #btn-cycle {
-      background: linear-gradient(135deg, rgba(255,225,86,0.92), rgba(255,63,164,0.88));
-      color: #24124f;
-      border-color: rgba(255,255,255,0.42);
-    }
-
-    .game-area {
-      min-height: 0;
-      display: grid;
-      grid-template-rows: 1fr auto;
-      gap: 10px;
-    }
-
-    #btn-game {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-xl);
-      padding: clamp(18px, 4vw, 38px);
-      border: 2px solid rgba(255,255,255,0.36);
-      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.16);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.36), transparent 22%),
-        linear-gradient(135deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
-      transition: background 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    #btn-game::before {
-      content: "";
-      position: absolute;
-      inset: -28%;
-      background:
-        radial-gradient(circle, rgba(255,255,255,0.17) 0 7%, transparent 8% 100%);
-      background-size: 62px 62px;
-      opacity: 0.38;
-      transform: rotate(-14deg);
-      pointer-events: none;
-    }
-
-    #btn-game::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 42%, rgba(0,0,0,0.10));
-      pointer-events: none;
-    }
-
-    #btn-game > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    #state-label {
-      margin-bottom: clamp(5px, 1.2vw, 11px);
-      font-size: clamp(0.78rem, 2.6vw, 1.15rem);
-      font-weight: 900;
-      letter-spacing: 0.17em;
-      text-transform: uppercase;
-      opacity: 0.90;
-    }
-
-    #main-title {
-      max-width: 96%;
-      font-size: clamp(2.25rem, 10vw, 7.2rem);
-      line-height: 0.92;
-      font-weight: 900;
-      text-wrap: balance;
-      text-shadow: 0 10px 28px rgba(0,0,0,0.24);
-      overflow-wrap: anywhere;
-    }
-
-    #counter {
-      margin-top: clamp(10px, 2vw, 20px);
-      min-width: clamp(82px, 17vw, 142px);
-      padding: 7px 20px;
-      border-radius: var(--radius-pill);
-      background: var(--dark-chip);
-      border: 1px solid rgba(255,255,255,0.30);
-      font-size: clamp(2.15rem, 7vw, 5rem);
-      line-height: 1;
-      font-weight: 900;
-      box-shadow: inset 0 0 18px rgba(0,0,0,0.12);
-    }
-
-    #track-artist-inline {
-      margin-top: clamp(8px, 1.8vw, 16px);
-      max-width: 92%;
-      font-size: clamp(1.2rem, 4.4vw, 2.5rem);
-      line-height: 1.05;
-      font-weight: 900;
-      color: rgba(255,255,255,0.94);
-      text-wrap: balance;
-      text-shadow: 0 8px 24px rgba(0,0,0,0.20);
-    }
-
-    #next-hint {
-      margin-top: clamp(8px, 1.8vw, 14px);
-      padding: 7px 15px;
-      border-radius: var(--radius-pill);
-      background: var(--dark-chip);
-      border: 1px solid rgba(255,255,255,0.22);
-      font-size: clamp(0.78rem, 2.4vw, 1rem);
-      font-weight: 900;
-      color: rgba(255,255,255,0.82);
-    }
-
-    #btn-game.state-ready {
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.36), transparent 22%),
-        linear-gradient(135deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
-    }
-
-    #btn-game.state-playing {
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.34), transparent 22%),
-        linear-gradient(135deg, var(--orange) 0%, var(--pink) 52%, var(--purple) 100%);
-      animation: playingPulse 1.3s ease-in-out infinite;
-    }
-
-    #btn-game.state-timeout {
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.32), transparent 22%),
-        linear-gradient(135deg, var(--red) 0%, var(--orange) 56%, var(--yellow) 100%);
-      animation: timeoutPulse 0.72s ease-in-out infinite alternate;
-    }
-
-    #btn-game.state-revealed {
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,0.28), transparent 22%),
-        linear-gradient(135deg, #20124d 0%, var(--purple) 44%, var(--bg-b) 100%);
-      animation: none;
-    }
-
-    .trivia-row {
-      display: none;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      min-height: clamp(74px, 15dvh, 116px);
-    }
-
-    .trivia-row.visible {
-      display: grid;
-    }
-
-    .trivia-button {
-      min-width: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: var(--radius-lg);
-      padding: 11px 14px;
-      border: 1px solid rgba(255,255,255,0.36);
-      box-shadow: 0 12px 34px rgba(0,0,0,0.24), inset 0 0 0 1px rgba(255,255,255,0.10);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    #btn-release {
-      background: linear-gradient(135deg, var(--yellow), var(--orange));
-      color: #251640;
-    }
-
-    #btn-album {
-      background: linear-gradient(135deg, var(--cyan), var(--green));
-      color: #162947;
-    }
-
-    .trivia-label {
-      font-size: clamp(0.76rem, 2.4vw, 1rem);
-      line-height: 1.05;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      opacity: 0.78;
-    }
-
-    .trivia-value {
-      margin-top: 4px;
-      max-width: 100%;
-      font-size: clamp(1.05rem, 3.7vw, 1.85rem);
-      line-height: 1.03;
-      font-weight: 900;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .trivia-button.revealed .trivia-label {
-      opacity: 0.62;
-    }
-
-    .status-strip {
-      min-height: 33px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 9px;
-      color: var(--soft-white);
-      font-size: clamp(0.76rem, 2.3vw, 0.94rem);
-      font-weight: 800;
-    }
-
-    #status-text {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    #btn-login,
-    #btn-reset-session {
-      display: none;
-      height: 36px;
-      border-radius: var(--radius-pill);
-      padding: 0 14px;
-      font-size: 0.86rem;
-      font-weight: 900;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-      white-space: nowrap;
-    }
-
-    #btn-login {
-      background: var(--green);
-      color: #102017;
-    }
-
-    #btn-reset-session {
-      background: rgba(255,255,255,0.18);
-      border: 1px solid var(--line);
-      color: var(--white);
-    }
-
-    @keyframes playingPulse {
-      0%, 100% { box-shadow: var(--shadow), 0 0 0 rgba(255,255,255,0); }
-      50% { box-shadow: var(--shadow), 0 0 34px rgba(255,255,255,0.27); }
-    }
-
-    @keyframes timeoutPulse {
-      from { filter: brightness(1); }
-      to { filter: brightness(1.17); }
-    }
-
-    @media (orientation: portrait) {
-      #app-shell {
-        grid-template-rows: auto 1fr auto;
-        gap: 9px;
-      }
-
-      .top-bar {
-        grid-template-columns: auto 1fr auto;
-        min-height: 40px;
-      }
-
-      .brand {
-        width: 40px;
-        height: 40px;
-        justify-content: center;
-        padding: 0;
-      }
-
-      .brand span:last-child {
-        display: none;
-      }
-
-      .playlist-chip,
-      .round-button {
-        height: 40px;
-      }
-
-      .round-button {
-        width: 40px;
-      }
-
-      .game-area {
-        grid-template-rows: 1fr auto;
-      }
-
-      #btn-game {
-        border-radius: 30px;
-        padding: 18px 16px;
-      }
-
-      #main-title {
-        font-size: clamp(2.5rem, 13vw, 5.8rem);
-      }
-
-      #counter {
-        font-size: clamp(2.8rem, 15vw, 5.4rem);
-      }
-
-      #track-artist-inline {
-        font-size: clamp(1.25rem, 6vw, 2.35rem);
-      }
-
-      .trivia-row {
-        grid-template-columns: 1fr;
-        min-height: 150px;
-      }
-
-      .trivia-button {
-        min-height: 70px;
-      }
-
-      .status-strip {
-        min-height: 34px;
-      }
-    }
-
-    @media (orientation: landscape) and (max-height: 430px) {
-      #app-shell {
-        gap: 7px;
-        padding-top: max(7px, env(safe-area-inset-top));
-        padding-bottom: max(7px, env(safe-area-inset-bottom));
-      }
-
-      .top-bar {
-        min-height: 36px;
-      }
-
-      .brand,
-      .playlist-chip,
-      .round-button {
-        height: 36px;
-      }
-
-      .round-button {
-        width: 36px;
-        font-size: 1rem;
-      }
-
-      .trivia-row {
-        min-height: 58px;
-      }
-
-      .trivia-button {
-        border-radius: 18px;
-        padding: 7px 10px;
-      }
-
-      #state-label {
-        margin-bottom: 3px;
-      }
-
-      #counter {
-        margin-top: 5px;
-      }
-
-      .status-strip {
-        min-height: 24px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <main id="app-shell">
-    <header class="top-bar">
-      <div class="brand" aria-label="AdiBeat"><span class="brand-dot"></span><span>AdiBeat</span></div>
-      <div class="playlist-chip"><span id="playlist-label">Preparando juego...</span></div>
-      <button id="btn-cycle" class="round-button" type="button" aria-label="Cambiar playlist">↻</button>
-    </header>
-
-    <section class="game-area">
-      <button id="btn-game" class="state-ready" type="button">
-        <span id="state-label">LISTO</span>
-        <span id="main-title">INICIAR</span>
-        <span id="counter" hidden>15</span>
-        <span id="track-artist-inline" hidden></span>
-        <span id="next-hint" hidden>Toca aquí para siguiente canción</span>
-      </button>
-
-      <div id="trivia-row" class="trivia-row" aria-live="polite">
-        <button id="btn-release" class="trivia-button" type="button">
-          <span class="trivia-label">Fecha de publicación</span>
-          <span class="trivia-value">Toca para revelar</span>
-        </button>
-        <button id="btn-album" class="trivia-button" type="button">
-          <span class="trivia-label">Nombre del álbum</span>
-          <span class="trivia-value">Toca para revelar</span>
-        </button>
-      </div>
-    </section>
-
-    <footer class="status-strip">
-      <div id="status-text">Conecta Spotify y abre la app en un dispositivo activo.</div>
-      <button id="btn-login" type="button">Conectar Spotify</button>
-      <button id="btn-reset-session" type="button">Reconectar</button>
-    </footer>
-  </main>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const CLIENT_ID = "e848a261a8e7411a8a1138326bd4a18f";
-      const REDIRECT_URI = "https://rourog.github.io/adibeat/";
-      const SCOPES = [
-        "user-modify-playback-state",
-        "user-read-playback-state",
-        "playlist-read-private",
-        "playlist-read-collaborative"
-      ].join(" ");
-
-      // Prioridad: la primera lista siempre es AdiBeat.
-      // El botón ↻ solo cicla entre estas listas. Ya no hay playlist manual ni fallback a canciones guardadas.
-      const PLAYLISTS = [
-        { id: "00MtRUjzL76Njcqe0mNvsD", fallbackName: "AdiBeat" },
-        { id: "6w5cQsiUyHHOZAmxzTXeER", fallbackName: "Lista 2" },
-        { id: "3qdqZPJUy1ulEwEeLOUmgA", fallbackName: "Lista 3" }
-      ];
-
-      const ROUND_SECONDS = 15;
-      const STORAGE_INDEX = "adibeat_playlist_index";
-      const STORAGE_TOKEN = "adibeat_token";
-      const STORAGE_REFRESH = "adibeat_refresh_token";
-      const STORAGE_VERSION = "adibeat_predef_v1";
-      const CURRENT_VERSION = "predefinidas_sin_plan_b_2026_05_20";
-
-      const ui = {
-        playlistLabel: document.getElementById("playlist-label"),
-        statusText: document.getElementById("status-text"),
-        btnLogin: document.getElementById("btn-login"),
-        btnResetSession: document.getElementById("btn-reset-session"),
-        btnCycle: document.getElementById("btn-cycle"),
-        btnGame: document.getElementById("btn-game"),
-        stateLabel: document.getElementById("state-label"),
-        mainTitle: document.getElementById("main-title"),
-        counter: document.getElementById("counter"),
-        artistInline: document.getElementById("track-artist-inline"),
-        nextHint: document.getElementById("next-hint"),
-        triviaRow: document.getElementById("trivia-row"),
-        btnRelease: document.getElementById("btn-release"),
-        btnAlbum: document.getElementById("btn-album")
-      };
-
-      let accessToken = localStorage.getItem(STORAGE_TOKEN) || "";
-      let refreshToken = localStorage.getItem(STORAGE_REFRESH) || "";
-      let playlistTracks = [];
-      let currentTrack = null;
-      let currentPlaylistIndex = Number.parseInt(localStorage.getItem(STORAGE_INDEX) || "0", 10);
-      let gameState = "IDLE";
-      let roundTimer = null;
-      let roundTicker = null;
-      let audioCtx = null;
-      let loadingPlaylist = false;
-
-      if (localStorage.getItem(STORAGE_VERSION) !== CURRENT_VERSION) {
-        localStorage.setItem(STORAGE_INDEX, "0");
-        localStorage.setItem(STORAGE_VERSION, CURRENT_VERSION);
-        currentPlaylistIndex = 0;
-      }
-
-      if (!Number.isFinite(currentPlaylistIndex) || currentPlaylistIndex < 0 || currentPlaylistIndex >= PLAYLISTS.length) {
-        currentPlaylistIndex = 0;
-        localStorage.setItem(STORAGE_INDEX, "0");
-      }
-
-      // Limpieza de versiones anteriores: elimina el plan B/manual si quedó guardado.
-      localStorage.removeItem("adibeat_custom_playlist");
-
-      const randomString = (length) => {
-        const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        const values = crypto.getRandomValues(new Uint8Array(length));
-        return Array.from(values, x => possible[x % possible.length]).join("");
-      };
-
-      const sha256 = async (plain) => {
-        const encoder = new TextEncoder();
-        return crypto.subtle.digest("SHA-256", encoder.encode(plain));
-      };
-
-      const base64encode = (input) => {
-        return btoa(String.fromCharCode(...new Uint8Array(input)))
-          .replace(/=/g, "")
-          .replace(/\+/g, "-")
-          .replace(/\//g, "_");
-      };
-
-      function setStatus(message) {
-        ui.statusText.textContent = message;
-      }
-
-      function setGameClass(stateClass) {
-        ui.btnGame.classList.remove("state-ready", "state-playing", "state-timeout", "state-revealed");
-        ui.btnGame.classList.add(stateClass);
-      }
-
-      function clearRoundTimers() {
-        if (roundTimer) clearTimeout(roundTimer);
-        if (roundTicker) clearInterval(roundTicker);
-        roundTimer = null;
-        roundTicker = null;
-      }
-
-      function resetTriviaButtons() {
-        ui.triviaRow.classList.remove("visible");
-
-        ui.btnRelease.classList.remove("revealed");
-        ui.btnRelease.querySelector(".trivia-label").textContent = "Fecha de publicación";
-        ui.btnRelease.querySelector(".trivia-value").textContent = "Toca para revelar";
-
-        ui.btnAlbum.classList.remove("revealed");
-        ui.btnAlbum.querySelector(".trivia-label").textContent = "Nombre del álbum";
-        ui.btnAlbum.querySelector(".trivia-value").textContent = "Toca para revelar";
-      }
-
-      function setReadyUI() {
-        gameState = "IDLE";
-        clearRoundTimers();
-        setGameClass("state-ready");
-        ui.stateLabel.textContent = "LISTO";
-        ui.mainTitle.textContent = playlistTracks.length ? "INICIAR" : "CARGANDO";
-        ui.counter.hidden = true;
-        ui.artistInline.hidden = true;
-        ui.artistInline.textContent = "";
-        ui.nextHint.hidden = true;
-        resetTriviaButtons();
-      }
-
-      function setLoadingUI(label = "CARGANDO") {
-        gameState = "LOADING";
-        clearRoundTimers();
-        setGameClass("state-ready");
-        ui.btnGame.disabled = true;
-        ui.stateLabel.textContent = "SPOTIFY";
-        ui.mainTitle.textContent = label;
-        ui.counter.hidden = true;
-        ui.artistInline.hidden = true;
-        ui.nextHint.hidden = true;
-        resetTriviaButtons();
-      }
-
-      function setPlayingUI(seconds) {
-        gameState = "PLAYING";
-        setGameClass("state-playing");
-        ui.stateLabel.textContent = "RONDA ACTIVA";
-        ui.mainTitle.textContent = "Adivina el Beat!!!";
-        ui.counter.textContent = seconds;
-        ui.counter.hidden = false;
-        ui.artistInline.hidden = true;
-        ui.artistInline.textContent = "";
-        ui.nextHint.hidden = true;
-        resetTriviaButtons();
-      }
-
-      function setTimeoutUI() {
-        gameState = "TIMEOUT";
-        clearRoundTimers();
-        setGameClass("state-timeout");
-        ui.stateLabel.textContent = "TIEMPO";
-        ui.mainTitle.textContent = "ADIVINEN TODOS";
-        ui.counter.hidden = true;
-        ui.artistInline.hidden = true;
-        ui.nextHint.hidden = true;
-        setStatus("Se acabó el contador. La música sigue; toca para revelar.");
-        softBeep("timeout");
-      }
-
-      function setRevealedUI() {
-        if (!currentTrack) return;
-
-        gameState = "REVEALED";
-        clearRoundTimers();
-        setGameClass("state-revealed");
-        ui.stateLabel.textContent = "RESPUESTA";
-        ui.mainTitle.textContent = currentTrack.name;
-        ui.counter.hidden = true;
-        ui.artistInline.textContent = currentTrack.artist;
-        ui.artistInline.hidden = false;
-        ui.nextHint.hidden = false;
-        ui.triviaRow.classList.add("visible");
-        setStatus("Respuesta revelada. La canción continúa sonando.");
-        softBeep("reveal");
-      }
-
-      function processTracks(itemsArray) {
-        return (itemsArray || []).map(obj => {
-          const t = obj?.track || obj?.item;
-          if (!t || !t.uri || !t.uri.startsWith("spotify:track:")) return null;
-          if (t.is_local) return null;
-
-          return {
-            uri: t.uri,
-            name: t.name || "Canción desconocida",
-            artist: Array.isArray(t.artists) ? t.artists.map(a => a.name).join(", ") : "Artista desconocido",
-            album: t.album?.name || "Álbum no disponible",
-            releaseDate: t.album?.release_date || "Fecha no disponible",
-            releasePrecision: t.album?.release_date_precision || "day"
-          };
-        }).filter(Boolean);
-      }
-
-      function formatReleaseDate(track) {
-        if (!track?.releaseDate || track.releaseDate === "Fecha no disponible") return "Fecha no disponible";
-        return track.releaseDate;
-      }
-
-      function getAudioContext() {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        return audioCtx;
-      }
-
-      function softBeep(type) {
-        try {
-          const ctx = getAudioContext();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const now = ctx.currentTime;
-
-          osc.type = "sine";
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-
-          let startFreq = 540;
-          let endFreq = 880;
-          if (type === "timeout") {
-            startFreq = 230;
-            endFreq = 150;
-          }
-          if (type === "cycle") {
-            startFreq = 450;
-            endFreq = 720;
-          }
-
-          osc.frequency.setValueAtTime(startFreq, now);
-          osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.18);
-          gain.gain.setValueAtTime(0.0001, now);
-          gain.gain.exponentialRampToValueAtTime(0.075, now + 0.035);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
-
-          osc.start(now);
-          osc.stop(now + 0.26);
-        } catch (e) {
-          // Silencioso: las notificaciones no deben romper el juego.
-        }
-      }
-
-      async function refreshAccessTokenIfPossible() {
-        if (!refreshToken) return false;
-
-        const response = await fetch("https://accounts.spotify.com/api/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            client_id: CLIENT_ID,
-            grant_type: "refresh_token",
-            refresh_token: refreshToken
-          })
-        });
-
-        if (!response.ok) return false;
-
-        const data = await response.json();
-        if (!data.access_token) return false;
-
-        accessToken = data.access_token;
-        localStorage.setItem(STORAGE_TOKEN, accessToken);
-
-        if (data.refresh_token) {
-          refreshToken = data.refresh_token;
-          localStorage.setItem(STORAGE_REFRESH, refreshToken);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AdiBeat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-a: #1d102f;
+            --bg-b: #07152f;
+            --card: rgba(255,255,255,0.11);
+            --card-strong: rgba(255,255,255,0.18);
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.72);
+            --purple: #8B5CF6;
+            --pink: #EC4899;
+            --cyan: #22D3EE;
+            --green: #34D399;
+            --yellow: #FBBF24;
+            --red: #FB7185;
+            --dark: #111827;
+            --radius-xl: 34px;
+            --radius-lg: 24px;
+            --shadow: 0 24px 70px rgba(0,0,0,0.38);
         }
 
-        return true;
-      }
-
-      async function spotifyFetch(url, options = {}, retry = true) {
-        const response = await fetch(url, {
-          ...options,
-          headers: {
-            ...(options.headers || {}),
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-
-        if (response.status === 401 && retry) {
-          const refreshed = await refreshAccessTokenIfPossible();
-          if (refreshed) return spotifyFetch(url, options, false);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        return response;
-      }
-
-      async function fetchJson(url, options = {}) {
-        const response = await spotifyFetch(url, options);
-        if (!response.ok) {
-          const body = await response.text().catch(() => "");
-          throw new Error(`Spotify API ${response.status}: ${body}`);
-        }
-        return response.json();
-      }
-
-      async function exchangeCodeForToken(code) {
-        const codeVerifier = localStorage.getItem("code_verifier");
-
-        const response = await fetch("https://accounts.spotify.com/api/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            client_id: CLIENT_ID,
-            grant_type: "authorization_code",
-            code,
-            redirect_uri: REDIRECT_URI,
-            code_verifier: codeVerifier
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.access_token) {
-          throw new Error("No se pudo completar la conexión con Spotify.");
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #121212;
+            color: var(--text);
         }
 
-        accessToken = data.access_token;
-        localStorage.setItem(STORAGE_TOKEN, accessToken);
-
-        if (data.refresh_token) {
-          refreshToken = data.refresh_token;
-          localStorage.setItem(STORAGE_REFRESH, refreshToken);
+        body {
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(236,72,153,0.34), transparent 34%),
+                radial-gradient(circle at 85% 20%, rgba(34,211,238,0.28), transparent 32%),
+                radial-gradient(circle at 50% 100%, rgba(139,92,246,0.34), transparent 34%),
+                linear-gradient(135deg, var(--bg-a), var(--bg-b));
         }
 
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-
-      async function login() {
-        const codeVerifier = randomString(64);
-        localStorage.setItem("code_verifier", codeVerifier);
-
-        const codeChallenge = base64encode(await sha256(codeVerifier));
-        const authUrl = new URL("https://accounts.spotify.com/authorize");
-
-        authUrl.search = new URLSearchParams({
-          client_id: CLIENT_ID,
-          response_type: "code",
-          redirect_uri: REDIRECT_URI,
-          scope: SCOPES,
-          code_challenge_method: "S256",
-          code_challenge: codeChallenge,
-          show_dialog: "true"
-        }).toString();
-
-        window.location.href = authUrl.toString();
-      }
-
-      async function loadPlaylist(index) {
-        if (loadingPlaylist) return;
-        loadingPlaylist = true;
-
-        const selected = PLAYLISTS[index] || PLAYLISTS[0];
-        currentPlaylistIndex = index;
-        localStorage.setItem(STORAGE_INDEX, String(currentPlaylistIndex));
-
-        playlistTracks = [];
-        currentTrack = null;
-        setLoadingUI("CARGANDO");
-        ui.playlistLabel.textContent = selected.fallbackName;
-        setStatus(`Cargando ${selected.fallbackName}...`);
-
-        try {
-          const playlistData = await fetchJson(
-            `https://api.spotify.com/v1/playlists/${selected.id}?fields=name,tracks(total)`
-          );
-
-          const playlistName = playlistData.name || selected.fallbackName;
-          let items = [];
-          let nextUrl = `https://api.spotify.com/v1/playlists/${selected.id}/items?limit=100&fields=items(track(uri,is_local,name,artists(name),album(name,release_date,release_date_precision))),next`;
-
-          while (nextUrl) {
-            const page = await fetchJson(nextUrl);
-            items = items.concat(page.items || []);
-            nextUrl = page.next;
-          }
-
-          playlistTracks = processTracks(items);
-
-          if (!playlistTracks.length) {
-            throw new Error("La playlist no tiene canciones reproducibles.");
-          }
-
-          ui.playlistLabel.textContent = `${playlistName} · ${playlistTracks.length}`;
-          ui.btnGame.disabled = false;
-          ui.btnCycle.disabled = false;
-          setStatus(`Lista activa: ${playlistName}. Presiona INICIAR.`);
-          setReadyUI();
-        } catch (error) {
-          playlistTracks = [];
-          ui.btnGame.disabled = true;
-          ui.btnCycle.disabled = false;
-          setGameClass("state-timeout");
-          ui.stateLabel.textContent = "ERROR";
-          ui.mainTitle.textContent = "SIN LISTA";
-          ui.counter.hidden = true;
-          ui.artistInline.hidden = true;
-          ui.nextHint.hidden = true;
-          resetTriviaButtons();
-          setStatus(`No se pudo cargar ${selected.fallbackName}. Usa ↻ para intentar otra lista.`);
-        } finally {
-          loadingPlaylist = false;
+        button {
+            border: none;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            font-weight: 900;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: transform 0.12s ease, filter 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
         }
-      }
 
-      async function startRound() {
-        if (!playlistTracks.length || !accessToken || loadingPlaylist) return;
+        button:active {
+            transform: scale(0.97);
+        }
 
-        clearRoundTimers();
-        currentTrack = playlistTracks[Math.floor(Math.random() * playlistTracks.length)];
-        setPlayingUI(ROUND_SECONDS);
-        setStatus("Reproduciendo. Toca el botón si alguien adivina.");
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+        }
 
-        try {
-          const response = await spotifyFetch("https://api.spotify.com/v1/me/player/play", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ uris: [currentTrack.uri] })
-          });
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 24px;
+            cursor: pointer;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(255,255,255,0.22), transparent 24%),
+                linear-gradient(135deg, #7C3AED, #DB2777 58%, #0891B2);
+            transition: opacity 0.45s ease;
+        }
 
-          if (!response.ok) {
-            throw new Error("No hay dispositivo activo.");
-          }
+        #splash-screen h1 {
+            font-size: clamp(3.4rem, 14vw, 7rem);
+            line-height: 0.9;
+            letter-spacing: -0.08em;
+            text-shadow: 0 20px 40px rgba(0,0,0,0.28);
+        }
 
-          let remaining = ROUND_SECONDS;
-          roundTicker = setInterval(() => {
-            remaining -= 1;
-            ui.counter.textContent = remaining;
+        #splash-hint {
+            padding: 12px 20px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.16);
+            color: rgba(255,255,255,0.86);
+            font-weight: 700;
+            animation: pulse 1.6s ease-in-out infinite;
+        }
 
-            if (remaining <= 0) {
-              clearInterval(roundTicker);
-              roundTicker = null;
+        #main-screen {
+            width: 100%;
+            height: 100svh;
+            display: none;
+            opacity: 0;
+            flex-direction: column;
+            gap: 12px;
+            padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+            transition: opacity 0.35s ease;
+        }
+
+        .top-bar {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            min-height: 44px;
+        }
+
+        .brand {
+            font-size: clamp(1.15rem, 4.6vw, 1.8rem);
+            font-weight: 900;
+            letter-spacing: -0.06em;
+            white-space: nowrap;
+        }
+
+        #playlist-label {
+            min-width: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            color: rgba(255,255,255,0.88);
+            font-size: clamp(0.76rem, 2.5vw, 0.95rem);
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .icon-btn {
+            width: 42px;
+            height: 40px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.16);
+            font-size: 1.05rem;
+        }
+
+        #btn-cycle {
+            background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(139,92,246,0.95));
+        }
+
+        #btn-reset {
+            background: rgba(17,24,39,0.52);
+        }
+
+        #error-disclaimer {
+            display: none;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-lg);
+            background: rgba(251,113,133,0.18);
+            border: 1px solid rgba(251,113,133,0.36);
+            color: #ffe3e9;
+            font-weight: 800;
+            text-align: center;
+            font-size: clamp(0.78rem, 3.1vw, 0.98rem);
+        }
+
+        #btn-login {
+            width: min(92vw, 520px);
+            min-height: 78px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #22C55E, #A3E635);
+            color: #102019;
+            box-shadow: var(--shadow);
+            font-size: clamp(1.15rem, 5vw, 1.8rem);
+            align-self: center;
+            margin: auto 0;
+        }
+
+        .game-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #btn-play {
+            display: none;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            border-radius: var(--radius-xl);
+            padding: clamp(18px, 4vw, 34px);
+            flex-direction: column;
+            gap: clamp(8px, 2.2vw, 16px);
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,255,255,0.30), transparent 26%),
+                linear-gradient(135deg, #8B5CF6, #EC4899 55%, #F97316);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.20);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #btn-play::after {
+            content: "";
+            position: absolute;
+            inset: -45%;
+            background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.16), transparent 62%);
+            transform: translateX(-35%) rotate(12deg);
+            pointer-events: none;
+        }
+
+        #btn-play.state-loading {
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,255,255,0.24), transparent 26%),
+                linear-gradient(135deg, #2563EB, #7C3AED);
+        }
+
+        #btn-play.state-playing {
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,255,255,0.30), transparent 26%),
+                linear-gradient(135deg, #06B6D4, #8B5CF6 48%, #EC4899);
+        }
+
+        #btn-play.state-timeout {
+            animation: urgentPulse 0.9s ease-in-out infinite alternate;
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,255,255,0.25), transparent 26%),
+                linear-gradient(135deg, #FB7185, #F97316 55%, #FBBF24);
+            color: #1f1020;
+        }
+
+        #btn-play.state-revealed {
+            background:
+                radial-gradient(circle at 20% 12%, rgba(255,255,255,0.18), transparent 26%),
+                linear-gradient(135deg, #111827, #2d1b69 52%, #481a56);
+            border-color: rgba(255,255,255,0.16);
+        }
+
+        #play-kicker {
+            position: relative;
+            z-index: 1;
+            font-size: clamp(0.8rem, 2.7vw, 1rem);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.72);
+        }
+
+        #play-text {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            font-size: clamp(2.5rem, 13vw, 7rem);
+            line-height: 0.88;
+            letter-spacing: -0.08em;
+            text-transform: uppercase;
+            text-wrap: balance;
+        }
+
+        #timer-text {
+            position: relative;
+            z-index: 1;
+            display: none;
+            min-width: 96px;
+            height: clamp(64px, 16vw, 118px);
+            padding: 0 clamp(20px, 5vw, 42px);
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.26);
+            border: 1px solid rgba(255,255,255,0.20);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.18);
+            font-size: clamp(2.7rem, 12vw, 6rem);
+            letter-spacing: -0.06em;
+        }
+
+        #revealed-info {
+            position: relative;
+            z-index: 1;
+            display: none;
+            width: min(96%, 920px);
+            padding: clamp(14px, 3.2vw, 24px);
+            border-radius: var(--radius-lg);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            backdrop-filter: blur(12px);
+        }
+
+        #track-name-main {
+            font-size: clamp(1.55rem, 7vw, 4.2rem);
+            line-height: 0.98;
+            letter-spacing: -0.06em;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-transform: none;
+            overflow-wrap: anywhere;
+        }
+
+        #track-artist-main {
+            font-size: clamp(1rem, 4.2vw, 2.2rem);
+            line-height: 1.05;
+            color: rgba(255,255,255,0.82);
+            text-transform: none;
+            overflow-wrap: anywhere;
+        }
+
+        #next-hint {
+            margin-top: 14px;
+            font-size: clamp(0.78rem, 2.5vw, 1rem);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.58);
+        }
+
+        #trivia-panel {
+            display: none;
+            width: 100%;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            min-height: clamp(104px, 22vh, 160px);
+        }
+
+        .trivia-btn {
+            min-height: 100%;
+            border-radius: var(--radius-lg);
+            padding: clamp(12px, 3vw, 18px);
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.24);
+            overflow: hidden;
+        }
+
+        .trivia-btn:nth-child(1) {
+            background: linear-gradient(135deg, rgba(34,211,238,0.35), rgba(14,165,233,0.18));
+        }
+
+        .trivia-btn:nth-child(2) {
+            background: linear-gradient(135deg, rgba(251,191,36,0.34), rgba(236,72,153,0.18));
+        }
+
+        .trivia-label {
+            font-size: clamp(0.9rem, 3.6vw, 1.45rem);
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .trivia-answer {
+            display: none;
+            font-size: clamp(1rem, 4.5vw, 1.9rem);
+            line-height: 1.05;
+            color: rgba(255,255,255,0.92);
+            text-transform: none;
+            overflow-wrap: anywhere;
+        }
+
+        .trivia-btn.is-open .trivia-label {
+            opacity: 0.62;
+        }
+
+        .trivia-btn.is-open .trivia-answer {
+            display: block;
+        }
+
+        .loading-note {
+            display: none;
+            align-self: center;
+            margin: auto 0;
+            width: min(92vw, 560px);
+            padding: 22px;
+            border-radius: var(--radius-lg);
+            background: rgba(255,255,255,0.11);
+            border: 1px solid rgba(255,255,255,0.16);
+            text-align: center;
+            color: rgba(255,255,255,0.82);
+            font-weight: 800;
+        }
+
+        @media (orientation: landscape) {
+            #main-screen {
+                gap: 10px;
             }
-          }, 1000);
 
-          roundTimer = setTimeout(setTimeoutUI, ROUND_SECONDS * 1000);
-          softBeep("start");
-        } catch (error) {
-          clearRoundTimers();
-          gameState = "IDLE";
-          setGameClass("state-timeout");
-          ui.stateLabel.textContent = "SIN DISPOSITIVO";
-          ui.mainTitle.textContent = "ABRE SPOTIFY";
-          ui.counter.hidden = true;
-          ui.artistInline.hidden = true;
-          ui.nextHint.hidden = true;
-          setStatus("Abre Spotify y reproduce algo primero. Sin dispositivo activo, la API se pone exquisita.");
-        }
-      }
+            .game-area {
+                display: grid;
+                grid-template-columns: 1fr minmax(220px, 30vw);
+                grid-template-rows: 1fr;
+                align-items: stretch;
+            }
 
-      function revealTrack() {
-        if (!currentTrack) return;
-        setRevealedUI();
-      }
+            #btn-play {
+                min-height: 0;
+            }
 
-      function revealTrivia(kind) {
-        if (!currentTrack || gameState !== "REVEALED") return;
-
-        const target = kind === "release" ? ui.btnRelease : ui.btnAlbum;
-        const label = target.querySelector(".trivia-label");
-        const value = target.querySelector(".trivia-value");
-
-        target.classList.add("revealed");
-
-        if (kind === "release") {
-          label.textContent = "Fecha de publicación";
-          value.textContent = formatReleaseDate(currentTrack);
-        } else {
-          label.textContent = "Nombre del álbum";
-          value.textContent = currentTrack.album || "Álbum no disponible";
+            #trivia-panel {
+                grid-template-columns: 1fr;
+                min-height: 0;
+            }
         }
 
-        softBeep("reveal");
-      }
+        @media (max-width: 420px) and (orientation: portrait) {
+            .top-bar {
+                grid-template-columns: auto 1fr auto auto;
+            }
 
-      function resetSession() {
-        localStorage.removeItem(STORAGE_TOKEN);
-        localStorage.removeItem(STORAGE_REFRESH);
-        localStorage.removeItem("code_verifier");
-        localStorage.removeItem("adibeat_custom_playlist");
-        window.location.reload();
-      }
+            .brand {
+                font-size: 1.1rem;
+            }
 
-      ui.btnGame.addEventListener("click", () => {
-        getAudioContext();
+            #playlist-label {
+                padding: 0 10px;
+            }
 
-        if (gameState === "IDLE" || gameState === "REVEALED") {
-          startRound();
-          return;
+            .icon-btn {
+                width: 38px;
+                height: 38px;
+            }
+
+            #trivia-panel {
+                min-height: 116px;
+            }
         }
 
-        if (gameState === "PLAYING" || gameState === "TIMEOUT") {
-          revealTrack();
+        @keyframes pulse {
+            0%, 100% { opacity: 0.62; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
         }
-      });
 
-      ui.btnCycle.addEventListener("click", () => {
-        if (!accessToken || loadingPlaylist) return;
-        getAudioContext();
-        softBeep("cycle");
-        const nextIndex = (currentPlaylistIndex + 1) % PLAYLISTS.length;
-        loadPlaylist(nextIndex);
-      });
-
-      ui.btnRelease.addEventListener("click", () => revealTrivia("release"));
-      ui.btnAlbum.addEventListener("click", () => revealTrivia("album"));
-      ui.btnLogin.addEventListener("click", login);
-      ui.btnResetSession.addEventListener("click", resetSession);
-
-      async function boot() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
-
-        try {
-          if (code && !accessToken) {
-            await exchangeCodeForToken(code);
-          }
-
-          if (!accessToken && refreshToken) {
-            await refreshAccessTokenIfPossible();
-          }
-
-          if (!accessToken) {
-            ui.btnLogin.style.display = "inline-flex";
-            ui.btnResetSession.style.display = "none";
-            ui.btnGame.disabled = true;
-            ui.btnCycle.disabled = true;
-            ui.stateLabel.textContent = "SPOTIFY";
-            ui.mainTitle.textContent = "CONECTA";
-            ui.playlistLabel.textContent = "Sin conexión";
-            setStatus("Conecta Spotify para cargar AdiBeat.");
-            return;
-          }
-
-          ui.btnLogin.style.display = "none";
-          ui.btnResetSession.style.display = "inline-flex";
-          ui.btnCycle.disabled = false;
-          await loadPlaylist(currentPlaylistIndex);
-        } catch (error) {
-          ui.btnLogin.style.display = "inline-flex";
-          ui.btnResetSession.style.display = "inline-flex";
-          ui.btnGame.disabled = true;
-          ui.btnCycle.disabled = true;
-          setGameClass("state-timeout");
-          ui.stateLabel.textContent = "ERROR";
-          ui.mainTitle.textContent = "RECONECTA";
-          ui.playlistLabel.textContent = "Error de sesión";
-          setStatus("La sesión falló. Reconecta Spotify.");
+        @keyframes urgentPulse {
+            from { filter: saturate(1) brightness(1); }
+            to { filter: saturate(1.3) brightness(1.16); }
         }
-      }
+    </style>
+</head>
+<body>
 
-      boot();
-    });
-  </script>
+    <div id="splash-screen">
+        <h1>AdiBeat</h1>
+        <div id="splash-hint">Toca para comenzar</div>
+    </div>
+
+    <div id="main-screen">
+        <div class="top-bar">
+            <div class="brand">AdiBeat</div>
+            <div id="playlist-label">Lista: cargando…</div>
+            <button id="btn-cycle" class="icon-btn" type="button" title="Cambiar lista">⏭</button>
+            <button id="btn-reset" class="icon-btn" type="button" title="Reconectar">↻</button>
+        </div>
+
+        <div id="error-disclaimer"></div>
+
+        <button id="btn-login" type="button" style="display: none;">Conectar Spotify</button>
+
+        <div id="loading-note" class="loading-note">Recuperando canciones de Spotify…</div>
+
+        <div class="game-area">
+            <button id="btn-play" type="button" class="state-idle">
+                <div id="play-kicker">Juego listo</div>
+                <div id="play-text">INICIAR</div>
+                <div id="timer-text">15</div>
+                <div id="revealed-info">
+                    <div id="track-name-main">Nombre de la canción</div>
+                    <div id="track-artist-main">Artista</div>
+                    <div id="next-hint">Toca aquí para la siguiente canción</div>
+                </div>
+            </button>
+
+            <div id="trivia-panel">
+                <button class="trivia-btn" id="btn-release" type="button">
+                    <div class="trivia-label">Fecha de publicación</div>
+                    <div class="trivia-answer" id="answer-release">????</div>
+                </button>
+                <button class="trivia-btn" id="btn-album" type="button">
+                    <div class="trivia-label">Nombre del álbum</div>
+                    <div class="trivia-answer" id="answer-album">????</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f';
+            const REDIRECT_URI = 'https://rourog.github.io/adibeat/';
+            const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private user-library-read';
+
+            /*
+                Base conservada:
+                - PKCE igual que la versión funcional.
+                - Lectura por /v1/me, /v1/playlists/{id}, /v1/playlists/{id}/items.
+                - Sin fallback a canciones guardadas.
+                - Sin carga manual.
+            */
+            const PLAYLISTS = [
+                { id: '00MtRUjzL76Njcqe0mNvsD', label: 'AdiBeat' },
+                { id: '6w5cQsiUyHHOZAmxzTXeER', label: 'Lista 2' },
+                { id: '3qdqZPJUy1ulEwEeLOUmgA', label: 'Lista 3' }
+            ];
+
+            const COUNTDOWN_SECONDS = 15;
+
+            localStorage.removeItem('adibeat_custom_playlist');
+
+            let currentPlaylistIndex = parseInt(localStorage.getItem('adibeat_playlist_index') || '0', 10);
+            if (!Number.isFinite(currentPlaylistIndex) || currentPlaylistIndex < 0 || currentPlaylistIndex >= PLAYLISTS.length) {
+                currentPlaylistIndex = 0;
+                localStorage.setItem('adibeat_playlist_index', String(currentPlaylistIndex));
+            }
+
+            let playlistTracks = [];
+            let currentTrackObj = null;
+            let gameState = 'IDLE';
+            let temporizador = null;
+            let intervalo = null;
+            let accessToken = localStorage.getItem('adibeat_token') || '';
+
+            const splashScreen = document.getElementById("splash-screen");
+            const mainScreen = document.getElementById("main-screen");
+            const btnLogin = document.getElementById("btn-login");
+            const btnPlay = document.getElementById("btn-play");
+            const btnCycle = document.getElementById("btn-cycle");
+            const btnReset = document.getElementById("btn-reset");
+            const playKicker = document.getElementById("play-kicker");
+            const playText = document.getElementById("play-text");
+            const timerText = document.getElementById("timer-text");
+            const revealedInfo = document.getElementById("revealed-info");
+            const trackNameMain = document.getElementById("track-name-main");
+            const trackArtistMain = document.getElementById("track-artist-main");
+            const playlistLabel = document.getElementById("playlist-label");
+            const errorDisclaimer = document.getElementById("error-disclaimer");
+            const loadingNote = document.getElementById("loading-note");
+            const triviaPanel = document.getElementById("trivia-panel");
+            const btnRelease = document.getElementById("btn-release");
+            const btnAlbum = document.getElementById("btn-album");
+            const answerRelease = document.getElementById("answer-release");
+            const answerAlbum = document.getElementById("answer-album");
+
+            splashScreen.addEventListener('click', () => {
+                playStartSound();
+                splashScreen.style.opacity = "0";
+                setTimeout(() => {
+                    splashScreen.style.display = "none";
+                    mainScreen.style.display = "flex";
+                    setTimeout(() => mainScreen.style.opacity = "1", 30);
+                }, 450);
+            });
+
+            function playStartSound() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'square';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.frequency.setValueAtTime(280, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(720, ctx.currentTime + 0.08);
+                    osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.18);
+
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.26);
+
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.26);
+                } catch(e) {}
+            }
+
+            const generateRandomString = (length) => {
+                const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const values = crypto.getRandomValues(new Uint8Array(length));
+                return Object.values(values).reduce((acc, x) => acc + possible[x % possible.length], "");
+            };
+
+            const sha256 = async (plain) => {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(plain);
+                return window.crypto.subtle.digest('SHA-256', data);
+            };
+
+            const base64encode = (input) => {
+                return btoa(String.fromCharCode(...new Uint8Array(input)))
+                    .replace(/=/g, '')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_');
+            };
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code && !accessToken) {
+                const codeVerifier = localStorage.getItem('code_verifier');
+                fetch("https://accounts.spotify.com/api/token", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        client_id: CLIENT_ID,
+                        grant_type: 'authorization_code',
+                        code: code,
+                        redirect_uri: REDIRECT_URI,
+                        code_verifier: codeVerifier,
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.access_token) {
+                        accessToken = data.access_token;
+                        localStorage.setItem('adibeat_token', accessToken);
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        iniciarApp();
+                    } else {
+                        showLogin("No se pudo completar la conexión con Spotify.");
+                    }
+                })
+                .catch(() => showLogin("Falló la conexión con Spotify."));
+            } else {
+                iniciarApp();
+            }
+
+            btnLogin.addEventListener('click', iniciarLoginSpotify);
+
+            btnCycle.addEventListener('click', async () => {
+                if (!accessToken) return;
+                currentPlaylistIndex = (currentPlaylistIndex + 1) % PLAYLISTS.length;
+                localStorage.setItem('adibeat_playlist_index', String(currentPlaylistIndex));
+                resetRoundUi();
+                await cargarPlaylist(currentPlaylistIndex);
+            });
+
+            btnReset.addEventListener('click', () => {
+                localStorage.removeItem('adibeat_token');
+                localStorage.removeItem('code_verifier');
+                localStorage.removeItem('adibeat_playlist_index');
+                localStorage.removeItem('adibeat_custom_playlist');
+                window.location.href = window.location.pathname;
+            });
+
+            btnPlay.addEventListener('click', () => {
+                if (playlistTracks.length === 0) return;
+
+                if (gameState === 'IDLE' || gameState === 'REVEALED') {
+                    iniciarRonda();
+                    return;
+                }
+
+                if (gameState === 'PLAYING') {
+                    revelarInformacion();
+                    return;
+                }
+
+                if (gameState === 'TIMEOUT') {
+                    revelarInformacion();
+                }
+            });
+
+            btnRelease.addEventListener('click', () => {
+                if (!currentTrackObj) return;
+                btnRelease.classList.toggle('is-open');
+            });
+
+            btnAlbum.addEventListener('click', () => {
+                if (!currentTrackObj) return;
+                btnAlbum.classList.toggle('is-open');
+            });
+
+            function iniciarApp() {
+                if (accessToken) {
+                    btnLogin.style.display = 'none';
+                    cargarPlaylist(currentPlaylistIndex);
+                } else {
+                    showLogin();
+                }
+            }
+
+            async function iniciarLoginSpotify() {
+                const codeVerifier = generateRandomString(64);
+                localStorage.setItem('code_verifier', codeVerifier);
+                const codeChallenge = base64encode(await sha256(codeVerifier));
+
+                const authUrl = new URL("https://accounts.spotify.com/authorize");
+                authUrl.search = new URLSearchParams({
+                    client_id: CLIENT_ID,
+                    response_type: 'code',
+                    redirect_uri: REDIRECT_URI,
+                    scope: SCOPES,
+                    code_challenge_method: 'S256',
+                    code_challenge: codeChallenge,
+                    show_dialog: 'true'
+                }).toString();
+
+                window.location.href = authUrl.toString();
+            }
+
+            async function cargarPlaylist(index) {
+                const selected = PLAYLISTS[index];
+                playlistTracks = [];
+                currentTrackObj = null;
+
+                hideError();
+                btnPlay.style.display = 'none';
+                triviaPanel.style.display = 'none';
+                loadingNote.style.display = 'block';
+                playlistLabel.textContent = `Lista: ${selected.label}`;
+                btnCycle.disabled = true;
+
+                try {
+                    // Conserva el pre-chequeo de usuario que tenía tu versión funcional.
+                    await spotifyJson('https://api.spotify.com/v1/me');
+
+                    // Conserva la lectura explícita de metadata de playlist.
+                    const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${selected.id}`);
+                    const playlistName = playlistData?.name || selected.label;
+                    playlistLabel.textContent = `Lista: ${playlistName}`;
+
+                    const items = await cargarItemsPlaylist(selected.id);
+                    playlistTracks = procesarCanciones(items);
+
+                    if (playlistTracks.length === 0) {
+                        throw new Error('La lista se pudo leer, pero no tiene tracks reproducibles.');
+                    }
+
+                    loadingNote.style.display = 'none';
+                    btnPlay.style.display = 'flex';
+                    resetRoundUi();
+                } catch (error) {
+                    loadingNote.style.display = 'none';
+                    btnPlay.style.display = 'none';
+                    playlistTracks = [];
+                    showError(`No pude recuperar canciones de "${selected.label}". ${mensajeSpotify(error)}`);
+                } finally {
+                    btnCycle.disabled = false;
+                }
+            }
+
+            async function cargarItemsPlaylist(playlistId) {
+                const items = [];
+                let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/items?limit=50`;
+                let safety = 0;
+
+                while (nextUrl && safety < 30) {
+                    const data = await spotifyJson(nextUrl);
+                    if (Array.isArray(data.items)) items.push(...data.items);
+                    nextUrl = data.next;
+                    safety++;
+                }
+
+                return items;
+            }
+
+            async function spotifyJson(url, options = {}) {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        ...(options.headers || {}),
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('adibeat_token');
+                    accessToken = '';
+                    showLogin("La sesión de Spotify expiró. Reconecta.");
+                    throw new Error('Sesión expirada.');
+                }
+
+                if (!response.ok) {
+                    let detail = '';
+                    try {
+                        const data = await response.json();
+                        detail = data?.error?.message || JSON.stringify(data);
+                    } catch(e) {}
+                    throw new Error(`${response.status}${detail ? `: ${detail}` : ''}`);
+                }
+
+                if (response.status === 204) return {};
+                return response.json();
+            }
+
+            function procesarCanciones(itemsArray) {
+                return itemsArray.map(obj => {
+                    const t = obj?.item || obj?.track;
+
+                    if (!t || !t.uri || !t.uri.startsWith('spotify:track:')) return null;
+
+                    const releaseRaw = t.album?.release_date || '';
+                    const releasePrecision = t.album?.release_date_precision || '';
+                    const albumName = t.album?.name || 'Sencillo / sin álbum';
+
+                    return {
+                        uri: t.uri,
+                        name: t.name || 'Desconocida',
+                        artist: Array.isArray(t.artists) && t.artists.length
+                            ? t.artists.map(a => a.name).join(', ')
+                            : 'Artista desconocido',
+                        album: albumName,
+                        releaseDate: formatearFechaSpotify(releaseRaw, releasePrecision),
+                        year: releaseRaw ? releaseRaw.substring(0, 4) : '????'
+                    };
+                }).filter(Boolean);
+            }
+
+            function formatearFechaSpotify(value, precision) {
+                if (!value) return 'Fecha no disponible';
+
+                const parts = value.split('-');
+
+                if (precision === 'year' || parts.length === 1) return parts[0];
+
+                if (precision === 'month' || parts.length === 2) {
+                    const [year, month] = parts;
+                    return `${month}/${year}`;
+                }
+
+                if (parts.length === 3) {
+                    const [year, month, day] = parts;
+                    return `${day}/${month}/${year}`;
+                }
+
+                return value;
+            }
+
+            async function iniciarRonda() {
+                if (playlistTracks.length === 0) return;
+
+                clearTimers();
+                hideError();
+                hideTrivia();
+
+                const randomIndex = Math.floor(Math.random() * playlistTracks.length);
+                currentTrackObj = playlistTracks[randomIndex];
+
+                gameState = 'LOADING';
+                setPlayButtonState('loading');
+                playKicker.textContent = 'Preparando pista';
+                playText.textContent = 'SINTONIZANDO…';
+                timerText.style.display = 'none';
+                revealedInfo.style.display = 'none';
+                btnPlay.disabled = true;
+
+                try {
+                    await fetch('https://api.spotify.com/v1/me/player/play', {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            uris: [currentTrackObj.uri],
+                            position_ms: 0
+                        })
+                    }).then(async response => {
+                        if (response.status === 401) {
+                            localStorage.removeItem('adibeat_token');
+                            accessToken = '';
+                            showLogin("La sesión de Spotify expiró. Reconecta.");
+                            throw new Error('Sesión expirada.');
+                        }
+
+                        if (!response.ok && response.status !== 204) {
+                            let detail = '';
+                            try {
+                                const data = await response.json();
+                                detail = data?.error?.message || JSON.stringify(data);
+                            } catch(e) {}
+                            throw new Error(`${response.status}${detail ? `: ${detail}` : ''}`);
+                        }
+                    });
+
+                    btnPlay.disabled = false;
+                    gameState = 'PLAYING';
+                    setPlayButtonState('playing');
+                    playKicker.textContent = 'Ronda activa';
+                    playText.textContent = 'Adivina el Beat!!!';
+                    timerText.style.display = 'flex';
+
+                    let tiempo = COUNTDOWN_SECONDS;
+                    timerText.textContent = tiempo;
+
+                    intervalo = setInterval(() => {
+                        tiempo -= 1;
+                        timerText.textContent = tiempo;
+
+                        if (tiempo <= 0) {
+                            clearInterval(intervalo);
+                            intervalo = null;
+                        }
+                    }, 1000);
+
+                    temporizador = setTimeout(() => {
+                        gameState = 'TIMEOUT';
+                        setPlayButtonState('timeout');
+                        playKicker.textContent = 'Tiempo agotado';
+                        playText.textContent = 'ADIVINEN TODOS';
+                        timerText.style.display = 'none';
+                    }, COUNTDOWN_SECONDS * 1000);
+                } catch (error) {
+                    btnPlay.disabled = false;
+                    gameState = 'IDLE';
+                    setPlayButtonState('idle');
+                    playKicker.textContent = 'Juego listo';
+                    playText.textContent = 'INICIAR';
+                    timerText.style.display = 'none';
+                    showError(`No pude iniciar la canción. Abre Spotify, reproduce cualquier canción y vuelve a intentar. ${mensajeSpotify(error)}`);
+                }
+            }
+
+            function revelarInformacion() {
+                if (!currentTrackObj) return;
+
+                clearTimers();
+
+                gameState = 'REVEALED';
+                setPlayButtonState('revealed');
+
+                playKicker.textContent = 'Respuesta';
+                playText.textContent = '';
+                timerText.style.display = 'none';
+
+                trackNameMain.textContent = currentTrackObj.name;
+                trackArtistMain.textContent = currentTrackObj.artist;
+                revealedInfo.style.display = 'block';
+
+                answerRelease.textContent = currentTrackObj.releaseDate || currentTrackObj.year || 'Fecha no disponible';
+                answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
+
+                triviaPanel.style.display = 'grid';
+                btnRelease.classList.remove('is-open');
+                btnAlbum.classList.remove('is-open');
+            }
+
+            function resetRoundUi() {
+                clearTimers();
+                hideTrivia();
+
+                gameState = 'IDLE';
+                btnPlay.disabled = false;
+                setPlayButtonState('idle');
+                playKicker.textContent = `${playlistTracks.length} canciones disponibles`;
+                playText.textContent = 'INICIAR';
+                timerText.style.display = 'none';
+                revealedInfo.style.display = 'none';
+            }
+
+            function hideTrivia() {
+                triviaPanel.style.display = 'none';
+                btnRelease.classList.remove('is-open');
+                btnAlbum.classList.remove('is-open');
+            }
+
+            function setPlayButtonState(stateName) {
+                btnPlay.classList.remove('state-idle', 'state-loading', 'state-playing', 'state-timeout', 'state-revealed');
+                btnPlay.classList.add(`state-${stateName}`);
+            }
+
+            function clearTimers() {
+                if (intervalo) {
+                    clearInterval(intervalo);
+                    intervalo = null;
+                }
+
+                if (temporizador) {
+                    clearTimeout(temporizador);
+                    temporizador = null;
+                }
+            }
+
+            function showLogin(message = '') {
+                btnLogin.style.display = 'flex';
+                btnPlay.style.display = 'none';
+                loadingNote.style.display = 'none';
+                triviaPanel.style.display = 'none';
+                playlistLabel.textContent = 'Spotify no conectado';
+
+                if (message) showError(message);
+            }
+
+            function showError(message) {
+                errorDisclaimer.textContent = message;
+                errorDisclaimer.style.display = 'block';
+            }
+
+            function hideError() {
+                errorDisclaimer.textContent = '';
+                errorDisclaimer.style.display = 'none';
+            }
+
+            function mensajeSpotify(error) {
+                const msg = String(error?.message || '');
+
+                if (!msg) return '';
+                if (msg.includes('403')) return 'Puede ser permiso de playlist, cuenta sin Premium o restricción de Spotify.';
+                if (msg.includes('404')) return 'Revisa que el ID de la playlist exista.';
+                if (msg.includes('429')) return 'Spotify está limitando llamadas. Espera un poco.';
+                if (msg.includes('401')) return 'Necesitas reconectar Spotify.';
+
+                return msg;
+            }
+        });
+    </script>
 </body>
 </html>
