@@ -14,17 +14,20 @@
         #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
         #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; }
-        #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
+        #status-text { font-size: 1.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; word-break: break-word; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
         #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); margin-bottom: 20px;}
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 50vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 40vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; margin-bottom: 20px;}
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
 
-        #btn-reset { padding: 10px 20px; font-size: 1rem; border-radius: 20px; background-color: #333; color: #fff; margin-top: 10px; }
+        .control-panel { display: none; flex-direction: column; gap: 10px; width: 90vw; }
+        .btn-small { padding: 15px 20px; font-size: 1rem; border-radius: 20px; width: 100%; }
+        #btn-cycle { background-color: #673AB7; color: #fff; }
+        #btn-reset { background-color: #333; color: #fff; }
 
         /* --- CONSOLA DE DEBUG --- */
         #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background-color: rgba(0, 0, 0, 0.95); color: #00ff00; font-family: monospace; font-size: 13px; padding: 10px; overflow-y: auto; border-top: 2px solid #444; z-index: 100; user-select: text; -webkit-user-select: text; cursor: text; }
@@ -45,11 +48,15 @@
             <span id="play-text">▶ INICIAR TURNO</span>
             <span id="timer-text">15s</span>
         </button>
-        <button id="btn-reset">🔄 Forzar Nueva Conexión</button>
+        
+        <div id="control-panel" class="control-panel">
+            <button id="btn-cycle" class="btn-small">⏭ Siguiente Playlist</button>
+            <button id="btn-reset" class="btn-small">🔄 Forzar Nueva Conexión</button>
+        </div>
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Consola de Diagnóstico Iniciada con Bypass.</div>
+        <div>[Sistema] Consola Lista. Modo Multi-Playlist activo.</div>
     </div>
 
     <script>
@@ -67,24 +74,53 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // --- CONFIGURACIÓN ---
+            // --- CONFIGURACIÓN PRINCIPAL ---
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private'; 
-            const PLAYLIST_ID = '3qdqZPJUy1ulEwEeLOUmgA'; 
+            
+            // --- SISTEMA DE LISTAS DE REPRODUCCIÓN ---
+            const PLAYLISTS = [
+                '00MtRUjzL76Njcqe0mNvsD', // Lista Nueva
+                '6w5cQsiUyHHOZAmxzTXeER', // AdiBeat - Red
+                '3qdqZPJUy1ulEwEeLOUmgA'  // 🌝 (La de prueba vacía)
+            ];
+            
+            // Recuperar el índice actual de la memoria, si no existe, empezar en 0
+            let currentPlaylistIndex = parseInt(localStorage.getItem('adibeat_playlist_index')) || 0;
+            // Asegurarnos de que el índice no se rompa si borramos listas del código
+            if (currentPlaylistIndex >= PLAYLISTS.length) currentPlaylistIndex = 0;
+            
+            const PLAYLIST_ID = PLAYLISTS[currentPlaylistIndex];
             
             let playlistTracks = []; 
             let temporizador;
 
+            // DOM Elements
             const splashScreen = document.getElementById("splash-screen");
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
+            const controlPanel = document.getElementById("control-panel");
             const btnReset = document.getElementById("btn-reset");
+            const btnCycle = document.getElementById("btn-cycle");
             const statusText = document.getElementById("status-text");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
 
+            // Función para ciclar listas
+            btnCycle.addEventListener('click', () => {
+                let nextIndex = currentPlaylistIndex + 1;
+                if (nextIndex >= PLAYLISTS.length) nextIndex = 0;
+                
+                localStorage.setItem('adibeat_playlist_index', nextIndex);
+                logDebug(`Cambiando a lista ${nextIndex + 1} de ${PLAYLISTS.length}. Recargando...`, "info");
+                
+                // Recargamos la página limpiando el código de la URL
+                window.location.href = window.location.pathname; 
+            });
+
+            // Función de Reset
             btnReset.addEventListener('click', () => {
                 logDebug("Borrando credenciales antiguas...", "warn");
                 localStorage.removeItem('adibeat_token');
@@ -92,6 +128,7 @@
                 window.location.href = window.location.pathname; 
             });
 
+            // Utilidades PKCE
             const generateRandomString = (length) => {
                 const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                 const values = crypto.getRandomValues(new Uint8Array(length));
@@ -111,6 +148,7 @@
                     .replace(/\//g, '_');
             };
 
+            // Animación Inicial
             setTimeout(() => {
                 splashScreen.style.opacity = "0";
                 setTimeout(() => {
@@ -120,6 +158,7 @@
                 }, 500);
             }, 1000);
 
+            // --- AUTENTICACIÓN ---
             let accessToken = localStorage.getItem('adibeat_token') || '';
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
@@ -140,13 +179,13 @@
                 .then(response => response.json())
                 .then(data => {
                     if(data.access_token) {
-                        logDebug("Nuevo Token obtenido con éxito.", "success");
+                        logDebug("Token obtenido con éxito.", "success");
                         accessToken = data.access_token;
                         localStorage.setItem('adibeat_token', accessToken); 
                         window.history.pushState("", document.title, window.location.pathname); 
                         iniciarApp();
                     } else {
-                        logDebug(`Error obteniendo token: ${JSON.stringify(data)}`, "error");
+                        logDebug(`Error de Token: ${JSON.stringify(data)}`, "error");
                         statusText.innerText = "Error de conexión";
                         btnLogin.style.display = 'block';
                     }
@@ -155,13 +194,11 @@
                 iniciarApp();
             }
 
-// LÓGICA DE BYPASS CORREGIDA
             function iniciarApp() {
                 if (accessToken) {
-                    statusText.innerText = "Descargando canciones...";
-                    logDebug(`Solicitando paquete completo para Playlist ID: ${PLAYLIST_ID}...`);
+                    statusText.innerText = `Cargando lista ${currentPlaylistIndex + 1}/${PLAYLISTS.length}...`;
+                    logDebug(`Solicitando Playlist ID: ${PLAYLIST_ID}`);
                     
-                    // Quitamos el '?fields=' problemático y pedimos todo el objeto de la playlist
                     fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
@@ -174,29 +211,34 @@
                         return response.json();
                     })
                     .then(data => {
-                        logDebug(`Playlist confirmada: "${data.name}"`, "success");
+                        const playlistName = data.name;
+                        logDebug(`Playlist confirmada: "${playlistName}"`, "success");
 
-                        // Navegación segura (Optional Chaining '?') para evitar colapsos
                         const items = data.tracks?.items || [];
-                        
                         playlistTracks = items
-                            .filter(item => item && item.track && item.track.uri) // Filtramos basura nula
+                            .filter(item => item && item.track && item.track.uri) 
                             .map(item => item.track.uri);
                         
+                        // Mostramos el panel de control sin importar si hay canciones o no
+                        controlPanel.style.display = 'flex';
+                        
                         if(playlistTracks.length > 0) {
-                            logDebug(`¡Misión Cumplida! ${playlistTracks.length} canciones extraídas.`, "success");
+                            logDebug(`Extracción exitosa: ${playlistTracks.length} canciones.`, "success");
                             btnPlay.style.display = 'flex';
-                            statusText.innerText = `Conectado: ${playlistTracks.length} canciones`;
+                            
+                            // AQUÍ CAMBIAMOS EL TEXTO PARA MOSTRAR EL NOMBRE DE LA LISTA
+                            statusText.innerHTML = `Conectado a:<br><strong>${playlistName}</strong><br><span style="font-size:1rem; opacity:0.7;">(${playlistTracks.length} canciones)</span>`;
                         } else {
-                            logDebug("La lista se descargó, pero realmente no tiene canciones.", "warn");
-                            statusText.innerText = "Playlist vacía";
+                            logDebug("La lista se descargó, pero no tiene pistas reproducibles.", "warn");
+                            statusText.innerHTML = `<strong>${playlistName}</strong><br>está vacía`;
                         }
                     })
                     .catch(error => {
-                        logDebug(`Fallo: ${error.message}`, "error");
-                        statusText.innerText = "Error al descargar (Ver consola)";
+                        logDebug(`Fallo de descarga: ${error.message}`, "error");
+                        statusText.innerText = "Error de descarga";
+                        controlPanel.style.display = 'flex';
                         if (error.message.includes("TOKEN_CADUCADO")) {
-                            logDebug("El token caducó. Usa el botón de Forzar Conexión.", "warn");
+                            logDebug("Usa el botón de Forzar Conexión.", "warn");
                         }
                     });
 
@@ -205,7 +247,6 @@
                     btnLogin.style.display = 'block';
                     
                     btnLogin.addEventListener('click', async () => {
-                        logDebug("Iniciando flujo de login...");
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -226,14 +267,14 @@
                 }
             }
 
-            // --- LÓGICA DE JUEGO ---
+            // --- LÓGICA DE JUEGO (REPRODUCCIÓN) ---
             btnPlay.addEventListener('click', () => {
                 if(playlistTracks.length === 0) return;
                 clearTimeout(temporizador);
 
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
                 const trackUri = playlistTracks[randomIndex];
-                logDebug(`Mandando PLAY: ${trackUri}`);
+                logDebug(`Enviando a bocinas: ${trackUri}`);
                 
                 playText.innerText = "SINTONIZANDO...";
                 
@@ -251,7 +292,7 @@
                         throw new Error(`HTTP ${response.status}: ${err.error?.message || 'Error de Playback'}`);
                     }
                     
-                    logDebug("Reproducción remota iniciada.");
+                    logDebug("Comando Play ejecutado.");
                     playText.innerText = "¡ADIVINA!";
                     timerText.style.display = "block";
                     btnPlay.style.backgroundColor = "#673AB7"; 
@@ -266,7 +307,7 @@
                     }, 1000);
 
                     temporizador = setTimeout(() => {
-                        logDebug("Pausando la canción (15s).");
+                        logDebug("15s alcanzados. Pausando...");
                         fetch('https://api.spotify.com/v1/me/player/pause', {
                             method: 'PUT',
                             headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -279,9 +320,9 @@
                     }, 15000); 
                 })
                 .catch(error => {
-                    logDebug(`Playback Error: ${error.message}`, "error");
+                    logDebug(`Playback Falló: ${error.message}`, "error");
                     playText.innerText = "ERROR";
-                    statusText.innerText = "Abre Spotify y ponle Play a algo primero";
+                    statusText.innerHTML = "Abre Spotify en tu<br>celular o TV primero";
                 });
             });
         });
