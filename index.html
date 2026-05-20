@@ -78,7 +78,7 @@
     </div>
 
     <div id="debug-console">
-        <div>[Sistema] Modos Ciclado y Escáner de Cuentas Activados.</div>
+        <div>[Sistema] Núcleo actualizado a la API de Febrero 2026.</div>
     </div>
 
     <script>
@@ -100,7 +100,6 @@
             const REDIRECT_URI = 'https://rourog.github.io/adibeat/'; 
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative user-read-email user-read-private user-library-read'; 
             
-            // --- EL ARREGLO DE TUS LISTAS ---
             const PLAYLISTS = [
                 '00MtRUjzL76Njcqe0mNvsD', 
                 '6w5cQsiUyHHOZAmxzTXeER', 
@@ -132,12 +131,11 @@
             const trackArtistEl = document.getElementById("track-artist");
             const trackAlbumEl = document.getElementById("track-album");
 
-            // Función para ciclar listas
             btnCycle.addEventListener('click', () => {
                 let nextIndex = currentPlaylistIndex + 1;
                 if (nextIndex >= PLAYLISTS.length) nextIndex = 0;
                 localStorage.setItem('adibeat_playlist_index', nextIndex);
-                localStorage.removeItem('adibeat_custom_playlist'); // Borra cualquier link pegado
+                localStorage.removeItem('adibeat_custom_playlist'); 
                 window.location.href = window.location.pathname; 
             });
 
@@ -208,8 +206,9 @@
             }
 
             function procesarCanciones(itemsArray) {
-                return itemsArray.map(item => {
-                    const t = item?.track;
+                return itemsArray.map(obj => {
+                    // EL FIX DE ORO: Soporte para la nueva API de Spotify que usa 'item' en lugar de 'track'
+                    const t = obj?.item || obj?.track;
                     if (!t || !t.uri || !t.uri.startsWith('spotify:track:')) return null;
                     
                     return {
@@ -229,7 +228,6 @@
                 return input; 
             }
 
-            // FUNCIÓN MEJORADA: COMPARA IDs ANTES DE DESCARGAR
             function cargarPlaylist(playlistId) {
                 statusText.innerText = `Analizando seguridad...`;
                 btnPlay.style.display = 'none';
@@ -238,7 +236,6 @@
                 let loggedInUserId = '';
                 let playlistName = '';
 
-                // Diagnóstico Simultáneo
                 Promise.all([
                     fetch('https://api.spotify.com/v1/me', { headers: { 'Authorization': `Bearer ${accessToken}` } }).then(res => res.json()),
                     fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, { headers: { 'Authorization': `Bearer ${accessToken}` } }).then(res => res.json())
@@ -248,17 +245,16 @@
                     const ownerId = playlistData.owner?.id;
                     playlistName = playlistData.name || "Lista Custom";
 
-                    logDebug(`ID de la Sesión Actual: ${loggedInUserId}`, "info");
-                    logDebug(`ID del Creador de la Lista: ${ownerId}`, "info");
+                    logDebug(`ID Sesión: ${loggedInUserId} | Creador: ${ownerId}`, "info");
 
                     if (loggedInUserId !== ownerId) {
-                        logDebug("⚠️ ALERTA: Tu sesión no coincide con el creador. Spotify bloqueará la lista.", "error");
+                        logDebug("⚠️ ALERTA: Tu sesión no coincide con el creador.", "warn");
                     } else {
-                        logDebug("✅ IDs idénticos. Permiso concedido por propiedad.", "success");
+                        logDebug("✅ Permiso concedido por propiedad.", "success");
                     }
 
-                    // Proceder a descargar pistas
-                    return fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`, {
+                    // EL FIX DE ORO PARTE 2: Usar el nuevo endpoint /items en lugar de /tracks
+                    return fetch(`https://api.spotify.com/v1/playlists/${playlistId}/items?limit=100`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     });
                 })
@@ -270,12 +266,12 @@
                     return response.json();
                 })
                 .then(data => {
-                    if (!data.items) throw new Error("La lista está vacía.");
+                    if (!data.items) throw new Error("La lista está vacía o el array fue censurado.");
                     
                     playlistTracks = procesarCanciones(data.items);
                     
                     if(playlistTracks.length > 0) {
-                        logDebug(`¡Éxito! ${playlistTracks.length} canciones cargadas.`, "success");
+                        logDebug(`¡Victoria! ${playlistTracks.length} canciones descargadas mediante la nueva API.`, "success");
                         btnPlay.style.display = 'flex';
                         controlPanel.style.display = 'flex';
                         setupPanel.style.display = 'flex';
@@ -285,16 +281,16 @@
                     }
                 })
                 .catch(error => {
-                    logDebug(`Error Crítico: ${error.message}`, "error");
+                    logDebug(`Error de Descarga: ${error.message}`, "error");
                     
                     if (error.message.includes("TOKEN_CADUCADO")) {
                         logDebug("Token expirado. Forzando cierre...", "warn");
                         statusText.innerText = "Token Caducado";
                     } else {
-                        // Plan B
                         logDebug("Activando Plan B: Tus 'Me Gusta'", "warn");
-                        statusText.innerHTML = `Bloqueo de API detectado<br><span style="font-size:1rem">Cargando tus Me Gusta...</span>`;
+                        statusText.innerHTML = `Error de API<br><span style="font-size:1rem">Cargando tus Me Gusta...</span>`;
                         
+                        // Los Me Gusta de momento siguen funcionando con /tracks
                         fetch(`https://api.spotify.com/v1/me/tracks?limit=50`, {
                             headers: { 'Authorization': `Bearer ${accessToken}` }
                         })
@@ -326,7 +322,6 @@
                     if (savedPlaylist) {
                         cargarPlaylist(savedPlaylist);
                     } else {
-                        // Carga la lista correspondiente del arreglo PLAYLISTS
                         logDebug(`Iniciando con Lista en Memoria: ${currentPlaylistIndex + 1}/${PLAYLISTS.length}`);
                         cargarPlaylist(PLAYLISTS[currentPlaylistIndex]);
                     }
