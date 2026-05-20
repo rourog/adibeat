@@ -10,19 +10,40 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body { background-color: #121212; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1DB954; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
-        #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #121212; }
+        /* NUEVO COLOR: Morado Neón para validar actualización */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #673AB7; display: flex; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease-out; }
+        #splash-screen h1 { font-size: 4rem; font-weight: 900; letter-spacing: 2px; color: #ffffff; }
         
-        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; }
+        #main-screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.5s ease-in; padding-bottom: 160px; /* Espacio para la consola */ }
         #status-text { font-size: 1.5rem; margin-bottom: 30px; font-weight: 900; letter-spacing: 1px; text-align: center; color: #b3b3b3; }
         
         button { border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; }
         button:active { transform: scale(0.95); }
         
-        #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #1DB954; color: #121212; box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4); }
+        /* Botones también en morado */
+        #btn-login { padding: 20px 40px; font-size: 1.5rem; border-radius: 50px; background-color: #673AB7; color: #ffffff; box-shadow: 0 8px 20px rgba(103, 58, 183, 0.4); }
         
-        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 60vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; }
+        #btn-play { background-color: #ff4646; color: white; display: none; box-shadow: 0 8px 20px rgba(255, 70, 70, 0.4); width: 90vw; height: 50vh; border-radius: 30px; font-size: 3rem; border: 4px solid #ff4646; flex-direction: column; gap: 10px; }
         #timer-text { font-size: 1.5rem; font-weight: normal; opacity: 0.8; display: none; }
+
+        /* --- CONSOLA DE DEBUG --- */
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            border-top: 2px solid #333;
+            z-index: 100;
+        }
+        .log-error { color: #ff4646; }
+        .log-warn { color: #ffeb3b; }
     </style>
 </head>
 <body>
@@ -37,7 +58,24 @@
         </button>
     </div>
 
+    <!-- Consola de Debug en Pantalla -->
+    <div id="debug-console">
+        <div>[Sistema] Consola iniciada...</div>
+    </div>
+
     <script>
+        // --- FUNCIÓN DE DEBUG EN PANTALLA ---
+        const debugConsole = document.getElementById("debug-console");
+        function logDebug(message, type = "info") {
+            const div = document.createElement("div");
+            div.innerText = `> ${message}`;
+            if (type === "error") div.className = "log-error";
+            if (type === "warn") div.className = "log-warn";
+            debugConsole.appendChild(div);
+            debugConsole.scrollTop = debugConsole.scrollHeight; // Auto-scroll
+            console.log(`[${type.toUpperCase()}]`, message); // Mantiene el log original
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             // --- CONFIGURACIÓN DE LA APP ---
             const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f'; 
@@ -45,6 +83,13 @@
             const SCOPES = 'user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative'; 
             const PLAYLIST_ID = '6w5cQsiUyHHOZAmxzTXeER'; 
             
+            logDebug(`URL Actual del navegador: ${window.location.href}`);
+            logDebug(`REDIRECT_URI configurada: ${REDIRECT_URI}`);
+            
+            if (window.location.href.startsWith("http://localhost") || window.location.href.startsWith("http://127.0.0.1")) {
+                logDebug("⚠️ ADVERTENCIA: Estás en localhost pero tu REDIRECT_URI apunta a GitHub.", "warn");
+            }
+
             let playlistTracks = []; 
             let temporizador;
 
@@ -92,7 +137,9 @@
             const code = urlParams.get('code');
 
             if (code && !accessToken) {
+                logDebug("Código detectado en la URL. Solicitando Token a Spotify...");
                 const codeVerifier = localStorage.getItem('code_verifier');
+                
                 fetch("https://accounts.spotify.com/api/token", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -107,24 +154,27 @@
                 .then(response => response.json())
                 .then(data => {
                     if(data.access_token) {
+                        logDebug("Token obtenido con éxito.");
                         accessToken = data.access_token;
                         localStorage.setItem('adibeat_token', accessToken); 
                         window.history.pushState("", document.title, window.location.pathname); 
                         iniciarApp();
                     } else {
-                        statusText.innerText = "Error de conexión con Spotify";
+                        logDebug(`Error obteniendo token: ${JSON.stringify(data)}`, "error");
+                        statusText.innerText = "Error de conexión";
                         btnLogin.style.display = 'block';
                     }
-                });
+                })
+                .catch(err => logDebug(`Fetch error: ${err}`, "error"));
             } else {
                 iniciarApp();
             }
 
             function iniciarApp() {
                 if (accessToken) {
+                    logDebug("Iniciando app con Token existente.");
                     statusText.innerText = "Cargando Playlist 'AdiBeat - Red'...";
                     
-                    // --- OBTENER CANCIONES DE LA PLAYLIST ---
                     fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?fields=items(track(uri))`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     })
@@ -138,14 +188,16 @@
                             .map(item => item.track.uri);
                         
                         if(playlistTracks.length > 0) {
+                            logDebug(`Playlist cargada. ${playlistTracks.length} pistas encontradas.`);
                             btnPlay.style.display = 'flex';
                             statusText.innerText = `Playlist lista: ${playlistTracks.length} canciones`;
                         } else {
+                            logDebug("La playlist se cargó pero está vacía.", "warn");
                             statusText.innerText = "La playlist está vacía";
                         }
                     })
                     .catch(error => {
-                        console.error(error);
+                        logDebug(`Error cargando música: ${error.message}`, "error");
                         if (error.message === "Token caducado") {
                             localStorage.removeItem('adibeat_token');
                             window.location.reload();
@@ -155,10 +207,12 @@
                     });
 
                 } else {
+                    logDebug("No hay token. Esperando acción del usuario.");
                     statusText.innerText = "Bienvenido a AdiBeat";
                     btnLogin.style.display = 'block';
                     
                     btnLogin.addEventListener('click', async () => {
+                        logDebug("Generando llaves y redirigiendo a Spotify...");
                         const codeVerifier = generateRandomString(64);
                         window.localStorage.setItem('code_verifier', codeVerifier);
                         const hashed = await sha256(codeVerifier);
@@ -174,6 +228,7 @@
                             code_challenge: codeChallenge,
                         }).toString();
                         
+                        logDebug(`Redirigiendo a: ${authUrl.toString().substring(0, 100)}...`);
                         window.location.href = authUrl.toString();
                     });
                 }
@@ -182,17 +237,14 @@
             // --- LÓGICA DE JUEGO (REPRODUCCIÓN Y TEMPORIZADOR) ---
             btnPlay.addEventListener('click', () => {
                 if(playlistTracks.length === 0) return;
-
-                // Limpiar cualquier temporizador anterior por si acaso
                 clearTimeout(temporizador);
 
-                // 1. Elegimos una canción al azar
                 const randomIndex = Math.floor(Math.random() * playlistTracks.length);
                 const trackUri = playlistTracks[randomIndex];
+                logDebug(`Enviando PLAY para pista: ${trackUri}`);
                 
                 playText.innerText = "SINTONIZANDO...";
                 
-                // 2. Le mandamos el comando de PLAY a Spotify
                 fetch('https://api.spotify.com/v1/me/player/play', {
                     method: 'PUT',
                     headers: {
@@ -203,13 +255,12 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        // Cambiamos interfaz a modo "Sonando"
+                        logDebug("Comando PLAY aceptado por Spotify.");
                         playText.innerText = "¡ADIVINA!";
                         timerText.style.display = "block";
-                        btnPlay.style.backgroundColor = "#1DB954";
-                        btnPlay.style.borderColor = "#1DB954";
+                        btnPlay.style.backgroundColor = "#673AB7"; // Color activo morado
+                        btnPlay.style.borderColor = "#673AB7";
                         
-                        // Cuenta regresiva visual simple de 15 segundos
                         let tiempo = 15;
                         timerText.innerText = `${tiempo}s`;
                         const intervalo = setInterval(() => {
@@ -218,8 +269,8 @@
                             if(tiempo <= 0) clearInterval(intervalo);
                         }, 1000);
 
-                        // 3. Pausar automáticamente después de 15 segundos
                         temporizador = setTimeout(() => {
+                            logDebug("15s alcanzados. Enviando comando PAUSE.");
                             fetch('https://api.spotify.com/v1/me/player/pause', {
                                 method: 'PUT',
                                 headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -229,14 +280,15 @@
                                 btnPlay.style.backgroundColor = "#ff4646";
                                 btnPlay.style.borderColor = "#ff4646";
                             });
-                        }, 15000); // 15000 milisegundos = 15 segundos
+                        }, 15000); 
                         
                     } else {
+                        logDebug(`Error de PLAY. Status: ${response.status}. ¿Spotify está abierto?`, "error");
                         playText.innerText = "ERROR";
-                        statusText.innerText = "Por favor abre Spotify en tu dispositivo o TV para empezar";
+                        statusText.innerText = "Abre Spotify en tu celular o TV";
                     }
                 })
-                .catch(error => console.error(error));
+                .catch(error => logDebug(`Error en el fetch de PLAY: ${error}`, "error"));
             });
         });
     </script>
