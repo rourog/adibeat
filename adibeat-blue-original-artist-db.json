@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "type": "adibeat-blue-original-artist-db",
+  "playlistId": "3v71SvyMLTBhbpTfAkMizr",
+  "question": "¿Quién cantó originalmente esta canción?",
+  "answerLabel": "Artista Original",
+  "tracks": [
+    {
+      "spotifyId": "ID_DE_LA_CANCION",
+      "answer": "Artista original"
+    }
+  ]
+}
