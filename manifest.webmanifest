@@ -1,0 +1,36 @@
+{
+  "name": "AdiBeat",
+  "short_name": "AdiBeat",
+  "description": "Acompañante de juego musical para adivinar canciones, artistas y covers.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#1d102f",
+  "theme_color": "#1d102f",
+  "categories": [
+    "games",
+    "music",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
