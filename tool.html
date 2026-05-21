@@ -558,7 +558,8 @@
 
         updateAuthUi();
         if (accessToken) {
-          setMessage('Spotify conectado. Puedes leer AdiBeat-Red y AdiBeat-Blue.', 'ok');
+          setMessage('Spotify conectado. Si no ves canciones, presiona Leer listas. También intentaré cargarlas automáticamente.', 'ok');
+          setTimeout(() => loadPlaylists(), 150);
         }
       }
 
@@ -641,7 +642,8 @@
           localStorage.setItem(TOKEN_KEY, accessToken);
           window.history.replaceState({}, document.title, window.location.pathname);
           updateAuthUi();
-          setMessage('Spotify conectado. Ahora puedes leer las listas.', 'ok');
+          setMessage('Spotify conectado. Leyendo listas automáticamente…', 'ok');
+          setTimeout(() => loadPlaylists(), 150);
         } catch (error) {
           setMessage(`No se pudo conectar Spotify. ${error.message || ''}`, 'error');
           updateAuthUi();
@@ -657,29 +659,50 @@
         listEl.innerHTML = '<div class="empty">Leyendo playlists…</div>';
         setMessage('Consultando Spotify…', '');
 
+        const collected = [];
+        const diagnostics = [];
+
         try {
           await spotifyJson('https://api.spotify.com/v1/me');
 
-          const collected = [];
           for (const playlist of PLAYLISTS) {
-            const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${playlist.id}`);
-            const playlistName = playlistData?.name || playlist.label;
-            const items = await readPlaylistItems(playlist.id);
-            collected.push(...processItems(items, { ...playlist, label: playlistName }));
+            try {
+              setMessage(`Leyendo ${playlist.label}…`, '');
+
+              let playlistName = playlist.label;
+              try {
+                const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${encodeURIComponent(playlist.id)}?fields=id,name,tracks(total)`);
+                playlistName = playlistData?.name || playlist.label;
+              } catch (metaError) {
+                diagnostics.push(`${playlist.label}: metadata no disponible (${spotifyMessage(metaError)})`);
+              }
+
+              const items = await readPlaylistItems(playlist.id);
+              const processed = processItems(items, { ...playlist, label: playlistName });
+              diagnostics.push(`${playlistName}: ${processed.length} canciones leídas de ${items.length} items`);
+              collected.push(...processed);
+            } catch (playlistError) {
+              diagnostics.push(`${playlist.label}: ERROR ${spotifyMessage(playlistError)}`);
+            }
           }
 
           tracks = mergeDuplicates(collected).sort(compareTracks);
+
+          if (!tracks.length) {
+            throw new Error(`Spotify respondió, pero no encontré tracks utilizables. ${diagnostics.join(' · ')}`);
+          }
+
           renderList();
           updateStats();
           updateAuthUi();
-          setMessage(`Listas cargadas: ${tracks.length} canciones únicas. Los campos se guardan localmente al escribir.`, 'ok');
+          setMessage(`Listas cargadas: ${tracks.length} canciones únicas. ${diagnostics.join(' · ')}`, 'ok');
           updatePreview();
         } catch (error) {
           tracks = [];
           renderList();
           updateStats();
           updateAuthUi();
-          setMessage(`No pude leer las playlists. ${spotifyMessage(error)}`, 'error');
+          setMessage(`No pude leer las playlists. ${spotifyMessage(error)} ${diagnostics.length ? 'Detalle: ' + diagnostics.join(' · ') : ''}`, 'error');
         } finally {
           btnLoad.disabled = !accessToken;
         }
@@ -687,10 +710,11 @@
 
       async function readPlaylistItems(playlistId) {
         const items = [];
-        let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/items?limit=50`;
+        const id = encodeURIComponent(playlistId);
+        let nextUrl = `https://api.spotify.com/v1/playlists/${id}/items?limit=50&fields=items(track(id,uri,type,name,artists(name),album(name,release_date,images),external_urls)),next,total`;
         let guard = 0;
 
-        while (nextUrl && guard < 50) {
+        while (nextUrl && guard < 100) {
           const data = await spotifyJson(nextUrl);
           if (Array.isArray(data.items)) items.push(...data.items);
           nextUrl = data.next;
@@ -703,10 +727,14 @@
       function processItems(items, playlist) {
         return items
           .map(item => item?.track)
-          .filter(track => track && track.type === 'track' && track.uri)
+          .filter(track => {
+            if (!track || !track.uri || !track.name) return false;
+            if (track.type && track.type !== 'track') return false;
+            return String(track.uri).startsWith('spotify:track:');
+          })
           .map(track => {
             const artists = Array.isArray(track.artists) ? track.artists.map(a => a.name).filter(Boolean) : [];
-            const images = track.album?.images || [];
+            const images = Array.isArray(track.album?.images) ? track.album.images : [];
             const releaseDate = track.album?.release_date || '';
 
             return {
@@ -940,7 +968,7 @@
             const data = await response.json();
             detail = data?.error?.message || data?.error_description || '';
           } catch (_) {}
-          throw new Error(`Spotify respondió ${response.status}. ${detail}`.trim());
+          throw new Error(`Spotify respondió ${response.status}. ${detail} (${url})`.trim());
         }
 
         if (response.status === 204) return {};
