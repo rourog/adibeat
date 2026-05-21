@@ -6,8 +6,192 @@
   "answerLabel": "Artista Original",
   "tracks": [
     {
-      "spotifyId": "ID_DE_LA_CANCION",
-      "answer": "Artista original"
+      "spotifyId": "15VRO9CQwMpbqUYA7e6Hwg",
+      "answer": "David Bowie"
+    },
+    {
+      "spotifyId": "6ZWGKfPSyvC2Oe68CB2brV",
+      "answer": "José José"
+    },
+    {
+      "spotifyId": "4f6bE40jl7zuFJ3cOCwaI1",
+      "answer": "José José"
+    },
+    {
+      "spotifyId": "74b6K0AZr4tNKeA3gab9UU",
+      "answer": "Juan Gabriel"
+    },
+    {
+      "spotifyId": "3KayFl6PPARDkJIF0z1X24",
+      "answer": "Intocable"
+    },
+    {
+      "spotifyId": "50QkyL59HxlwHnz6wI8KeE",
+      "answer": "Juan Gabriel / Rocio Dúrcal"
+    },
+    {
+      "spotifyId": "3OCbJuTFZ6vX0NXvoZi762",
+      "answer": "José José"
+    },
+    {
+      "spotifyId": "7IfckgnBsIdP4XE4tfWEDN",
+      "answer": "a-ha"
+    },
+    {
+      "spotifyId": "3ZPKocroJIcnHGcnJVlLKD",
+      "answer": "Toto"
+    },
+    {
+      "spotifyId": "48ilT9DmEuiky8QlCn3NWZ",
+      "answer": "Michael Jackson"
+    },
+    {
+      "spotifyId": "5z6xHjCZr7a7AIcy8sPBKy",
+      "answer": "Michael Jackson"
+    },
+    {
+      "spotifyId": "0eZBeB2xFIS65jQHerispi",
+      "answer": "Simon & Garfunkel"
+    },
+    {
+      "spotifyId": "6hnhksrWAA4OYYpKRh8Oqb",
+      "answer": "Queen"
+    },
+    {
+      "spotifyId": "4iHITBaV9sOIukW5ABdHhI",
+      "answer": "Nena"
+    },
+    {
+      "spotifyId": "1a9n9JqL1mpS4f73KsckbX",
+      "answer": "Thin Lizzy"
+    },
+    {
+      "spotifyId": "0YgN51fNsdl1OiQ3EGAAHk",
+      "answer": "Pink Floyd"
+    },
+    {
+      "spotifyId": "6HJrxHKTBnEqefEJ0qcHWn",
+      "answer": "Deep Purple"
+    },
+    {
+      "spotifyId": "0JxDTC2o0zwDPFKi5WsBrN",
+      "answer": "Survivor"
+    },
+    {
+      "spotifyId": "0zDnjAZ0DYxLWS1qWUBBC9",
+      "answer": "Ramones"
+    },
+    {
+      "spotifyId": "1Oh3Qebn8nkZa0jCvC1B6P",
+      "answer": "Ramones"
+    },
+    {
+      "spotifyId": "2oZSBEtzUtq70iQwpNjrnk",
+      "answer": "Tradicional (Pedro Galindo / Elpidio Ramírez)"
+    },
+    {
+      "spotifyId": "4JwxJm8zCPbc1DMcfVdbBl",
+      "answer": "Pink Floyd"
+    },
+    {
+      "spotifyId": "5pr1uTWkj4nwzDx706NVTX",
+      "answer": "Johnny Cash (Anita Carter)"
+    },
+    {
+      "spotifyId": "7oof6K1s09QXjOxDucR2r8",
+      "answer": "Queen"
+    },
+    {
+      "spotifyId": "16J6wH4Evm97ta1hDQIYQC",
+      "answer": "Alaska y Dinarama"
+    },
+    {
+      "spotifyId": "46OcpoLeoyJWFTOsIlDruZ",
+      "answer": "El Chapo de Sinaloa"
+    },
+    {
+      "spotifyId": "4m407dOmNa3iFy6StmdLIf",
+      "answer": "Los Bukis"
+    },
+    {
+      "spotifyId": "3OQXAp3uGQvkPi4DAMaM5p",
+      "answer": "Los Dareyes de la Sierra"
+    },
+    {
+      "spotifyId": "2i958lqdtujEtWNkPZCzfo",
+      "answer": "La Oreja de Van Gogh"
+    },
+    {
+      "spotifyId": "7iK7TNCelnLVeBEIx17SAg",
+      "answer": "Miranda!"
+    },
+    {
+      "spotifyId": "2XaQGF2kfBOXjAW6P2gZcd",
+      "answer": "Franco De Vita"
+    },
+    {
+      "spotifyId": "6Jqwi5zuSP4fnXNwqcWDwk",
+      "answer": "Valentín Elizalde"
+    },
+    {
+      "spotifyId": "1hPcvQvvBcMsT38ktplMm8",
+      "answer": "Juan Gabriel"
+    },
+    {
+      "spotifyId": "5aZubhYBTy6tWIbRZMxVbF",
+      "answer": "Kevin Kaarl"
+    },
+    {
+      "spotifyId": "4K4IdDaDzpCBN3eR3mmEZw",
+      "answer": "Ed Maverick"
+    },
+    {
+      "spotifyId": "2lFhc7gAK3koo59b1Y0WpD",
+      "answer": "Kevin Kaarl"
+    },
+    {
+      "spotifyId": "3pPzYqVcgUvaPBwUpjc90j",
+      "answer": "Ed Maverick"
+    },
+    {
+      "spotifyId": "3YmjSVBCe6jXOUT0DQxy34",
+      "answer": "Bobby Pulido"
+    },
+    {
+      "spotifyId": "5JhUm1v5AbI5Yu6jLKCPRO",
+      "answer": "Morat"
+    },
+    {
+      "spotifyId": "4FjYDIaDlu3xf8JQrfgTBW",
+      "answer": "Reik"
+    },
+    {
+      "spotifyId": "77OLLnRUGQtf0HH626f0Vj",
+      "answer": "José Alfredo Jiménez"
+    },
+    {
+      "spotifyId": "0WkrZsdHp8vkYvYzaytgNF",
+      "answer": "Los Bukis"
+    },
+    {
+      "spotifyId": "2smr2ngXcU9qQSzpDzilsg",
+      "answer": "Julieta Venegas"
+    },
+    {
+      "spotifyId": "3nBP6Ux91YVUXIIJnggxGE",
+      "answer": "Cristian Castro"
+    },
+    {
+      "spotifyId": "1MFANkoG1Wubm9s6fticCT",
+      "answer": "Maná"
+    },
+    {
+      "spotifyId": "5HMwkkHXVgkJagI50h4EVg",
+      "answer": "Cecilia"
+    },
+    {
+      "spotifyId": "50jTcQY6sWdDyMWwg62d0z",
+      "answer": "Los Auténticos Decadentes"
     }
   ]
 }
