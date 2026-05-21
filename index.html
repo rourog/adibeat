@@ -143,7 +143,7 @@
         .top-bar {
             width: 100%;
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: auto 1fr auto auto;
             gap: 8px;
             align-items: center;
             min-height: 44px;
@@ -186,6 +186,28 @@
 
         #btn-settings {
             background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(139,92,246,0.95));
+        }
+
+        #btn-fullscreen {
+            background: linear-gradient(135deg, rgba(251,191,36,0.95), rgba(236,72,153,0.92));
+        }
+
+        #idle-dimmer {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0;
+            background: rgba(0,0,0,0.52);
+            transition: opacity 0.55s ease;
+        }
+
+        body.is-idle-dim #idle-dimmer {
+            opacity: 1;
+        }
+
+        body.is-idle-dim #main-screen {
+            filter: brightness(0.62) saturate(0.82);
         }
 
         #error-disclaimer {
@@ -812,6 +834,9 @@
         <div class="top-bar">
             <div class="brand">AdiBeat</div>
             <div id="playlist-label">Modo: cargando…</div>
+            <button id="btn-fullscreen" class="icon-btn" type="button" title="Pantalla completa / mantener pantalla encendida">
+                <span id="fullscreen-icon" class="material-symbols-rounded" aria-hidden="true">fullscreen</span>
+            </button>
             <button id="btn-settings" class="icon-btn" type="button" title="Configuración">
                 <span class="material-symbols-rounded" aria-hidden="true">settings</span>
             </button>
@@ -937,6 +962,8 @@
         </div>
     </div>
 
+    <div id="idle-dimmer" aria-hidden="true"></div>
+
     <script>
 
             if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(window.location.hostname))) {
@@ -976,6 +1003,7 @@
             const MODE_STORAGE_KEY = 'adibeat_game_mode';
             const CUSTOM_PLAYLIST_KEY = 'adibeat_custom_playlist';
             const ORIGINAL_ARTIST_DB_URL = 'adibeat-blue-original-artist-db.json';
+            const IDLE_DIM_DELAY_MS = 30000;
 
             localStorage.removeItem('adibeat_playlist_index');
 
@@ -996,12 +1024,17 @@
             let intervalo = null;
             let accessToken = localStorage.getItem('adibeat_token') || '';
             let lastPlaybackDeviceId = localStorage.getItem(DEVICE_CACHE_KEY) || '';
+            let wakeLockSentinel = null;
+            let wakeLockWanted = true;
+            let idleDimTimer = null;
 
             const splashScreen = document.getElementById("splash-screen");
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
             const btnSettings = document.getElementById("btn-settings");
+            const btnFullscreen = document.getElementById("btn-fullscreen");
+            const fullscreenIcon = document.getElementById("fullscreen-icon");
             const playKicker = document.getElementById("play-kicker");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
@@ -1038,6 +1071,9 @@
 
             splashScreen.addEventListener('click', () => {
                 playStartSound();
+                registrarActividadUsuario();
+                activarPantallaActiva();
+                intentarPantallaCompleta();
                 splashScreen.style.opacity = "0";
                 setTimeout(() => {
                     splashScreen.style.display = "none";
@@ -1045,6 +1081,106 @@
                     setTimeout(() => mainScreen.style.opacity = "1", 30);
                 }, 450);
             });
+
+            iniciarSensorDeInactividad();
+            document.addEventListener('fullscreenchange', actualizarIconoPantallaCompleta);
+            document.addEventListener('webkitfullscreenchange', actualizarIconoPantallaCompleta);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    registrarActividadUsuario();
+                    if (wakeLockWanted) activarPantallaActiva();
+                }
+            });
+
+            function iniciarSensorDeInactividad() {
+                const eventos = ['pointerdown', 'pointermove', 'touchstart', 'keydown', 'click'];
+                eventos.forEach(evento => {
+                    window.addEventListener(evento, registrarActividadUsuario, { passive: true });
+                });
+                registrarActividadUsuario();
+            }
+
+            function registrarActividadUsuario() {
+                document.body.classList.remove('is-idle-dim');
+                if (idleDimTimer) clearTimeout(idleDimTimer);
+                idleDimTimer = setTimeout(() => {
+                    document.body.classList.add('is-idle-dim');
+                }, IDLE_DIM_DELAY_MS);
+            }
+
+            async function alternarPantallaCompleta() {
+                if (estaEnPantallaCompleta()) {
+                    await salirPantallaCompleta();
+                } else {
+                    await intentarPantallaCompleta(true);
+                }
+                actualizarIconoPantallaCompleta();
+            }
+
+            function estaEnPantallaCompleta() {
+                return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+            }
+
+            async function intentarPantallaCompleta(silencioso = false) {
+                try {
+                    const root = document.documentElement;
+                    if (estaEnPantallaCompleta()) return true;
+                    if (root.requestFullscreen) {
+                        await root.requestFullscreen();
+                        return true;
+                    }
+                    if (root.webkitRequestFullscreen) {
+                        root.webkitRequestFullscreen();
+                        return true;
+                    }
+                } catch (error) {
+                    if (!silencioso) console.warn('No se pudo activar pantalla completa:', error);
+                }
+                return false;
+            }
+
+            async function salirPantallaCompleta() {
+                try {
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                        return;
+                    }
+                    if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                } catch (error) {
+                    console.warn('No se pudo salir de pantalla completa:', error);
+                }
+            }
+
+            function actualizarIconoPantallaCompleta() {
+                if (!fullscreenIcon) return;
+                fullscreenIcon.textContent = estaEnPantallaCompleta() ? 'fullscreen_exit' : 'fullscreen';
+            }
+
+            async function activarPantallaActiva(mostrarEstado = false) {
+                wakeLockWanted = true;
+
+                if (!('wakeLock' in navigator)) {
+                    if (mostrarEstado) setSettingsStatus('Este navegador no soporta bloqueo de pantalla activa. Instalada como PWA aún puede reducir barras, pero el sistema podría apagar la pantalla.');
+                    return false;
+                }
+
+                try {
+                    if (wakeLockSentinel && !wakeLockSentinel.released) return true;
+
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', () => {
+                        wakeLockSentinel = null;
+                    });
+
+                    if (mostrarEstado) setSettingsStatus('Pantalla activa: no debería apagarse automáticamente. Dimming interno después de 30 segundos.');
+                    return true;
+                } catch (error) {
+                    if (mostrarEstado) setSettingsStatus(`No pude bloquear la suspensión de pantalla: ${error?.message || error}`);
+                    return false;
+                }
+            }
 
             function playStartSound() {
                 try {
@@ -1122,6 +1258,11 @@
             btnLogin.addEventListener('click', iniciarLoginSpotify);
 
             btnSettings.addEventListener('click', openSettings);
+            btnFullscreen.addEventListener('click', async () => {
+                registrarActividadUsuario();
+                await alternarPantallaCompleta();
+                await activarPantallaActiva(true);
+            });
             btnCloseSettings.addEventListener('click', closeSettings);
             settingsModal.addEventListener('click', (event) => {
                 if (event.target === settingsModal) closeSettings();
