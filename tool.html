@@ -168,6 +168,11 @@
       -webkit-backdrop-filter:blur(12px) saturate(1.25);
     }
 
+    .row.has-data {
+      border-color:rgba(122,247,184,.50);
+      background:linear-gradient(135deg,rgba(122,247,184,.18),rgba(255,255,255,.07));
+    }
+
     .track-title {
       min-width:0;
       font-size:.98rem;
@@ -219,10 +224,10 @@
       <h1>AdiBeat Blue</h1>
       <button class="btn" id="btn-reconnect" type="button"><span class="material-symbols-rounded">restart_alt</span>Reconectar</button>
       <button class="btn primary" id="btn-load" type="button" disabled><span class="material-symbols-rounded">sync</span>Leer lista</button>
-      <button class="btn hot" id="btn-copy" type="button" disabled><span class="material-symbols-rounded">content_copy</span>JSON</button>
+      <button class="btn hot" id="btn-copy" type="button" disabled><span class="material-symbols-rounded">content_copy</span>Copiar JSON</button>
     </header>
 
-    <div class="status" id="status">Conecta Spotify y lee AdiBeat-Blue.</div>
+    <div class="status" id="status">Conecta Spotify y lee AdiBeat-Blue. La base local se lee desde <strong>adibeat-blue-original-artist-db.json</strong>.</div>
 
     <section class="list" id="track-list">
       <div class="empty">Sin canciones cargadas.</div>
@@ -239,13 +244,17 @@
       const SCOPES = 'playlist-read-private playlist-read-collaborative user-read-private';
 
       const BLUE_PLAYLIST_ID = '3v71SvyMLTBhbpTfAkMizr';
+      const DB_FILE_NAME = 'adibeat-blue-original-artist-db.json';
       const TOKEN_KEY = 'adibeat_blue_tool_token_v1';
       const VERIFIER_KEY = 'adibeat_blue_tool_verifier_v1';
-      const CURATION_KEY = 'adibeat_blue_original_artist_v1';
+      const CURATION_KEY = 'adibeat_blue_original_artist_draft_v2';
 
       let accessToken = localStorage.getItem(TOKEN_KEY) || '';
       let tracks = [];
-      let curation = readJson(CURATION_KEY, {});
+      let curation = {};
+      let dbFileLoaded = false;
+      let dbFileCount = 0;
+      let dbFileStatus = `BD local pendiente: ${DB_FILE_NAME}`;
 
       const $ = id => document.getElementById(id);
       const btnReconnect = $('btn-reconnect');
@@ -268,9 +277,13 @@
         }
 
         updateButtons();
-        if (accessToken) {
-          setStatus('Spotify conectado. Presiona “Leer lista”.', 'ok');
-        }
+        loadLocalDatabase(false).then(() => {
+          if (accessToken) {
+            setStatus(`Spotify conectado. ${dbFileStatus}. Presiona “Leer lista”.`, 'ok');
+          } else {
+            setStatus(`Conecta Spotify. ${dbFileStatus}.`, dbFileLoaded ? 'ok' : 'warn');
+          }
+        });
       }
 
       async function reconnectSpotify() {
@@ -323,7 +336,8 @@
           localStorage.setItem(TOKEN_KEY, accessToken);
           window.history.replaceState({}, document.title, window.location.pathname);
           updateButtons();
-          setStatus('Spotify conectado. Leyendo AdiBeat-Blue…', 'ok');
+          setStatus('Spotify conectado. Leyendo base local y AdiBeat-Blue…', 'ok');
+          await loadLocalDatabase(true);
           await loadBluePlaylist();
         } catch (error) {
           setStatus(`No se pudo conectar Spotify: ${messageOf(error)}`, 'err');
@@ -336,10 +350,11 @@
 
         btnLoad.disabled = true;
         btnCopy.disabled = true;
-        listEl.innerHTML = '<div class="empty">Leyendo AdiBeat-Blue…</div>';
-        setStatus('Consultando Spotify…', '');
+        listEl.innerHTML = '<div class="empty">Leyendo base local y AdiBeat-Blue…</div>';
+        setStatus('Consultando base local y Spotify…', '');
 
         try {
+          await loadLocalDatabase(true);
           await spotifyJson('https://api.spotify.com/v1/me');
           const items = await readPlaylistItems(BLUE_PLAYLIST_ID);
           tracks = processPlaylistItems(items);
@@ -351,7 +366,7 @@
           renderTracks();
           updateButtons();
           const filled = countFilled();
-          setStatus(`AdiBeat-Blue cargada: ${tracks.length} canciones. Capturadas: ${filled}.`, 'ok');
+          setStatus(`AdiBeat-Blue cargada: ${tracks.length} canciones. ${dbFileStatus}. Capturadas: ${filled}.`, 'ok');
         } catch (error) {
           if (error.status === 401) {
             localStorage.removeItem(TOKEN_KEY);
@@ -379,6 +394,51 @@
         }
 
         return items;
+      }
+
+
+      async function loadLocalDatabase(force = false) {
+        if (dbFileLoaded && !force) return;
+
+        const draftMap = readJson(CURATION_KEY, {});
+        let fileMap = {};
+
+        try {
+          const response = await fetch(`${DB_FILE_NAME}?v=${Date.now()}`, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const data = await response.json();
+          fileMap = databaseToMap(data);
+          dbFileLoaded = true;
+          dbFileCount = Object.keys(fileMap).length;
+          dbFileStatus = `BD local: ${dbFileCount} respuestas`;
+        } catch (error) {
+          dbFileLoaded = false;
+          dbFileCount = 0;
+          dbFileStatus = `BD local no encontrada o ilegible (${DB_FILE_NAME})`;
+        }
+
+        // El archivo JSON manda. El borrador local solo rellena canciones que aún no existen en el archivo.
+        curation = { ...draftMap, ...fileMap };
+      }
+
+      function databaseToMap(data) {
+        const map = {};
+        const records = Array.isArray(data) ? data : (Array.isArray(data?.tracks) ? data.tracks : []);
+
+        for (const record of records) {
+          const spotifyId = extractSpotifyId(record);
+          const answer = cleanText(
+            record?.answer ||
+            record?.originalArtist ||
+            record?.contextualAnswer ||
+            record?.artistaOriginal ||
+            ''
+          );
+          if (spotifyId && answer) map[spotifyId] = answer;
+        }
+
+        return map;
       }
 
       function processPlaylistItems(items) {
@@ -438,7 +498,7 @@
 
         for (const track of tracks) {
           const row = document.createElement('article');
-          row.className = 'row';
+          row.className = `row ${track.originalArtist ? 'has-data' : ''}`.trim();
 
           const info = document.createElement('div');
           info.innerHTML = `
@@ -473,21 +533,22 @@
         if (value) curation[spotifyId] = value;
         else delete curation[spotifyId];
         localStorage.setItem(CURATION_KEY, JSON.stringify(curation));
+        event.target.closest('.row')?.classList.toggle('has-data', Boolean(value));
 
-        setStatus(`AdiBeat-Blue cargada: ${tracks.length} canciones. Capturadas: ${countFilled()}.`, 'ok');
+        setStatus(`AdiBeat-Blue cargada: ${tracks.length} canciones. ${dbFileStatus}. Capturadas: ${countFilled()}.`, 'ok');
       }
 
       function buildJsonData() {
         return {
           version: 1,
           type: 'adibeat-blue-original-artist-db',
+          playlistId: BLUE_PLAYLIST_ID,
           question: '¿Quién cantó originalmente esta canción?',
           answerLabel: 'Artista Original',
           tracks: tracks
             .filter(track => track.originalArtist.trim())
             .map(track => ({
               spotifyId: track.spotifyId,
-              answerLabel: 'Artista Original',
               answer: track.originalArtist.trim()
             }))
         };
@@ -508,10 +569,10 @@
         const text = JSON.stringify(data, null, 2);
         try {
           await navigator.clipboard.writeText(text);
-          setStatus(`JSON copiado: ${data.tracks.length} respuestas.`, 'ok');
+          setStatus(`JSON copiado: ${data.tracks.length} respuestas. Reemplaza ${DB_FILE_NAME} en GitHub.`, 'ok');
         } catch (_) {
           fallbackCopy(text);
-          setStatus(`JSON copiado: ${data.tracks.length} respuestas.`, 'ok');
+          setStatus(`JSON copiado: ${data.tracks.length} respuestas. Reemplaza ${DB_FILE_NAME} en GitHub.`, 'ok');
         }
       }
 
@@ -558,6 +619,8 @@
 
       function extractSpotifyId(track) {
         if (!track) return '';
+        if (track.spotifyId) return String(track.spotifyId);
+        if (track.trackId) return String(track.trackId);
         if (track.id) return String(track.id);
         const uri = String(track.uri || '');
         const uriMatch = uri.match(/^spotify:track:([A-Za-z0-9]+)$/);
