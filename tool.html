@@ -267,7 +267,7 @@
               const items = await readPlaylistItems(playlist.id);
               const result = processPlaylistItems(items, { ...playlist, actualName });
               allTracks.push(...result.tracks);
-              diagnostics.push(`${actualName}: ${result.tracks.length} canciones útiles de ${items.length} items${result.skipped ? `, ${result.skipped} omitidos` : ''}`);
+              diagnostics.push(`${actualName}: ${result.tracks.length} canciones útiles de ${items.length} items${result.skipped ? `, ${result.skipped} omitidos` : ''}${result.nonTracks ? `, ${result.nonTracks} no-track` : ''}`);
             } catch (error) {
               diagnostics.push(`${playlist.label}: ERROR ${spotifyMessage(error)}`);
             }
@@ -298,7 +298,7 @@
 
       async function readPlaylistItems(playlistId) {
         const items = [];
-        let nextUrl = `https://api.spotify.com/v1/playlists/${encodeURIComponent(playlistId)}/items?limit=50&market=from_token&additional_types=track`;
+        let nextUrl = `https://api.spotify.com/v1/playlists/${encodeURIComponent(playlistId)}/items?limit=50&additional_types=track`;
         let guard = 0;
         while (nextUrl && guard < 100) {
           const data = await spotifyJson(nextUrl);
@@ -312,10 +312,16 @@
       function processPlaylistItems(items, playlist) {
         const out = [];
         let skipped = 0;
+        let nonTracks = 0;
         for (const item of items) {
           const track = unwrapTrack(item);
           const spotifyId = extractSpotifyId(track);
-          if (!track || !spotifyId) { skipped++; continue; }
+          if (!track || !spotifyId) {
+            skipped++;
+            if (item?.item?.type && item.item.type !== 'track') nonTracks++;
+            if (item?.track?.type && item.track.type !== 'track') nonTracks++;
+            continue;
+          }
 
           const title = cleanText(track.name || track.title || 'Sin título');
           if (!title || title === 'Sin título') { skipped++; continue; }
@@ -342,18 +348,32 @@
             originalArtist: curation[spotifyId]?.originalArtist || ''
           });
         }
-        return { tracks: out, skipped };
+        return { tracks: out, skipped, nonTracks };
       }
 
-      function unwrapTrack(item) {
-        if (!item) return null;
-        let candidate = item.track || item;
-        // Defensa contra respuestas o wrappers raros. Sí, Spotify a veces se pone creativo.
-        for (let i = 0; i < 3; i++) {
+      function unwrapTrack(playlistItem) {
+        if (!playlistItem) return null;
+
+        // Endpoint nuevo: GET /playlists/{playlist_id}/items devuelve cada entrada como
+        // PlaylistTrackObject y la canción viene en playlistItem.item.
+        // Endpoint viejo/deprecado y algunos wrappers antiguos usaban playlistItem.track.
+        // Soportamos ambas formas para no volver a hacer arqueología digital cada vez que
+        // Spotify cambia un nombre.
+        let candidate = playlistItem.item || playlistItem.track || playlistItem;
+
+        for (let i = 0; i < 4; i++) {
           if (!candidate) return null;
-          if (candidate.track && (candidate.track.id || candidate.track.uri || candidate.track.name)) candidate = candidate.track;
-          else break;
+          if (candidate.item && (candidate.item.id || candidate.item.uri || candidate.item.name || candidate.item.type)) {
+            candidate = candidate.item;
+            continue;
+          }
+          if (candidate.track && (candidate.track.id || candidate.track.uri || candidate.track.name || candidate.track.type)) {
+            candidate = candidate.track;
+            continue;
+          }
+          break;
         }
+
         if (candidate.type && candidate.type !== 'track') return null;
         if (candidate.is_local && !candidate.id) return null;
         return candidate;
