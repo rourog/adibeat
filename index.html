@@ -8,22 +8,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,0,0" rel="stylesheet">
     <style>
         :root {
-            --bg-a: #1d102f;
-            --bg-b: #07152f;
-            --card: rgba(255,255,255,0.11);
-            --card-strong: rgba(255,255,255,0.18);
+            --bg-a: #050B2E;
+            --bg-b: #090018;
+            --card: rgba(255,255,255,0.13);
+            --card-strong: rgba(255,255,255,0.22);
             --text: #ffffff;
-            --muted: rgba(255,255,255,0.72);
-            --purple: #8B5CF6;
-            --pink: #EC4899;
-            --cyan: #22D3EE;
-            --green: #34D399;
-            --yellow: #FBBF24;
-            --red: #FB7185;
-            --dark: #111827;
+            --muted: rgba(255,255,255,0.78);
+            --royal: #0047FF;
+            --blue: #2563FF;
+            --purple: #7C00FF;
+            --pink: #FF149D;
+            --magenta: #FF006E;
+            --cyan: #00E5FF;
+            --green: #21F3A3;
+            --yellow: #FFD60A;
+            --red: #FF2D55;
+            --dark: #080A1F;
             --radius-xl: 34px;
             --radius-lg: 24px;
-            --shadow: 0 24px 70px rgba(0,0,0,0.38);
+            --shadow: 0 26px 78px rgba(0,0,0,0.46);
         }
 
         * {
@@ -49,9 +52,9 @@
             align-items: center;
             justify-content: center;
             background:
-                radial-gradient(circle at 15% 15%, rgba(236,72,153,0.34), transparent 34%),
-                radial-gradient(circle at 85% 20%, rgba(34,211,238,0.28), transparent 32%),
-                radial-gradient(circle at 50% 100%, rgba(139,92,246,0.34), transparent 34%),
+                radial-gradient(circle at 14% 12%, rgba(255,0,110,0.48), transparent 34%),
+                radial-gradient(circle at 86% 18%, rgba(0,71,255,0.54), transparent 34%),
+                radial-gradient(circle at 50% 105%, rgba(0,229,255,0.30), transparent 36%),
                 linear-gradient(135deg, var(--bg-a), var(--bg-b));
         }
 
@@ -108,8 +111,8 @@
             padding: 24px;
             cursor: pointer;
             background:
-                radial-gradient(circle at 25% 20%, rgba(255,255,255,0.22), transparent 24%),
-                linear-gradient(135deg, #7C3AED, #DB2777 58%, #0891B2);
+                radial-gradient(circle at 25% 20%, rgba(255,255,255,0.24), transparent 24%),
+                linear-gradient(135deg, #0047FF, #FF006E 56%, #00E5FF);
             transition: opacity 0.45s ease;
         }
 
@@ -143,53 +146,62 @@
         .top-bar {
             width: 100%;
             display: grid;
-            grid-template-columns: auto 1fr auto auto;
-            gap: 8px;
+            grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
+            gap: clamp(5px, 1.5vw, 8px);
             align-items: center;
             min-height: 44px;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .brand {
-            font-size: clamp(1.15rem, 4.6vw, 1.8rem);
+            min-width: max-content;
+            font-size: clamp(1.38rem, 5.3vw, 2.2rem);
             font-weight: 900;
-            letter-spacing: -0.06em;
+            line-height: 0.95;
+            letter-spacing: -0.08em;
             white-space: nowrap;
+            text-shadow: 0 10px 26px rgba(255,0,110,0.34);
         }
 
         #playlist-label {
             min-width: 0;
+            max-width: 100%;
             height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 14px;
+            padding: 0 clamp(8px, 2.4vw, 14px);
             border-radius: 999px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
-            color: rgba(255,255,255,0.88);
-            font-size: clamp(0.76rem, 2.5vw, 0.95rem);
-            font-weight: 800;
+            background: rgba(0,71,255,0.22);
+            border: 1px solid rgba(0,229,255,0.30);
+            color: rgba(255,255,255,0.94);
+            font-size: clamp(0.70rem, 2.25vw, 0.95rem);
+            font-weight: 900;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.18);
         }
 
         .icon-btn {
-            width: 42px;
-            height: 40px;
+            flex: 0 0 auto;
+            width: clamp(36px, 10vw, 42px);
+            height: clamp(36px, 10vw, 40px);
+            min-width: clamp(36px, 10vw, 42px);
             border-radius: 999px;
             background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.18);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.16);
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.24);
             font-size: 1.05rem;
         }
 
         #btn-settings {
-            background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(139,92,246,0.95));
+            background: linear-gradient(135deg, rgba(0,229,255,0.96), rgba(0,71,255,0.96));
         }
 
         #btn-fullscreen {
-            background: linear-gradient(135deg, rgba(251,191,36,0.95), rgba(236,72,153,0.92));
+            background: linear-gradient(135deg, rgba(255,0,110,0.98), rgba(124,0,255,0.94));
         }
 
         #idle-dimmer {
@@ -227,7 +239,7 @@
             width: min(92vw, 520px);
             min-height: 78px;
             border-radius: 999px;
-            background: linear-gradient(135deg, #22C55E, #A3E635);
+            background: linear-gradient(135deg, #21F3A3, #00E5FF);
             color: #102019;
             box-shadow: var(--shadow);
             font-size: clamp(1.15rem, 5vw, 1.8rem);
@@ -254,7 +266,7 @@
             gap: clamp(8px, 2.2vw, 16px);
             background:
                 radial-gradient(circle at 20% 12%, rgba(255,255,255,0.30), transparent 26%),
-                linear-gradient(135deg, #8B5CF6, #EC4899 55%, #F97316);
+                linear-gradient(135deg, #0047FF, #FF006E 55%, #7C00FF);
             box-shadow: var(--shadow);
             border: 1px solid rgba(255,255,255,0.20);
             overflow: hidden;
@@ -314,27 +326,27 @@
         #btn-play.state-loading {
             background:
                 radial-gradient(circle at 20% 12%, rgba(255,255,255,0.24), transparent 26%),
-                linear-gradient(135deg, #2563EB, #7C3AED);
+                linear-gradient(135deg, #0047FF, #7C00FF);
         }
 
         #btn-play.state-playing {
             background:
                 radial-gradient(circle at 20% 12%, rgba(255,255,255,0.30), transparent 26%),
-                linear-gradient(135deg, #06B6D4, #8B5CF6 48%, #EC4899);
+                linear-gradient(135deg, #00E5FF, #0047FF 44%, #FF006E);
         }
 
         #btn-play.state-timeout {
             animation: urgentPulse 0.9s ease-in-out infinite alternate;
             background:
                 radial-gradient(circle at 20% 12%, rgba(255,255,255,0.25), transparent 26%),
-                linear-gradient(135deg, #FB7185, #F97316 55%, #FBBF24);
+                linear-gradient(135deg, #FF2D55, #FF006E 50%, #FFD60A);
             color: #1f1020;
         }
 
         #btn-play.state-revealed {
             background:
                 radial-gradient(circle at 20% 12%, rgba(255,255,255,0.18), transparent 26%),
-                linear-gradient(135deg, #111827, #2d1b69 52%, #481a56);
+                linear-gradient(135deg, #050B2E, #001B7A 48%, #3A005F);
             border-color: rgba(255,255,255,0.16);
         }
 
@@ -416,7 +428,7 @@
             line-height: 0.9;
             letter-spacing: -0.065em;
             color: #ffffff;
-            background: linear-gradient(92deg, #ffffff 0%, #fde68a 46%, #7dd3fc 100%);
+            background: linear-gradient(92deg, #ffffff 0%, #FFD60A 42%, #00E5FF 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -496,19 +508,19 @@
         #btn-release {
             background:
                 radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24), transparent 32%),
-                linear-gradient(135deg, rgba(34,211,238,0.86), rgba(139,92,246,0.74));
+                linear-gradient(135deg, rgba(0,229,255,0.94), rgba(0,71,255,0.88));
         }
 
         #btn-album {
             background:
                 radial-gradient(circle at 18% 12%, rgba(255,255,255,0.22), transparent 32%),
-                linear-gradient(135deg, rgba(251,191,36,0.78), rgba(236,72,153,0.70));
+                linear-gradient(135deg, rgba(255,214,10,0.90), rgba(255,0,110,0.84));
         }
 
         #btn-original {
             background:
                 radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24), transparent 32%),
-                linear-gradient(135deg, rgba(52,211,153,0.82), rgba(34,211,238,0.76));
+                linear-gradient(135deg, rgba(33,243,163,0.90), rgba(0,229,255,0.86));
         }
 
         .trivia-content {
@@ -633,7 +645,7 @@
             padding: clamp(18px, 4vw, 28px);
             background:
                 radial-gradient(circle at 12% 0%, rgba(255,255,255,0.14), transparent 30%),
-                linear-gradient(145deg, rgba(15,23,42,0.92), rgba(49,27,87,0.92));
+                linear-gradient(145deg, rgba(5,11,46,0.94), rgba(58,0,95,0.92));
             border: 1px solid rgba(255,255,255,0.18);
             box-shadow: 0 28px 90px rgba(0,0,0,0.52);
         }
@@ -696,7 +708,7 @@
         }
 
         .mode-btn.is-active {
-            background: linear-gradient(135deg, rgba(34,211,238,0.92), rgba(139,92,246,0.88));
+            background: linear-gradient(135deg, rgba(0,229,255,0.94), rgba(0,71,255,0.92));
             border-color: rgba(255,255,255,0.30);
         }
 
@@ -758,7 +770,7 @@
         }
 
         #btn-add-playlist {
-            background: linear-gradient(135deg, rgba(52,211,153,0.88), rgba(34,211,238,0.82));
+            background: linear-gradient(135deg, rgba(33,243,163,0.92), rgba(0,229,255,0.88));
         }
 
         .settings-action.danger {
@@ -804,25 +816,57 @@
         }
 
         @media (max-width: 420px) and (orientation: portrait) {
+            #main-screen {
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
+            }
+
             .top-bar {
-                grid-template-columns: auto 1fr auto;
+                grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
+                gap: 5px;
             }
 
             .brand {
-                font-size: 1.1rem;
+                font-size: clamp(1.28rem, 6vw, 1.55rem);
             }
 
             #playlist-label {
-                padding: 0 10px;
+                height: 36px;
+                padding: 0 7px;
+                font-size: clamp(0.66rem, 2.7vw, 0.82rem);
             }
 
             .icon-btn {
-                width: 38px;
-                height: 38px;
+                width: 34px;
+                min-width: 34px;
+                height: 36px;
+            }
+
+            .icon-btn .material-symbols-rounded {
+                font-size: 1.28rem;
             }
 
             #trivia-panel {
                 min-height: 116px;
+            }
+        }
+
+
+        @media (max-width: 340px) and (orientation: portrait) {
+            .brand {
+                font-size: 1.16rem;
+                letter-spacing: -0.075em;
+            }
+
+            #playlist-label {
+                font-size: 0.62rem;
+                padding: 0 5px;
+            }
+
+            .icon-btn {
+                width: 32px;
+                min-width: 32px;
+                height: 34px;
             }
         }
 
@@ -837,7 +881,7 @@
         }
     </style>
 
-    <meta name="theme-color" content="#1d102f">
+    <meta name="theme-color" content="#0047FF">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="AdiBeat">
@@ -855,7 +899,7 @@
     <div id="main-screen">
         <div class="top-bar">
             <div class="brand">AdiBeat</div>
-            <div id="playlist-label">Modo: cargando…</div>
+            <div id="playlist-label">Cargando…</div>
             <button id="btn-fullscreen" class="icon-btn" type="button" title="Pantalla completa / mantener pantalla encendida">
                 <span id="fullscreen-icon" class="material-symbols-rounded" aria-hidden="true">fullscreen</span>
             </button>
@@ -1469,7 +1513,7 @@
                 btnPlay.style.display = 'none';
                 triviaPanel.style.display = 'none';
                 loadingNote.style.display = 'block';
-                playlistLabel.textContent = `Modo: ${mode.label}`;
+                playlistLabel.textContent = `${mode.label}`;
                 setSettingsControlsDisabled(true);
 
                 try {
@@ -1500,7 +1544,7 @@
 
                     loadingNote.style.display = 'none';
                     btnPlay.style.display = 'flex';
-                    playlistLabel.textContent = `Modo: ${mode.label} · ${playlistTracks.length} canciones`;
+                    playlistLabel.textContent = `${mode.label} · ${playlistTracks.length} canciones`;
                     resetRoundUi();
                 } catch (error) {
                     loadingNote.style.display = 'none';
@@ -1721,7 +1765,7 @@
 
                 if (!playlistTracks.length) {
                     playlistLabel.textContent = accessToken
-                        ? `Modo: ${activeMode.label}`
+                        ? `${activeMode.label}`
                         : 'Spotify no conectado';
                 }
             }
