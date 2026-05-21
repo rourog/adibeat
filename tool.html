@@ -369,12 +369,52 @@
 
     #output-preview.is-visible { display: block; }
 
+    .redirect-panel {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: var(--radius-xl);
+      background: rgba(0,0,0,0.24);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    }
+
+    .redirect-panel .redirect-copy {
+      min-width: 0;
+    }
+
+    .redirect-panel .redirect-label {
+      margin: 0 0 6px;
+      color: rgba(255,255,255,0.62);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 900;
+    }
+
+    .redirect-panel code {
+      display: block;
+      overflow-wrap: anywhere;
+      color: #d9fbff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .redirect-panel.is-danger {
+      border-color: rgba(255,109,122,0.55);
+      background: rgba(255,109,122,0.12);
+    }
+
     @media (max-width: 820px) {
       .topbar { grid-template-columns: 1fr; }
       .actions { justify-content: stretch; }
       .pill-btn { flex: 1; justify-content: center; }
       .status-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .toolbar { grid-template-columns: 1fr; }
+      .redirect-panel { grid-template-columns: 1fr; }
       .format-select { min-width: 0; }
       .track-card { grid-template-columns: 54px minmax(0, 1fr); }
       .input-wrap { grid-column: 1 / -1; }
@@ -403,6 +443,17 @@
         </button>
       </div>
     </header>
+
+    <section class="redirect-panel" id="redirect-panel" aria-label="Redirect URI de Spotify">
+      <div class="redirect-copy">
+        <p class="redirect-label">Redirect URI que debe existir en Spotify Developer Dashboard</p>
+        <code id="redirect-uri-text"></code>
+      </div>
+      <button class="pill-btn" id="btn-copy-redirect" type="button">
+        <span class="material-symbols-rounded" aria-hidden="true">link</span>
+        Copiar URI
+      </button>
+    </section>
 
     <section class="panel status-panel" aria-label="Resumen">
       <div class="stat">
@@ -448,7 +499,13 @@
       'use strict';
 
       const CLIENT_ID = 'e848a261a8e7411a8a1138326bd4a18f';
-      const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+      // Spotify exige coincidencia exacta. Si publicas este archivo con otro nombre/ruta,
+      // agrega esa URL exacta al allowlist de Redirect URIs en Spotify Developer Dashboard.
+      // También puedes fijar aquí una URL concreta si quieres evitar redirects dinámicos.
+      const REDIRECT_URI_OVERRIDE = '';
+      const REDIRECT_URI = REDIRECT_URI_OVERRIDE || cleanRedirectUri(window.location.href);
+
       const SCOPES = 'playlist-read-private playlist-read-collaborative user-read-private user-read-email';
       const TOKEN_KEY = 'adibeat_db_token';
       const VERIFIER_KEY = 'adibeat_db_code_verifier';
@@ -473,6 +530,9 @@
       const listEl = document.getElementById('track-list');
       const messageEl = document.getElementById('message');
       const outputPreview = document.getElementById('output-preview');
+      const redirectPanel = document.getElementById('redirect-panel');
+      const redirectUriText = document.getElementById('redirect-uri-text');
+      const btnCopyRedirect = document.getElementById('btn-copy-redirect');
       const statTotal = document.getElementById('stat-total');
       const statRed = document.getElementById('stat-red');
       const statBlue = document.getElementById('stat-blue');
@@ -484,7 +544,12 @@
       boot();
 
       function boot() {
+        renderRedirectUriInfo();
         bindEvents();
+
+        if (window.location.protocol === 'file:') {
+          setMessage('Estás abriendo el archivo como file://. Spotify OAuth no trabaja bien así. Súbelo a GitHub Pages o úsalo con un servidor local y registra esa URL exacta como Redirect URI.', 'error');
+        }
 
         if (code && !accessToken) {
           completeSpotifyLogin(code);
@@ -506,9 +571,24 @@
 
         btnLoad.addEventListener('click', loadPlaylists);
         btnCopy.addEventListener('click', copyDatabase);
+        btnCopyRedirect.addEventListener('click', copyRedirectUri);
         btnPreview.addEventListener('click', togglePreview);
         searchInput.addEventListener('input', renderList);
         formatSelect.addEventListener('change', updatePreview);
+      }
+
+      function renderRedirectUriInfo() {
+        redirectUriText.textContent = REDIRECT_URI;
+        redirectPanel.classList.toggle('is-danger', window.location.protocol === 'file:');
+      }
+
+      async function copyRedirectUri() {
+        try {
+          await copyText(REDIRECT_URI);
+          setMessage('Redirect URI copiado. Pégalo exactamente igual en Spotify Developer Dashboard.', 'ok');
+        } catch (_) {
+          setMessage('No pude copiar el Redirect URI automáticamente. Cópialo manualmente desde la caja superior.', 'error');
+        }
       }
 
       function updateAuthUi() {
@@ -869,6 +949,17 @@
 
       function spotifyMessage(error) {
         return error?.message || 'Error desconocido.';
+      }
+
+      function cleanRedirectUri(href) {
+        try {
+          const url = new URL(href);
+          url.search = '';
+          url.hash = '';
+          return url.toString();
+        } catch (_) {
+          return window.location.origin + window.location.pathname;
+        }
       }
 
       function setMessage(text, type) {
