@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AdiBeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,0,0" rel="stylesheet">
     <style>
         :root {
             --bg-a: #1d102f;
@@ -78,6 +79,23 @@
             transform: none;
         }
 
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: 700;
+            font-style: normal;
+            font-size: 1.5rem;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-flex;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'liga';
+        }
+
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -125,7 +143,7 @@
         .top-bar {
             width: 100%;
             display: grid;
-            grid-template-columns: auto 1fr auto auto;
+            grid-template-columns: auto 1fr auto;
             gap: 8px;
             align-items: center;
             min-height: 44px;
@@ -166,12 +184,8 @@
             font-size: 1.05rem;
         }
 
-        #btn-cycle {
+        #btn-settings {
             background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(139,92,246,0.95));
-        }
-
-        #btn-reset {
-            background: rgba(17,24,39,0.52);
         }
 
         #error-disclaimer {
@@ -233,8 +247,8 @@
             opacity: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at 50% 35%, rgba(0,0,0,0.08), transparent 34%),
-                linear-gradient(180deg, rgba(3,7,18,0.14), rgba(3,7,18,0.52));
+                radial-gradient(circle at 50% 40%, rgba(255,255,255,0.10), transparent 38%),
+                linear-gradient(180deg, rgba(3,7,18,0.04), rgba(3,7,18,0.32));
             transition: opacity 0.28s ease;
         }
 
@@ -261,17 +275,17 @@
             object-fit: cover;
             opacity: 0;
             pointer-events: none;
-            filter: blur(26px) saturate(1.18) brightness(0.56);
-            transform: scale(1.15);
+            filter: blur(26px) saturate(1.85) brightness(0.96) contrast(1.12);
+            transform: scale(1.16);
             transition: opacity 0.28s ease, filter 0.34s ease, transform 0.34s ease;
         }
 
         #btn-play.state-revealed #main-album-art {
-            opacity: 0.92;
+            opacity: 0.98;
         }
 
         #btn-play.state-revealed.album-clear #main-album-art {
-            filter: blur(0) saturate(1.08) brightness(0.72);
+            filter: blur(0) saturate(1.16) brightness(0.84) contrast(1.05);
             transform: scale(1.02);
         }
 
@@ -339,77 +353,95 @@
             letter-spacing: -0.06em;
         }
 
-        #revealed-info {
-            position: relative;
-            z-index: 4;
+        #btn-play.state-revealed #play-kicker,
+        #btn-play.state-revealed #play-text {
             display: none;
-            width: min(96%, 920px);
-            padding: clamp(16px, 3.4vw, 26px);
+        }
+
+        #revealed-info {
+            position: absolute;
+            z-index: 4;
+            left: clamp(14px, 3.4vw, 30px);
+            right: clamp(14px, 3.4vw, 30px);
+            bottom: clamp(14px, 3.4vw, 30px);
+            display: none;
+            padding: clamp(14px, 3.2vw, 24px) clamp(72px, 12vw, 104px) clamp(14px, 3.2vw, 24px) clamp(16px, 3.4vw, 28px);
             border-radius: var(--radius-lg);
-            background: rgba(10,14,28,0.58);
-            border: 1px solid rgba(255,255,255,0.22);
-            backdrop-filter: blur(18px) saturate(1.25);
-            -webkit-backdrop-filter: blur(18px) saturate(1.25);
+            background: rgba(5,10,22,0.58);
+            border: 1px solid rgba(255,255,255,0.24);
+            backdrop-filter: blur(20px) saturate(1.45);
+            -webkit-backdrop-filter: blur(20px) saturate(1.45);
             box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.14),
-                0 20px 46px rgba(0,0,0,0.34);
+                inset 0 1px 0 rgba(255,255,255,0.18),
+                0 22px 52px rgba(0,0,0,0.38);
         }
 
         .reveal-layout {
             display: grid;
             grid-template-columns: 1fr;
-            gap: clamp(10px, 2.6vw, 18px);
-            align-items: center;
-            justify-items: center;
-            text-align: center;
-        }
-
-        #album-art-main {
-            width: 100%;
-            max-width: 210px;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: clamp(18px, 4vw, 28px);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.36);
-            background: rgba(0,0,0,0.24);
-            border: 1px solid rgba(255,255,255,0.18);
+            align-items: end;
+            justify-items: start;
+            text-align: left;
         }
 
         .reveal-copy {
             min-width: 0;
+            width: 100%;
         }
 
         #track-name-main {
-            font-size: clamp(1.55rem, 7vw, 4.2rem);
-            line-height: 0.98;
-            letter-spacing: -0.06em;
+            font-size: clamp(1.65rem, 7.4vw, 4.35rem);
+            line-height: 0.96;
+            letter-spacing: -0.065em;
             color: #ffffff;
+            background: linear-gradient(92deg, #ffffff 0%, #fde68a 46%, #7dd3fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
             text-transform: none;
             overflow-wrap: anywhere;
+            text-shadow: 0 10px 28px rgba(0,0,0,0.42);
         }
 
         #track-artist-main {
-            font-size: clamp(1rem, 4.2vw, 2.2rem);
+            font-size: clamp(1.02rem, 4.35vw, 2.25rem);
             line-height: 1.05;
-            color: rgba(255,255,255,0.82);
+            color: #C4B5FD;
             text-transform: none;
             overflow-wrap: anywhere;
+            text-shadow: 0 8px 22px rgba(0,0,0,0.54);
         }
 
-        #next-hint {
-            margin-top: 14px;
-            font-size: clamp(0.78rem, 2.5vw, 1rem);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.58);
+        #next-icon {
+            position: absolute;
+            z-index: 5;
+            right: clamp(22px, 5vw, 44px);
+            bottom: clamp(22px, 5vw, 44px);
+            width: clamp(42px, 10vw, 60px);
+            height: clamp(42px, 10vw, 60px);
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            display: none;
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.24);
+            color: rgba(255,255,255,0.94);
+            box-shadow: 0 14px 34px rgba(0,0,0,0.32);
+            backdrop-filter: blur(14px) saturate(1.4);
+            -webkit-backdrop-filter: blur(14px) saturate(1.4);
+            font-size: clamp(1.7rem, 6vw, 2.4rem);
+        }
+
+        #btn-play.state-revealed #next-icon {
+            display: flex;
         }
 
         #trivia-panel {
             display: none;
             width: 100%;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: clamp(10px, 2.6vw, 18px);
+            grid-template-columns: 1fr;
+            gap: clamp(8px, 2.4vw, 14px);
             align-items: stretch;
         }
 
@@ -417,15 +449,14 @@
             position: relative;
             isolation: isolate;
             width: 100%;
-            min-height: 0;
-            aspect-ratio: 1 / 1;
+            min-height: clamp(70px, 13svh, 104px);
             border-radius: var(--radius-lg);
-            padding: clamp(14px, 3.4vw, 24px);
-            flex-direction: column;
-            gap: 10px;
+            padding: clamp(14px, 3.4vw, 22px) clamp(18px, 4vw, 28px);
+            flex-direction: row;
+            gap: 14px;
             background: rgba(255,255,255,0.14);
             border: 1px solid rgba(255,255,255,0.20);
-            box-shadow: 0 16px 36px rgba(0,0,0,0.24);
+            box-shadow: 0 14px 32px rgba(0,0,0,0.22);
             overflow: hidden;
         }
 
@@ -434,18 +465,28 @@
             position: absolute;
             inset: 0;
             z-index: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.48));
+            background:
+                radial-gradient(circle at 10% 0%, rgba(255,255,255,0.18), transparent 34%),
+                linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.32));
             pointer-events: none;
         }
 
         #btn-release {
             background:
-                radial-gradient(circle at 20% 10%, rgba(255,255,255,0.26), transparent 30%),
-                linear-gradient(135deg, rgba(34,211,238,0.82), rgba(139,92,246,0.72));
+                radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24), transparent 32%),
+                linear-gradient(135deg, rgba(34,211,238,0.86), rgba(139,92,246,0.74));
         }
 
         #btn-album {
-            background: rgba(17,24,39,0.72);
+            background:
+                radial-gradient(circle at 18% 12%, rgba(255,255,255,0.22), transparent 32%),
+                linear-gradient(135deg, rgba(251,191,36,0.78), rgba(236,72,153,0.70));
+        }
+
+        #btn-original {
+            background:
+                radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24), transparent 32%),
+                linear-gradient(135deg, rgba(52,211,153,0.82), rgba(34,211,238,0.76));
         }
 
         .trivia-content {
@@ -453,43 +494,52 @@
             z-index: 2;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: auto auto;
+            column-gap: 12px;
+            row-gap: 4px;
             align-items: center;
-            justify-content: center;
-            gap: clamp(8px, 2vw, 14px);
-            text-shadow: 0 4px 18px rgba(0,0,0,0.55);
+            text-align: left;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.48);
         }
 
         .trivia-label {
-            font-size: clamp(1rem, 4.2vw, 1.75rem);
+            grid-column: 1;
+            grid-row: 1;
+            font-size: clamp(1.02rem, 4vw, 1.6rem);
             line-height: 1;
             text-transform: uppercase;
             letter-spacing: -0.02em;
+            color: #ffffff;
         }
 
         .trivia-hint {
-            font-size: clamp(0.74rem, 2.8vw, 1rem);
+            grid-column: 1;
+            grid-row: 2;
+            font-size: clamp(0.72rem, 2.65vw, 0.98rem);
             line-height: 1.05;
-            color: rgba(255,255,255,0.74);
+            color: rgba(255,255,255,0.76);
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
 
         .trivia-answer {
+            grid-column: 2;
+            grid-row: 1 / span 2;
             display: none;
-            max-width: 100%;
-            padding: 8px 12px;
-            border-radius: 18px;
-            background: rgba(0,0,0,0.34);
-            border: 1px solid rgba(255,255,255,0.16);
-            font-size: clamp(1.12rem, 5vw, 2rem);
+            max-width: min(58vw, 520px);
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.30);
+            border: 1px solid rgba(255,255,255,0.18);
+            font-size: clamp(1.05rem, 4.4vw, 1.85rem);
             line-height: 1.05;
-            color: rgba(255,255,255,0.96);
+            color: rgba(255,255,255,0.98);
             text-transform: none;
             overflow-wrap: anywhere;
+            text-align: right;
         }
-
 
         .trivia-btn.is-open .trivia-hint {
             display: none;
@@ -497,14 +547,6 @@
 
         .trivia-btn.is-open .trivia-answer {
             display: block;
-        }
-
-        #btn-album.is-open .trivia-content {
-            justify-content: flex-end;
-        }
-
-        #btn-album.is-open .trivia-label {
-            opacity: 0.82;
         }
 
         .loading-note {
@@ -521,16 +563,176 @@
             font-weight: 800;
         }
 
+
+        .settings-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            background: rgba(3,7,18,0.62);
+            backdrop-filter: blur(18px) saturate(1.25);
+            -webkit-backdrop-filter: blur(18px) saturate(1.25);
+        }
+
+        .settings-modal.is-open {
+            display: flex;
+        }
+
+        .settings-card {
+            width: min(94vw, 640px);
+            max-height: min(88svh, 760px);
+            overflow: auto;
+            border-radius: var(--radius-xl);
+            padding: clamp(18px, 4vw, 28px);
+            background:
+                radial-gradient(circle at 12% 0%, rgba(255,255,255,0.14), transparent 30%),
+                linear-gradient(145deg, rgba(15,23,42,0.92), rgba(49,27,87,0.92));
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 28px 90px rgba(0,0,0,0.52);
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .settings-title {
+            font-size: clamp(1.35rem, 5.5vw, 2.1rem);
+            font-weight: 900;
+            letter-spacing: -0.06em;
+        }
+
+        .settings-close {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .settings-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .settings-section-title {
+            font-size: 0.82rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.66);
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .mode-btn,
+        .settings-action,
+        #btn-add-playlist {
+            width: 100%;
+            min-height: 58px;
+            border-radius: 20px;
+            padding: 13px 16px;
+            justify-content: space-between;
+            text-align: left;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+        }
+
+        .mode-btn.is-active {
+            background: linear-gradient(135deg, rgba(34,211,238,0.92), rgba(139,92,246,0.88));
+            border-color: rgba(255,255,255,0.30);
+        }
+
+        .mode-btn:disabled {
+            opacity: 0.42;
+        }
+
+        .mode-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .mode-name {
+            font-size: 1.02rem;
+            font-weight: 900;
+        }
+
+        .mode-description {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.72);
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mode-check {
+            opacity: 0;
+            font-size: 1.45rem;
+        }
+
+        .mode-btn.is-active .mode-check {
+            opacity: 1;
+        }
+
+        .playlist-input-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        #custom-playlist-input {
+            width: 100%;
+            min-height: 54px;
+            border-radius: 18px;
+            padding: 0 16px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.10);
+            color: #ffffff;
+            outline: none;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        #custom-playlist-input::placeholder {
+            color: rgba(255,255,255,0.45);
+        }
+
+        #btn-add-playlist {
+            background: linear-gradient(135deg, rgba(52,211,153,0.88), rgba(34,211,238,0.82));
+        }
+
+        .settings-action.danger {
+            background: rgba(251,113,133,0.18);
+            border-color: rgba(251,113,133,0.32);
+        }
+
+        #settings-status {
+            min-height: 20px;
+            color: rgba(255,255,255,0.76);
+            font-size: 0.86rem;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
         @media (orientation: landscape) {
             #main-screen {
                 gap: 10px;
-            }
-
-            .game-area {
-                display: grid;
-                grid-template-columns: 1fr minmax(220px, 30vw);
-                grid-template-rows: 1fr;
-                align-items: stretch;
             }
 
             #btn-play {
@@ -538,13 +740,11 @@
             }
 
             #trivia-panel {
-                grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr;
-                min-height: 0;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .trivia-btn {
-                aspect-ratio: auto;
+            #trivia-panel.has-context {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
@@ -561,7 +761,7 @@
 
         @media (max-width: 420px) and (orientation: portrait) {
             .top-bar {
-                grid-template-columns: auto 1fr auto auto;
+                grid-template-columns: auto 1fr auto;
             }
 
             .brand {
@@ -603,9 +803,10 @@
     <div id="main-screen">
         <div class="top-bar">
             <div class="brand">AdiBeat</div>
-            <div id="playlist-label">Lista: cargando…</div>
-            <button id="btn-cycle" class="icon-btn" type="button" title="Cambiar lista">⏭</button>
-            <button id="btn-reset" class="icon-btn" type="button" title="Reconectar">↻</button>
+            <div id="playlist-label">Modo: cargando…</div>
+            <button id="btn-settings" class="icon-btn" type="button" title="Configuración">
+                <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+            </button>
         </div>
 
         <div id="error-disclaimer"></div>
@@ -618,17 +819,17 @@
             <button id="btn-play" type="button" class="state-idle">
                 <img id="main-album-art" alt="Arte del álbum" loading="lazy">
                 <div id="play-kicker">Juego listo</div>
-                <div id="play-text">INICIAR</div>
+                <div id="play-text">ADIVINA LA CANCIÓN</div>
                 <div id="timer-text">15</div>
                 <div id="revealed-info">
                     <div class="reveal-layout">
                         <div class="reveal-copy">
                             <div id="track-name-main">Nombre de la canción</div>
                             <div id="track-artist-main">Artista</div>
-                            <div id="next-hint">Toca aquí para la siguiente canción</div>
                         </div>
                     </div>
                 </div>
+                <div id="next-icon" class="material-symbols-rounded" aria-hidden="true" title="Siguiente canción">skip_next</div>
             </button>
 
             <div id="trivia-panel">
@@ -646,6 +847,84 @@
                         <div class="trivia-answer" id="answer-album">????</div>
                     </div>
                 </button>
+                <button class="trivia-btn" id="btn-original" type="button" style="display: none;">
+                    <div class="trivia-content">
+                        <div class="trivia-label">Original</div>
+                        <div class="trivia-hint">Toca para revelar</div>
+                        <div class="trivia-answer" id="answer-original">????</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+
+        <div id="settings-modal" class="settings-modal" aria-hidden="true">
+            <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+                <div class="settings-header">
+                    <div id="settings-title" class="settings-title">Configuración</div>
+                    <button id="btn-close-settings" class="settings-close" type="button" title="Cerrar configuración">
+                        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Modo de juego</div>
+                    <div id="mode-buttons" class="mode-buttons">
+                        <button class="mode-btn" type="button" data-mode="normal">
+                            <span class="mode-copy">
+                                <span class="mode-name">Normal</span>
+                                <span class="mode-description">Solo AdiBeat-Red</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
+                        </button>
+                        <button class="mode-btn" type="button" data-mode="covers">
+                            <span class="mode-copy">
+                                <span class="mode-name">Covers</span>
+                                <span class="mode-description">Solo AdiBeat-Blue</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
+                        </button>
+                        <button class="mode-btn" type="button" data-mode="combined">
+                            <span class="mode-copy">
+                                <span class="mode-name">Combinado</span>
+                                <span class="mode-description">AdiBeat-Red + AdiBeat-Blue</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
+                        </button>
+                        <button class="mode-btn" type="button" data-mode="custom">
+                            <span class="mode-copy">
+                                <span class="mode-name">Personalizada</span>
+                                <span class="mode-description" id="custom-mode-description">Agrega una playlist para activar este modo</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Agregar playlist</div>
+                    <div class="playlist-input-row">
+                        <input id="custom-playlist-input" type="text" inputmode="url" autocomplete="off" placeholder="Pega URL o ID de Spotify">
+                        <button id="btn-add-playlist" type="button">
+                            <span>Agregar y jugar</span>
+                            <span class="material-symbols-rounded" aria-hidden="true">playlist_add</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Spotify</div>
+                    <button id="btn-force-device" class="settings-action" type="button">
+                        <span>Forzar reconexión del dispositivo</span>
+                        <span class="material-symbols-rounded" aria-hidden="true">sync</span>
+                    </button>
+                    <button id="btn-reconnect-account" class="settings-action danger" type="button">
+                        <span>Reconectar cuenta Spotify</span>
+                        <span class="material-symbols-rounded" aria-hidden="true">logout</span>
+                    </button>
+                </div>
+
+                <div id="settings-status"></div>
             </div>
         </div>
     </div>
@@ -661,30 +940,41 @@
                 - PKCE igual que la versión funcional.
                 - Lectura por /v1/me, /v1/playlists/{id}, /v1/playlists/{id}/items.
                 - Sin fallback a canciones guardadas.
-                - Sin carga manual.
+                - Modos de juego con playlists predefinidas + playlist personalizada opcional.
             */
-            const PLAYLISTS = [
-                { id: '00MtRUjzL76Njcqe0mNvsD', label: 'AdiBeat' },
-                { id: '6w5cQsiUyHHOZAmxzTXeER', label: 'Lista 2' },
-                { id: '3qdqZPJUy1ulEwEeLOUmgA', label: 'Lista 3' }
+            const PLAYLIST_SOURCES = {
+                red: { id: '00MtRUjzL76Njcqe0mNvsD', label: 'AdiBeat-Red', sourceKey: 'red' },
+                blue: { id: '3v71SvyMLTBhbpTfAkMizr', label: 'AdiBeat-Blue', sourceKey: 'blue' }
+            };
+
+            const GAME_MODES = [
+                { id: 'normal', label: 'Normal', description: 'AdiBeat-Red', sources: ['red'] },
+                { id: 'covers', label: 'Covers', description: 'AdiBeat-Blue', sources: ['blue'] },
+                { id: 'combined', label: 'Combinado', description: 'AdiBeat-Red + AdiBeat-Blue', sources: ['red', 'blue'] },
+                { id: 'custom', label: 'Personalizada', description: 'Playlist agregada', sources: ['custom'], requiresCustom: true }
             ];
 
             const COUNTDOWN_SECONDS = 15;
             const DEVICE_CACHE_KEY = 'adibeat_last_device_id';
             const DEVICE_WAKE_DELAY_MS = 750;
+            const MODE_STORAGE_KEY = 'adibeat_game_mode';
+            const CUSTOM_PLAYLIST_KEY = 'adibeat_custom_playlist';
+            const ORIGINAL_ARTIST_DB_URL = 'adibeat-blue-original-artist-db.json';
 
-            localStorage.removeItem('adibeat_custom_playlist');
+            localStorage.removeItem('adibeat_playlist_index');
 
-            let currentPlaylistIndex = parseInt(localStorage.getItem('adibeat_playlist_index') || '0', 10);
-            if (!Number.isFinite(currentPlaylistIndex) || currentPlaylistIndex < 0 || currentPlaylistIndex >= PLAYLISTS.length) {
-                currentPlaylistIndex = 0;
-                localStorage.setItem('adibeat_playlist_index', String(currentPlaylistIndex));
-            }
+            let customPlaylist = leerPlaylistPersonalizada();
+            let currentGameModeId = localStorage.getItem(MODE_STORAGE_KEY) || 'normal';
+            if (!GAME_MODES.some(mode => mode.id === currentGameModeId)) currentGameModeId = 'normal';
+            if (currentGameModeId === 'custom' && !customPlaylist) currentGameModeId = 'normal';
+            localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
 
             let playlistTracks = [];
             let sessionQueue = [];
             let playedTrackUris = new Set();
             let currentTrackObj = null;
+            let originalArtistDb = new Map();
+            let originalArtistDbLoaded = false;
             let gameState = 'IDLE';
             let temporizador = null;
             let intervalo = null;
@@ -695,8 +985,7 @@
             const mainScreen = document.getElementById("main-screen");
             const btnLogin = document.getElementById("btn-login");
             const btnPlay = document.getElementById("btn-play");
-            const btnCycle = document.getElementById("btn-cycle");
-            const btnReset = document.getElementById("btn-reset");
+            const btnSettings = document.getElementById("btn-settings");
             const playKicker = document.getElementById("play-kicker");
             const playText = document.getElementById("play-text");
             const timerText = document.getElementById("timer-text");
@@ -709,9 +998,27 @@
             const triviaPanel = document.getElementById("trivia-panel");
             const btnRelease = document.getElementById("btn-release");
             const btnAlbum = document.getElementById("btn-album");
+            const btnOriginal = document.getElementById("btn-original");
             const answerRelease = document.getElementById("answer-release");
             const answerAlbum = document.getElementById("answer-album");
+            const answerOriginal = document.getElementById("answer-original");
+            const releaseLabel = btnRelease.querySelector('.trivia-label');
+            const releaseHint = btnRelease.querySelector('.trivia-hint');
+            const albumLabel = btnAlbum.querySelector('.trivia-label');
+            const albumHint = btnAlbum.querySelector('.trivia-hint');
+            const originalLabel = btnOriginal.querySelector('.trivia-label');
+            const originalHint = btnOriginal.querySelector('.trivia-hint');
             const mainAlbumArt = document.getElementById("main-album-art");
+            const nextIcon = document.getElementById("next-icon");
+            const settingsModal = document.getElementById("settings-modal");
+            const btnCloseSettings = document.getElementById("btn-close-settings");
+            const modeButtons = Array.from(document.querySelectorAll(".mode-btn"));
+            const customModeDescription = document.getElementById("custom-mode-description");
+            const customPlaylistInput = document.getElementById("custom-playlist-input");
+            const btnAddPlaylist = document.getElementById("btn-add-playlist");
+            const btnForceDevice = document.getElementById("btn-force-device");
+            const btnReconnectAccount = document.getElementById("btn-reconnect-account");
+            const settingsStatus = document.getElementById("settings-status");
 
             splashScreen.addEventListener('click', () => {
                 playStartSound();
@@ -798,21 +1105,87 @@
 
             btnLogin.addEventListener('click', iniciarLoginSpotify);
 
-            btnCycle.addEventListener('click', async () => {
-                if (!accessToken) return;
-                currentPlaylistIndex = (currentPlaylistIndex + 1) % PLAYLISTS.length;
-                localStorage.setItem('adibeat_playlist_index', String(currentPlaylistIndex));
-                resetRoundUi();
-                await cargarPlaylist(currentPlaylistIndex);
+            btnSettings.addEventListener('click', openSettings);
+            btnCloseSettings.addEventListener('click', closeSettings);
+            settingsModal.addEventListener('click', (event) => {
+                if (event.target === settingsModal) closeSettings();
             });
 
-            btnReset.addEventListener('click', () => {
+            modeButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const modeId = button.dataset.mode;
+                    if (!modeId || button.disabled || !accessToken) return;
+                    currentGameModeId = modeId;
+                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
+                    setSettingsStatus(`Modo seleccionado: ${getModeById(modeId).label}`);
+                    resetRoundUi();
+                    await cargarModo(currentGameModeId);
+                });
+            });
+
+            btnAddPlaylist.addEventListener('click', async () => {
+                if (!accessToken) {
+                    setSettingsStatus('Conecta Spotify antes de agregar una playlist.');
+                    return;
+                }
+
+                const playlistId = extraerPlaylistId(customPlaylistInput.value);
+                if (!playlistId) {
+                    setSettingsStatus('Pega una URL o ID válido de playlist de Spotify.');
+                    return;
+                }
+
+                btnAddPlaylist.disabled = true;
+                setSettingsStatus('Leyendo playlist…');
+
+                try {
+                    const data = await spotifyJson(`https://api.spotify.com/v1/playlists/${playlistId}`);
+                    customPlaylist = {
+                        id: playlistId,
+                        label: data?.name || 'Playlist personalizada'
+                    };
+                    localStorage.setItem(CUSTOM_PLAYLIST_KEY, JSON.stringify(customPlaylist));
+                    currentGameModeId = 'custom';
+                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
+                    customPlaylistInput.value = '';
+                    updateSettingsUi();
+                    setSettingsStatus(`Playlist agregada: ${customPlaylist.label}`);
+                    await cargarModo(currentGameModeId);
+                } catch (error) {
+                    setSettingsStatus(`No pude agregar esa playlist. ${mensajeSpotify(error)}`);
+                } finally {
+                    btnAddPlaylist.disabled = false;
+                }
+            });
+
+            btnForceDevice.addEventListener('click', async () => {
+                if (!accessToken) {
+                    setSettingsStatus('Spotify no está conectado.');
+                    return;
+                }
+
+                localStorage.removeItem(DEVICE_CACHE_KEY);
+                lastPlaybackDeviceId = '';
+                btnForceDevice.disabled = true;
+                setSettingsStatus('Buscando dispositivo Spotify…');
+
+                try {
+                    const device = await resolverDispositivoSpotify(true);
+                    setSettingsStatus(`Dispositivo listo: ${device?.name || 'Spotify Connect'}`);
+                } catch (error) {
+                    setSettingsStatus(mensajeSpotify(error));
+                } finally {
+                    btnForceDevice.disabled = false;
+                }
+            });
+
+            btnReconnectAccount.addEventListener('click', () => {
                 localStorage.removeItem('adibeat_token');
                 localStorage.removeItem('code_verifier');
-                localStorage.removeItem('adibeat_playlist_index');
-                localStorage.removeItem('adibeat_custom_playlist');
                 localStorage.removeItem(DEVICE_CACHE_KEY);
-                window.location.href = window.location.pathname;
+                accessToken = '';
+                closeSettings();
+                iniciarLoginSpotify();
             });
 
             btnPlay.addEventListener('click', () => {
@@ -841,18 +1214,31 @@
             btnRelease.addEventListener('click', () => {
                 if (!currentTrackObj) return;
                 btnRelease.classList.add('is-open');
+
+                if (esCancionBlueCover(currentTrackObj)) {
+                    mostrarArteAlbumPrincipal(true);
+                }
             });
 
             btnAlbum.addEventListener('click', () => {
                 if (!currentTrackObj) return;
                 btnAlbum.classList.add('is-open');
-                btnPlay.classList.add('album-clear');
+
+                if (!esCancionBlueCover(currentTrackObj)) {
+                    btnPlay.classList.add('album-clear');
+                }
+            });
+
+            btnOriginal.addEventListener('click', () => {
+                if (!currentTrackObj?.originalArtist) return;
+                btnOriginal.classList.add('is-open');
             });
 
             function iniciarApp() {
+                updateSettingsUi();
                 if (accessToken) {
                     btnLogin.style.display = 'none';
-                    cargarPlaylist(currentPlaylistIndex);
+                    cargarModo(currentGameModeId);
                 } else {
                     showLogin();
                 }
@@ -877,47 +1263,67 @@
                 window.location.href = authUrl.toString();
             }
 
-            async function cargarPlaylist(index) {
-                const selected = PLAYLISTS[index];
+            async function cargarModo(modeId) {
+                const mode = getModeById(modeId);
+                const sources = obtenerFuentesModo(mode);
+
+                if (sources.length === 0) {
+                    currentGameModeId = 'normal';
+                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
+                    return cargarModo(currentGameModeId);
+                }
+
                 playlistTracks = [];
                 sessionQueue = [];
                 playedTrackUris = new Set();
                 currentTrackObj = null;
 
                 hideError();
+                updateSettingsUi();
                 btnPlay.style.display = 'none';
                 triviaPanel.style.display = 'none';
                 loadingNote.style.display = 'block';
-                playlistLabel.textContent = `Lista: ${selected.label}`;
-                btnCycle.disabled = true;
+                playlistLabel.textContent = `Modo: ${mode.label}`;
+                setSettingsControlsDisabled(true);
 
                 try {
+                    await cargarBaseArtistasOriginales();
+
                     // Conserva el pre-chequeo de usuario que tenía tu versión funcional.
                     await spotifyJson('https://api.spotify.com/v1/me');
 
-                    // Conserva la lectura explícita de metadata de playlist.
-                    const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${selected.id}`);
-                    const playlistName = playlistData?.name || selected.label;
-                    playlistLabel.textContent = `Lista: ${playlistName}`;
+                    const collectedTracks = [];
+                    const loadedNames = [];
 
-                    const items = await cargarItemsPlaylist(selected.id);
-                    playlistTracks = procesarCanciones(items);
+                    for (const source of sources) {
+                        // Conserva la lectura explícita de metadata de playlist.
+                        const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${source.id}`);
+                        const playlistName = playlistData?.name || source.label;
+                        loadedNames.push(playlistName);
+
+                        const items = await cargarItemsPlaylist(source.id);
+                        collectedTracks.push(...procesarCanciones(items, playlistName, source.sourceKey));
+                    }
+
+                    playlistTracks = deduplicarCanciones(collectedTracks);
                     prepararSesionSinRepeticiones();
 
                     if (playlistTracks.length === 0) {
-                        throw new Error('La lista se pudo leer, pero no tiene tracks reproducibles.');
+                        throw new Error('La playlist se pudo leer, pero no tiene tracks reproducibles.');
                     }
 
                     loadingNote.style.display = 'none';
                     btnPlay.style.display = 'flex';
+                    playlistLabel.textContent = `Modo: ${mode.label} · ${playlistTracks.length} canciones`;
                     resetRoundUi();
                 } catch (error) {
                     loadingNote.style.display = 'none';
                     btnPlay.style.display = 'none';
                     playlistTracks = [];
-                    showError(`No pude recuperar canciones de "${selected.label}". ${mensajeSpotify(error)}`);
+                    showError(`No pude recuperar canciones del modo "${mode.label}". ${mensajeSpotify(error)}`);
                 } finally {
-                    btnCycle.disabled = false;
+                    setSettingsControlsDisabled(false);
+                    updateSettingsUi();
                 }
             }
 
@@ -990,7 +1396,176 @@
                 return error;
             }
 
-            function procesarCanciones(itemsArray) {
+
+            async function cargarBaseArtistasOriginales(forceReload = false) {
+                if (originalArtistDbLoaded && !forceReload) return;
+
+                originalArtistDbLoaded = true;
+                originalArtistDb = new Map();
+
+                try {
+                    const url = `${ORIGINAL_ARTIST_DB_URL}?v=${Date.now()}`;
+                    const response = await fetch(url, { cache: 'no-store' });
+
+                    if (!response.ok) {
+                        if (response.status !== 404) {
+                            console.warn(`No pude leer ${ORIGINAL_ARTIST_DB_URL}: ${response.status}`);
+                        }
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const tracks = Array.isArray(data?.tracks)
+                        ? data.tracks
+                        : Array.isArray(data)
+                            ? data
+                            : [];
+
+                    for (const entry of tracks) {
+                        const answer = String(entry?.answer || entry?.originalArtist || '').trim();
+                        if (!answer) continue;
+
+                        const spotifyId = extraerTrackId(entry?.spotifyId || entry?.id || entry?.uri || '');
+                        const uri = entry?.uri || (spotifyId ? `spotify:track:${spotifyId}` : '');
+
+                        if (spotifyId) originalArtistDb.set(spotifyId, answer);
+                        if (uri) originalArtistDb.set(uri, answer);
+                    }
+                } catch (error) {
+                    console.warn(`No pude cargar ${ORIGINAL_ARTIST_DB_URL}`, error);
+                }
+            }
+
+            function extraerTrackId(value) {
+                const clean = String(value || '').trim();
+                if (!clean) return '';
+
+                const uriMatch = clean.match(/^spotify:track:([A-Za-z0-9]+)$/i);
+                if (uriMatch) return uriMatch[1];
+
+                const urlMatch = clean.match(/open\.spotify\.com\/track\/([A-Za-z0-9]+)/i);
+                if (urlMatch) return urlMatch[1];
+
+                const rawMatch = clean.match(/^[A-Za-z0-9]{16,}$/);
+                return rawMatch ? clean : '';
+            }
+
+            function buscarArtistaOriginal(trackId, uri) {
+                const id = extraerTrackId(trackId || uri || '');
+                return originalArtistDb.get(id) || originalArtistDb.get(uri) || '';
+            }
+
+            function getModeById(modeId) {
+                return GAME_MODES.find(mode => mode.id === modeId) || GAME_MODES[0];
+            }
+
+            function obtenerFuentesModo(mode) {
+                return mode.sources
+                    .map(sourceKey => {
+                        if (sourceKey === 'custom') {
+                            return customPlaylist ? { ...customPlaylist, sourceKey: 'custom' } : null;
+                        }
+                        const source = PLAYLIST_SOURCES[sourceKey];
+                        return source ? { ...source, sourceKey } : null;
+                    })
+                    .filter(Boolean);
+            }
+
+            function leerPlaylistPersonalizada() {
+                try {
+                    const raw = localStorage.getItem(CUSTOM_PLAYLIST_KEY);
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    if (!parsed?.id) return null;
+                    return {
+                        id: parsed.id,
+                        label: parsed.label || 'Playlist personalizada'
+                    };
+                } catch(e) {
+                    return null;
+                }
+            }
+
+            function extraerPlaylistId(value) {
+                const clean = String(value || '').trim();
+                if (!clean) return '';
+
+                const uriMatch = clean.match(/^spotify:playlist:([A-Za-z0-9]+)$/i);
+                if (uriMatch) return uriMatch[1];
+
+                const urlMatch = clean.match(/open\.spotify\.com\/playlist\/([A-Za-z0-9]+)/i);
+                if (urlMatch) return urlMatch[1];
+
+                const rawMatch = clean.match(/^[A-Za-z0-9]{16,}$/);
+                return rawMatch ? clean : '';
+            }
+
+            function deduplicarCanciones(tracks) {
+                const seen = new Set();
+                const unique = [];
+
+                for (const track of tracks) {
+                    if (!track?.uri || seen.has(track.uri)) continue;
+                    seen.add(track.uri);
+                    unique.push(track);
+                }
+
+                return unique;
+            }
+
+            function updateSettingsUi() {
+                const hasCustom = Boolean(customPlaylist?.id);
+                const activeMode = getModeById(currentGameModeId);
+
+                if (currentGameModeId === 'custom' && !hasCustom) {
+                    currentGameModeId = 'normal';
+                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
+                }
+
+                customModeDescription.textContent = hasCustom
+                    ? customPlaylist.label
+                    : 'Agrega una playlist para activar este modo';
+
+                modeButtons.forEach(button => {
+                    const modeId = button.dataset.mode;
+                    const isCustomWithoutPlaylist = modeId === 'custom' && !hasCustom;
+                    button.disabled = isCustomWithoutPlaylist;
+                    button.classList.toggle('is-active', modeId === currentGameModeId);
+                });
+
+                if (!playlistTracks.length) {
+                    playlistLabel.textContent = accessToken
+                        ? `Modo: ${activeMode.label}`
+                        : 'Spotify no conectado';
+                }
+            }
+
+            function setSettingsControlsDisabled(disabled) {
+                modeButtons.forEach(button => {
+                    const isCustomWithoutPlaylist = button.dataset.mode === 'custom' && !customPlaylist;
+                    button.disabled = disabled || isCustomWithoutPlaylist;
+                });
+                btnAddPlaylist.disabled = disabled;
+                btnForceDevice.disabled = disabled;
+            }
+
+            function openSettings() {
+                updateSettingsUi();
+                settingsStatus.textContent = '';
+                settingsModal.classList.add('is-open');
+                settingsModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeSettings() {
+                settingsModal.classList.remove('is-open');
+                settingsModal.setAttribute('aria-hidden', 'true');
+            }
+
+            function setSettingsStatus(message) {
+                settingsStatus.textContent = message || '';
+            }
+
+            function procesarCanciones(itemsArray, sourceName = '', sourceKey = '') {
                 return itemsArray.map(obj => {
                     const t = obj?.item || obj?.track;
 
@@ -1011,9 +1586,12 @@
                             : 'Artista desconocido',
                         album: albumName,
                         albumArt,
+                        sourcePlaylist: sourceName,
+                        sourceKey,
                         spotifyUrl: t.external_urls?.spotify || t.album?.external_urls?.spotify || '',
                         releaseDate: formatearFechaSpotify(releaseRaw, releasePrecision),
-                        year: releaseRaw ? releaseRaw.substring(0, 4) : '????'
+                        year: releaseRaw ? releaseRaw.substring(0, 4) : '????',
+                        originalArtist: buscarArtistaOriginal(t.id, t.uri)
                     };
                 }).filter(Boolean);
             }
@@ -1137,7 +1715,7 @@
                     gameState = 'IDLE';
                     setPlayButtonState('idle');
                     playKicker.textContent = 'Juego listo';
-                    playText.textContent = 'INICIAR';
+                    playText.textContent = 'ADIVINA LA CANCIÓN';
                     timerText.style.display = 'none';
                     showError(`No pude iniciar la canción. ${mensajeSpotify(error)}`);
                 }
@@ -1225,6 +1803,60 @@
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
 
+            function esCancionBlueCover(track) {
+                if (!track) return false;
+                return track.sourceKey === 'blue'
+                    || String(track.sourcePlaylist || '').toLowerCase().includes('adibeat-blue');
+            }
+
+            function mostrarArteAlbumPrincipal(clear = false) {
+                if (!currentTrackObj?.albumArt) {
+                    mainAlbumArt.removeAttribute('src');
+                    mainAlbumArt.alt = 'Arte del álbum no disponible';
+                    return;
+                }
+
+                mainAlbumArt.src = currentTrackObj.albumArt;
+                mainAlbumArt.alt = `Arte del álbum ${currentTrackObj.album}`;
+
+                if (clear) {
+                    btnPlay.classList.add('album-clear');
+                }
+            }
+
+            function configurarTriviaParaRonda(isBlueCover, hasOriginalArtist) {
+                btnRelease.classList.remove('is-open');
+                btnAlbum.classList.remove('is-open');
+                btnOriginal.classList.remove('is-open');
+                btnOriginal.style.display = 'none';
+                triviaPanel.classList.remove('has-context');
+
+                if (isBlueCover) {
+                    releaseLabel.textContent = 'Artista';
+                    releaseHint.textContent = 'Toca para revelar arte y artista';
+                    answerRelease.textContent = currentTrackObj.artist || 'Artista no disponible';
+
+                    albumLabel.textContent = 'Artista Original';
+                    albumHint.textContent = hasOriginalArtist
+                        ? 'Toca para revelar'
+                        : 'Sin dato en la base';
+                    answerAlbum.textContent = hasOriginalArtist
+                        ? currentTrackObj.originalArtist
+                        : 'Sin dato';
+                    btnAlbum.style.display = hasOriginalArtist ? 'flex' : 'none';
+                    return;
+                }
+
+                releaseLabel.textContent = 'Década';
+                releaseHint.textContent = 'Toca para revelar';
+                answerRelease.textContent = currentTrackObj.year || 'Año no disponible';
+
+                albumLabel.textContent = 'Álbum';
+                albumHint.textContent = 'Toca para revelar';
+                answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
+                btnAlbum.style.display = 'flex';
+            }
+
             function revelarInformacion() {
                 if (!currentTrackObj) return;
 
@@ -1237,30 +1869,31 @@
                 playText.textContent = '';
                 timerText.style.display = 'none';
 
+                const isBlueCover = esCancionBlueCover(currentTrackObj);
+                const hasOriginalArtist = Boolean(currentTrackObj.originalArtist);
+
                 trackNameMain.textContent = currentTrackObj.name;
-                trackArtistMain.textContent = currentTrackObj.artist;
+                trackArtistMain.textContent = isBlueCover ? '' : currentTrackObj.artist;
+                trackArtistMain.style.display = isBlueCover ? 'none' : 'block';
 
                 revealedInfo.style.display = 'block';
 
-                answerRelease.textContent = currentTrackObj.year || 'Año no disponible';
-                answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
+                configurarTriviaParaRonda(isBlueCover, hasOriginalArtist);
 
-                if (currentTrackObj.albumArt) {
-                    mainAlbumArt.src = currentTrackObj.albumArt;
-                    mainAlbumArt.alt = `Arte del álbum ${currentTrackObj.album}`;
-                } else {
+                if (isBlueCover) {
                     mainAlbumArt.removeAttribute('src');
-                    mainAlbumArt.alt = 'Arte del álbum no disponible';
+                    mainAlbumArt.alt = 'Arte del álbum oculto hasta revelar artista';
+                    btnPlay.classList.remove('album-clear');
+                } else {
+                    mostrarArteAlbumPrincipal(false);
                 }
 
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
-                document.getElementById('next-hint').textContent = restantes > 0
-                    ? `Toca aquí para la siguiente canción · quedan ${restantes}`
+                nextIcon.title = restantes > 0
+                    ? `Siguiente canción · quedan ${restantes}`
                     : 'Lista completada en esta sesión';
 
                 triviaPanel.style.display = 'grid';
-                btnRelease.classList.remove('is-open');
-                btnAlbum.classList.remove('is-open');
             }
 
             function resetRoundUi() {
@@ -1274,15 +1907,22 @@
                 setPlayButtonState('idle');
                 const restantes = Math.max(playlistTracks.length - playedTrackUris.size, 0);
                 playKicker.textContent = `${restantes} de ${playlistTracks.length} canciones sin repetir`;
-                playText.textContent = 'INICIAR';
+                playText.textContent = 'ADIVINA LA CANCIÓN';
                 timerText.style.display = 'none';
                 revealedInfo.style.display = 'none';
+                trackArtistMain.style.display = 'block';
+                btnAlbum.style.display = 'flex';
             }
 
             function hideTrivia() {
                 triviaPanel.style.display = 'none';
+                triviaPanel.classList.remove('has-context');
                 btnRelease.classList.remove('is-open');
                 btnAlbum.classList.remove('is-open');
+                btnOriginal.classList.remove('is-open');
+                btnOriginal.style.display = 'none';
+                btnAlbum.style.display = 'flex';
+                trackArtistMain.style.display = 'block';
                 btnPlay.classList.remove('album-clear');
             }
 
