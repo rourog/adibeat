@@ -483,6 +483,12 @@
                 linear-gradient(135deg, rgba(251,191,36,0.78), rgba(236,72,153,0.70));
         }
 
+        #btn-original {
+            background:
+                radial-gradient(circle at 18% 12%, rgba(255,255,255,0.24), transparent 32%),
+                linear-gradient(135deg, rgba(52,211,153,0.82), rgba(34,211,238,0.76));
+        }
+
         .trivia-content {
             position: relative;
             z-index: 2;
@@ -736,6 +742,10 @@
             #trivia-panel {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+
+            #trivia-panel.has-context {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
         }
 
         @media (max-width: 560px) and (orientation: portrait) {
@@ -835,6 +845,13 @@
                         <div class="trivia-label">Álbum</div>
                         <div class="trivia-hint">Toca para revelar</div>
                         <div class="trivia-answer" id="answer-album">????</div>
+                    </div>
+                </button>
+                <button class="trivia-btn" id="btn-original" type="button" style="display: none;">
+                    <div class="trivia-content">
+                        <div class="trivia-label">Original</div>
+                        <div class="trivia-hint">Toca para revelar</div>
+                        <div class="trivia-answer" id="answer-original">????</div>
                     </div>
                 </button>
             </div>
@@ -942,6 +959,7 @@
             const DEVICE_WAKE_DELAY_MS = 750;
             const MODE_STORAGE_KEY = 'adibeat_game_mode';
             const CUSTOM_PLAYLIST_KEY = 'adibeat_custom_playlist';
+            const ORIGINAL_ARTIST_DB_URL = 'adibeat-blue-original-artist-db.json';
 
             localStorage.removeItem('adibeat_playlist_index');
 
@@ -955,6 +973,8 @@
             let sessionQueue = [];
             let playedTrackUris = new Set();
             let currentTrackObj = null;
+            let originalArtistDb = new Map();
+            let originalArtistDbLoaded = false;
             let gameState = 'IDLE';
             let temporizador = null;
             let intervalo = null;
@@ -978,8 +998,10 @@
             const triviaPanel = document.getElementById("trivia-panel");
             const btnRelease = document.getElementById("btn-release");
             const btnAlbum = document.getElementById("btn-album");
+            const btnOriginal = document.getElementById("btn-original");
             const answerRelease = document.getElementById("answer-release");
             const answerAlbum = document.getElementById("answer-album");
+            const answerOriginal = document.getElementById("answer-original");
             const mainAlbumArt = document.getElementById("main-album-art");
             const nextIcon = document.getElementById("next-icon");
             const settingsModal = document.getElementById("settings-modal");
@@ -1194,6 +1216,11 @@
                 btnPlay.classList.add('album-clear');
             });
 
+            btnOriginal.addEventListener('click', () => {
+                if (!currentTrackObj?.originalArtist) return;
+                btnOriginal.classList.add('is-open');
+            });
+
             function iniciarApp() {
                 updateSettingsUi();
                 if (accessToken) {
@@ -1247,6 +1274,8 @@
                 setSettingsControlsDisabled(true);
 
                 try {
+                    await cargarBaseArtistasOriginales();
+
                     // Conserva el pre-chequeo de usuario que tenía tu versión funcional.
                     await spotifyJson('https://api.spotify.com/v1/me');
 
@@ -1354,6 +1383,64 @@
                 return error;
             }
 
+
+            async function cargarBaseArtistasOriginales(forceReload = false) {
+                if (originalArtistDbLoaded && !forceReload) return;
+
+                originalArtistDbLoaded = true;
+                originalArtistDb = new Map();
+
+                try {
+                    const url = `${ORIGINAL_ARTIST_DB_URL}?v=${Date.now()}`;
+                    const response = await fetch(url, { cache: 'no-store' });
+
+                    if (!response.ok) {
+                        if (response.status !== 404) {
+                            console.warn(`No pude leer ${ORIGINAL_ARTIST_DB_URL}: ${response.status}`);
+                        }
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const tracks = Array.isArray(data?.tracks)
+                        ? data.tracks
+                        : Array.isArray(data)
+                            ? data
+                            : [];
+
+                    for (const entry of tracks) {
+                        const answer = String(entry?.answer || entry?.originalArtist || '').trim();
+                        if (!answer) continue;
+
+                        const spotifyId = extraerTrackId(entry?.spotifyId || entry?.id || entry?.uri || '');
+                        const uri = entry?.uri || (spotifyId ? `spotify:track:${spotifyId}` : '');
+
+                        if (spotifyId) originalArtistDb.set(spotifyId, answer);
+                        if (uri) originalArtistDb.set(uri, answer);
+                    }
+                } catch (error) {
+                    console.warn(`No pude cargar ${ORIGINAL_ARTIST_DB_URL}`, error);
+                }
+            }
+
+            function extraerTrackId(value) {
+                const clean = String(value || '').trim();
+                if (!clean) return '';
+
+                const uriMatch = clean.match(/^spotify:track:([A-Za-z0-9]+)$/i);
+                if (uriMatch) return uriMatch[1];
+
+                const urlMatch = clean.match(/open\.spotify\.com\/track\/([A-Za-z0-9]+)/i);
+                if (urlMatch) return urlMatch[1];
+
+                const rawMatch = clean.match(/^[A-Za-z0-9]{16,}$/);
+                return rawMatch ? clean : '';
+            }
+
+            function buscarArtistaOriginal(trackId, uri) {
+                const id = extraerTrackId(trackId || uri || '');
+                return originalArtistDb.get(id) || originalArtistDb.get(uri) || '';
+            }
 
             function getModeById(modeId) {
                 return GAME_MODES.find(mode => mode.id === modeId) || GAME_MODES[0];
@@ -1486,7 +1573,8 @@
                         sourcePlaylist: sourceName,
                         spotifyUrl: t.external_urls?.spotify || t.album?.external_urls?.spotify || '',
                         releaseDate: formatearFechaSpotify(releaseRaw, releasePrecision),
-                        year: releaseRaw ? releaseRaw.substring(0, 4) : '????'
+                        year: releaseRaw ? releaseRaw.substring(0, 4) : '????',
+                        originalArtist: buscarArtistaOriginal(t.id, t.uri)
                     };
                 }).filter(Boolean);
             }
@@ -1718,6 +1806,11 @@
                 answerRelease.textContent = currentTrackObj.year || 'Año no disponible';
                 answerAlbum.textContent = currentTrackObj.album || 'Álbum no disponible';
 
+                const hasOriginalArtist = Boolean(currentTrackObj.originalArtist);
+                answerOriginal.textContent = hasOriginalArtist ? currentTrackObj.originalArtist : '';
+                btnOriginal.style.display = hasOriginalArtist ? 'flex' : 'none';
+                triviaPanel.classList.toggle('has-context', hasOriginalArtist);
+
                 if (currentTrackObj.albumArt) {
                     mainAlbumArt.src = currentTrackObj.albumArt;
                     mainAlbumArt.alt = `Arte del álbum ${currentTrackObj.album}`;
@@ -1734,6 +1827,7 @@
                 triviaPanel.style.display = 'grid';
                 btnRelease.classList.remove('is-open');
                 btnAlbum.classList.remove('is-open');
+                btnOriginal.classList.remove('is-open');
             }
 
             function resetRoundUi() {
@@ -1754,8 +1848,11 @@
 
             function hideTrivia() {
                 triviaPanel.style.display = 'none';
+                triviaPanel.classList.remove('has-context');
                 btnRelease.classList.remove('is-open');
                 btnAlbum.classList.remove('is-open');
+                btnOriginal.classList.remove('is-open');
+                btnOriginal.style.display = 'none';
                 btnPlay.classList.remove('album-clear');
             }
 
