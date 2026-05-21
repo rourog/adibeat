@@ -967,46 +967,49 @@
                 </div>
 
                 <div class="settings-section">
-                    <div class="settings-section-title">Modo de juego</div>
-                    <div id="mode-buttons" class="mode-buttons">
-                        <button class="mode-btn" type="button" data-mode="normal">
+                    <div class="settings-section-title">Listas activas</div>
+                    <div id="source-buttons" class="mode-buttons">
+                        <button class="mode-btn source-toggle" type="button" data-source="red">
                             <span class="mode-copy">
-                                <span class="mode-name">Normal</span>
-                                <span class="mode-description">Solo AdiBeat-Red</span>
+                                <span class="mode-name">Red</span>
+                                <span class="mode-description">AdiBeat-Red</span>
                             </span>
                             <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
                         </button>
-                        <button class="mode-btn" type="button" data-mode="covers">
+                        <button class="mode-btn source-toggle" type="button" data-source="blue">
                             <span class="mode-copy">
-                                <span class="mode-name">Covers</span>
-                                <span class="mode-description">Solo AdiBeat-Blue</span>
+                                <span class="mode-name">Blue</span>
+                                <span class="mode-description">Covers · artista original</span>
                             </span>
                             <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
                         </button>
-                        <button class="mode-btn" type="button" data-mode="combined">
+                        <button class="mode-btn source-toggle" type="button" data-source="green">
                             <span class="mode-copy">
-                                <span class="mode-name">Combinado</span>
-                                <span class="mode-description">AdiBeat-Red + AdiBeat-Blue</span>
+                                <span class="mode-name">Green</span>
+                                <span class="mode-description">AdiBeat-Green</span>
                             </span>
                             <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
                         </button>
-                        <button class="mode-btn" type="button" data-mode="custom">
+                        <button class="mode-btn source-toggle" type="button" data-source="yellow">
                             <span class="mode-copy">
-                                <span class="mode-name">Personalizada</span>
-                                <span class="mode-description" id="custom-mode-description">Agrega una playlist para activar este modo</span>
+                                <span class="mode-name">Yellow</span>
+                                <span class="mode-description">AdiBeat-Yellow</span>
                             </span>
                             <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
                         </button>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <div class="settings-section-title">Agregar playlist</div>
-                    <div class="playlist-input-row">
-                        <input id="custom-playlist-input" type="text" inputmode="url" autocomplete="off" placeholder="Pega URL o ID de Spotify">
-                        <button id="btn-add-playlist" type="button">
-                            <span>Agregar y jugar</span>
-                            <span class="material-symbols-rounded" aria-hidden="true">playlist_add</span>
+                        <button class="mode-btn source-toggle" type="button" data-source="pink">
+                            <span class="mode-copy">
+                                <span class="mode-name">Pink</span>
+                                <span class="mode-description">AdiBeat-Pink</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
+                        </button>
+                        <button class="mode-btn source-toggle" type="button" data-source="purple">
+                            <span class="mode-copy">
+                                <span class="mode-name">Purple</span>
+                                <span class="mode-description">AdiBeat-Purple</span>
+                            </span>
+                            <span class="mode-check material-symbols-rounded" aria-hidden="true">check_circle</span>
                         </button>
                     </div>
                 </div>
@@ -1049,35 +1052,31 @@
                 - PKCE igual que la versión funcional.
                 - Lectura por /v1/me, /v1/playlists/{id}, /v1/playlists/{id}/items.
                 - Sin fallback a canciones guardadas.
-                - Modos de juego con playlists predefinidas + playlist personalizada opcional.
+                - Selección múltiple de playlists predefinidas.
             */
             const PLAYLIST_SOURCES = {
-                red: { id: '00MtRUjzL76Njcqe0mNvsD', label: 'AdiBeat-Red', sourceKey: 'red' },
-                blue: { id: '3v71SvyMLTBhbpTfAkMizr', label: 'AdiBeat-Blue', sourceKey: 'blue' }
+                red: { id: '00MtRUjzL76Njcqe0mNvsD', label: 'AdiBeat-Red', shortLabel: 'Red', sourceKey: 'red' },
+                blue: { id: '3v71SvyMLTBhbpTfAkMizr', label: 'AdiBeat-Blue', shortLabel: 'Blue', sourceKey: 'blue' },
+                green: { id: '739XeUwhPYOW3bWmy0FLt8', label: 'AdiBeat-Green', shortLabel: 'Green', sourceKey: 'green' },
+                yellow: { id: '0haIFHJryUrTVtqu6WVz2C', label: 'AdiBeat-Yellow', shortLabel: 'Yellow', sourceKey: 'yellow' },
+                pink: { id: '6CaO5rro1Ns0pbByGt35pW', label: 'AdiBeat-Pink', shortLabel: 'Pink', sourceKey: 'pink' },
+                purple: { id: '7JmtnXgFBurzm6MMiSaAon', label: 'AdiBeat-Purple', shortLabel: 'Purple', sourceKey: 'purple' }
             };
 
-            const GAME_MODES = [
-                { id: 'normal', label: 'Normal', description: 'AdiBeat-Red', sources: ['red'] },
-                { id: 'covers', label: 'Covers', description: 'AdiBeat-Blue', sources: ['blue'] },
-                { id: 'combined', label: 'Combinado', description: 'AdiBeat-Red + AdiBeat-Blue', sources: ['red', 'blue'] },
-                { id: 'custom', label: 'Personalizada', description: 'Playlist agregada', sources: ['custom'], requiresCustom: true }
-            ];
+            const PLAYLIST_ORDER = ['red', 'blue', 'green', 'yellow', 'pink', 'purple'];
 
             const COUNTDOWN_SECONDS = 15;
             const DEVICE_CACHE_KEY = 'adibeat_last_device_id';
             const DEVICE_WAKE_DELAY_MS = 750;
-            const MODE_STORAGE_KEY = 'adibeat_game_mode';
-            const CUSTOM_PLAYLIST_KEY = 'adibeat_custom_playlist';
+            const SELECTED_SOURCES_KEY = 'adibeat_selected_sources';
+            const LEGACY_MODE_STORAGE_KEY = 'adibeat_game_mode';
             const ORIGINAL_ARTIST_DB_URL = 'adibeat-blue-original-artist-db.json';
             const IDLE_DIM_DELAY_MS = 180000;
 
             localStorage.removeItem('adibeat_playlist_index');
 
-            let customPlaylist = leerPlaylistPersonalizada();
-            let currentGameModeId = localStorage.getItem(MODE_STORAGE_KEY) || 'normal';
-            if (!GAME_MODES.some(mode => mode.id === currentGameModeId)) currentGameModeId = 'normal';
-            if (currentGameModeId === 'custom' && !customPlaylist) currentGameModeId = 'normal';
-            localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
+            let activeSourceKeys = leerFuentesSeleccionadas();
+            guardarFuentesSeleccionadas();
 
             let playlistTracks = [];
             let sessionQueue = [];
@@ -1127,10 +1126,7 @@
             const nextIcon = document.getElementById("next-icon");
             const settingsModal = document.getElementById("settings-modal");
             const btnCloseSettings = document.getElementById("btn-close-settings");
-            const modeButtons = Array.from(document.querySelectorAll(".mode-btn"));
-            const customModeDescription = document.getElementById("custom-mode-description");
-            const customPlaylistInput = document.getElementById("custom-playlist-input");
-            const btnAddPlaylist = document.getElementById("btn-add-playlist");
+            const sourceButtons = Array.from(document.querySelectorAll(".source-toggle"));
             const btnForceDevice = document.getElementById("btn-force-device");
             const btnReconnectAccount = document.getElementById("btn-reconnect-account");
             const settingsStatus = document.getElementById("settings-status");
@@ -1244,7 +1240,7 @@
                         wakeLockSentinel = null;
                     });
 
-                    if (mostrarEstado) setSettingsStatus('Pantalla activa: no debería apagarse automáticamente. Dimming interno después de 30 segundos.');
+                    if (mostrarEstado) setSettingsStatus('Pantalla activa: no debería apagarse automáticamente. Dimming interno después de 3 minutos.');
                     return true;
                 } catch (error) {
                     if (mostrarEstado) setSettingsStatus(`No pude bloquear la suspensión de pantalla: ${error?.message || error}`);
@@ -1338,51 +1334,30 @@
                 if (event.target === settingsModal) closeSettings();
             });
 
-            modeButtons.forEach(button => {
+            sourceButtons.forEach(button => {
                 button.addEventListener('click', async () => {
-                    const modeId = button.dataset.mode;
-                    if (!modeId || button.disabled || !accessToken) return;
-                    currentGameModeId = modeId;
-                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
-                    setSettingsStatus(`Modo seleccionado: ${getModeById(modeId).label}`);
-                    resetRoundUi();
-                    await cargarModo(currentGameModeId);
-                });
-            });
+                    const sourceKey = button.dataset.source;
+                    if (!sourceKey || button.disabled) return;
 
-            btnAddPlaylist.addEventListener('click', async () => {
-                if (!accessToken) {
-                    setSettingsStatus('Conecta Spotify antes de agregar una playlist.');
-                    return;
-                }
+                    const isActive = activeSourceKeys.includes(sourceKey);
+                    if (isActive && activeSourceKeys.length === 1) {
+                        setSettingsStatus('Mantén al menos una lista activa. Spotify no reproduce aire todavía.');
+                        return;
+                    }
 
-                const playlistId = extraerPlaylistId(customPlaylistInput.value);
-                if (!playlistId) {
-                    setSettingsStatus('Pega una URL o ID válido de playlist de Spotify.');
-                    return;
-                }
+                    activeSourceKeys = isActive
+                        ? activeSourceKeys.filter(key => key !== sourceKey)
+                        : normalizarFuentesSeleccionadas([...activeSourceKeys, sourceKey]);
 
-                btnAddPlaylist.disabled = true;
-                setSettingsStatus('Leyendo playlist…');
-
-                try {
-                    const data = await spotifyJson(`https://api.spotify.com/v1/playlists/${playlistId}`);
-                    customPlaylist = {
-                        id: playlistId,
-                        label: data?.name || 'Playlist personalizada'
-                    };
-                    localStorage.setItem(CUSTOM_PLAYLIST_KEY, JSON.stringify(customPlaylist));
-                    currentGameModeId = 'custom';
-                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
-                    customPlaylistInput.value = '';
+                    guardarFuentesSeleccionadas();
                     updateSettingsUi();
-                    setSettingsStatus(`Playlist agregada: ${customPlaylist.label}`);
-                    await cargarModo(currentGameModeId);
-                } catch (error) {
-                    setSettingsStatus(`No pude agregar esa playlist. ${mensajeSpotify(error)}`);
-                } finally {
-                    btnAddPlaylist.disabled = false;
-                }
+                    setSettingsStatus(`Listas activas: ${describirFuentesActivas(true)}`);
+
+                    if (accessToken) {
+                        resetRoundUi();
+                        await cargarListasActivas();
+                    }
+                });
             });
 
             btnForceDevice.addEventListener('click', async () => {
@@ -1468,7 +1443,7 @@
                 updateSettingsUi();
                 if (accessToken) {
                     btnLogin.style.display = 'none';
-                    cargarModo(currentGameModeId);
+                    cargarListasActivas();
                 } else {
                     showLogin();
                 }
@@ -1493,14 +1468,21 @@
                 window.location.href = authUrl.toString();
             }
 
-            async function cargarModo(modeId) {
-                const mode = getModeById(modeId);
-                const sources = obtenerFuentesModo(mode);
+            async function cargarListasActivas() {
+                const sources = obtenerFuentesActivas();
+                const sourceDescription = describirFuentesActivas();
 
                 if (sources.length === 0) {
-                    currentGameModeId = 'normal';
-                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
-                    return cargarModo(currentGameModeId);
+                    playlistTracks = [];
+                    sessionQueue = [];
+                    playedTrackUris = new Set();
+                    currentTrackObj = null;
+                    btnPlay.style.display = 'none';
+                    triviaPanel.style.display = 'none';
+                    playlistLabel.textContent = 'Sin listas';
+                    showError('Activa al menos una lista en configuración.');
+                    updateSettingsUi();
+                    return;
                 }
 
                 playlistTracks = [];
@@ -1513,7 +1495,7 @@
                 btnPlay.style.display = 'none';
                 triviaPanel.style.display = 'none';
                 loadingNote.style.display = 'block';
-                playlistLabel.textContent = `${mode.label}`;
+                playlistLabel.textContent = sourceDescription;
                 setSettingsControlsDisabled(true);
 
                 try {
@@ -1523,13 +1505,11 @@
                     await spotifyJson('https://api.spotify.com/v1/me');
 
                     const collectedTracks = [];
-                    const loadedNames = [];
 
                     for (const source of sources) {
                         // Conserva la lectura explícita de metadata de playlist.
                         const playlistData = await spotifyJson(`https://api.spotify.com/v1/playlists/${source.id}`);
                         const playlistName = playlistData?.name || source.label;
-                        loadedNames.push(playlistName);
 
                         const items = await cargarItemsPlaylist(source.id);
                         collectedTracks.push(...procesarCanciones(items, playlistName, source.sourceKey));
@@ -1539,18 +1519,18 @@
                     prepararSesionSinRepeticiones();
 
                     if (playlistTracks.length === 0) {
-                        throw new Error('La playlist se pudo leer, pero no tiene tracks reproducibles.');
+                        throw new Error('Las playlists se pudieron leer, pero no tienen tracks reproducibles.');
                     }
 
                     loadingNote.style.display = 'none';
                     btnPlay.style.display = 'flex';
-                    playlistLabel.textContent = `${mode.label} · ${playlistTracks.length} canciones`;
+                    playlistLabel.textContent = `${sourceDescription} · ${playlistTracks.length} canciones`;
                     resetRoundUi();
                 } catch (error) {
                     loadingNote.style.display = 'none';
                     btnPlay.style.display = 'none';
                     playlistTracks = [];
-                    showError(`No pude recuperar canciones del modo "${mode.label}". ${mensajeSpotify(error)}`);
+                    showError(`No pude recuperar canciones de las listas activas. ${mensajeSpotify(error)}`);
                 } finally {
                     setSettingsControlsDisabled(false);
                     updateSettingsUi();
@@ -1685,49 +1665,57 @@
                 return originalArtistDb.get(id) || originalArtistDb.get(uri) || '';
             }
 
-            function getModeById(modeId) {
-                return GAME_MODES.find(mode => mode.id === modeId) || GAME_MODES[0];
+            function normalizarFuentesSeleccionadas(value) {
+                const raw = Array.isArray(value) ? value : [];
+                const unique = [];
+
+                for (const key of raw) {
+                    if (PLAYLIST_ORDER.includes(key) && !unique.includes(key)) {
+                        unique.push(key);
+                    }
+                }
+
+                return PLAYLIST_ORDER.filter(key => unique.includes(key));
             }
 
-            function obtenerFuentesModo(mode) {
-                return mode.sources
+            function leerFuentesSeleccionadas() {
+                try {
+                    const raw = localStorage.getItem(SELECTED_SOURCES_KEY);
+                    const parsed = raw ? JSON.parse(raw) : null;
+                    const selected = normalizarFuentesSeleccionadas(parsed);
+                    if (selected.length) return selected;
+                } catch(e) {}
+
+                const legacyMode = localStorage.getItem(LEGACY_MODE_STORAGE_KEY) || 'normal';
+                if (legacyMode === 'covers') return ['blue'];
+                if (legacyMode === 'combined') return ['red', 'blue'];
+
+                return ['red'];
+            }
+
+            function guardarFuentesSeleccionadas() {
+                activeSourceKeys = normalizarFuentesSeleccionadas(activeSourceKeys);
+                if (activeSourceKeys.length === 0) activeSourceKeys = ['red'];
+                localStorage.setItem(SELECTED_SOURCES_KEY, JSON.stringify(activeSourceKeys));
+            }
+
+            function obtenerFuentesActivas() {
+                return activeSourceKeys
                     .map(sourceKey => {
-                        if (sourceKey === 'custom') {
-                            return customPlaylist ? { ...customPlaylist, sourceKey: 'custom' } : null;
-                        }
                         const source = PLAYLIST_SOURCES[sourceKey];
                         return source ? { ...source, sourceKey } : null;
                     })
                     .filter(Boolean);
             }
 
-            function leerPlaylistPersonalizada() {
-                try {
-                    const raw = localStorage.getItem(CUSTOM_PLAYLIST_KEY);
-                    if (!raw) return null;
-                    const parsed = JSON.parse(raw);
-                    if (!parsed?.id) return null;
-                    return {
-                        id: parsed.id,
-                        label: parsed.label || 'Playlist personalizada'
-                    };
-                } catch(e) {
-                    return null;
-                }
-            }
+            function describirFuentesActivas(expandida = false) {
+                const labels = activeSourceKeys
+                    .map(key => PLAYLIST_SOURCES[key]?.shortLabel || key)
+                    .filter(Boolean);
 
-            function extraerPlaylistId(value) {
-                const clean = String(value || '').trim();
-                if (!clean) return '';
-
-                const uriMatch = clean.match(/^spotify:playlist:([A-Za-z0-9]+)$/i);
-                if (uriMatch) return uriMatch[1];
-
-                const urlMatch = clean.match(/open\.spotify\.com\/playlist\/([A-Za-z0-9]+)/i);
-                if (urlMatch) return urlMatch[1];
-
-                const rawMatch = clean.match(/^[A-Za-z0-9]{16,}$/);
-                return rawMatch ? clean : '';
+                if (labels.length === 0) return 'Sin listas';
+                if (expandida || labels.length <= 2) return labels.join(' + ');
+                return `${labels.length} listas`;
             }
 
             function deduplicarCanciones(tracks) {
@@ -1744,38 +1732,31 @@
             }
 
             function updateSettingsUi() {
-                const hasCustom = Boolean(customPlaylist?.id);
-                const activeMode = getModeById(currentGameModeId);
+                sourceButtons.forEach(button => {
+                    const sourceKey = button.dataset.source;
+                    const isActive = activeSourceKeys.includes(sourceKey);
+                    const isLastActive = isActive && activeSourceKeys.length === 1;
 
-                if (currentGameModeId === 'custom' && !hasCustom) {
-                    currentGameModeId = 'normal';
-                    localStorage.setItem(MODE_STORAGE_KEY, currentGameModeId);
-                }
-
-                customModeDescription.textContent = hasCustom
-                    ? customPlaylist.label
-                    : 'Agrega una playlist para activar este modo';
-
-                modeButtons.forEach(button => {
-                    const modeId = button.dataset.mode;
-                    const isCustomWithoutPlaylist = modeId === 'custom' && !hasCustom;
-                    button.disabled = isCustomWithoutPlaylist;
-                    button.classList.toggle('is-active', modeId === currentGameModeId);
+                    button.classList.toggle('is-active', isActive);
+                    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    button.title = isLastActive
+                        ? 'Debe quedar al menos una lista activa'
+                        : isActive
+                            ? 'Toca para desactivar esta lista'
+                            : 'Toca para activar esta lista';
                 });
 
                 if (!playlistTracks.length) {
                     playlistLabel.textContent = accessToken
-                        ? `${activeMode.label}`
+                        ? describirFuentesActivas()
                         : 'Spotify no conectado';
                 }
             }
 
             function setSettingsControlsDisabled(disabled) {
-                modeButtons.forEach(button => {
-                    const isCustomWithoutPlaylist = button.dataset.mode === 'custom' && !customPlaylist;
-                    button.disabled = disabled || isCustomWithoutPlaylist;
+                sourceButtons.forEach(button => {
+                    button.disabled = disabled;
                 });
-                btnAddPlaylist.disabled = disabled;
                 btnForceDevice.disabled = disabled;
             }
 
